@@ -2217,7 +2217,7 @@ export default function SmartDecarb360({ goToPage, openEnquiryForm }) {
             <div className="max-w-2xl text-left">
               <div className="flex justify-start">
                 <img
-                  src="/smartdecarb360-logo.png"
+                  src="/smartdecarb360-logowhite.png"
                   alt="SmartDecarb360"
                   className="-ml-3 h-auto w-[560px] max-w-full object-contain"
                 />
