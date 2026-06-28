@@ -282,11 +282,19 @@ function getEventDisplayDate(event) {
 }
 
 function openContent(item, onOpenContent) {
-  if (item?.url) {
-    window.open(item.url, "_blank", "noopener,noreferrer");
+  const url = String(item?.url || "").trim();
+
+  if (!url) {
+    onOpenContent(item);
     return;
   }
-  onOpenContent(item);
+
+  if (url.startsWith("/")) {
+    window.location.assign(url);
+    return;
+  }
+
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 function Hero({ onOpenContent, pageSettings, heroCards }) {
@@ -294,13 +302,13 @@ function Hero({ onOpenContent, pageSettings, heroCards }) {
     <section className="relative isolate overflow-hidden bg-[#06112e] text-white">
       <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_52%_44%,rgba(6,182,212,.24),transparent_25%),radial-gradient(circle_at_76%_28%,rgba(168,85,247,.35),transparent_26%),linear-gradient(120deg,#06112e_0%,#071836_48%,#020817_100%)]" />
 
-      <div className="absolute inset-y-0 right-0 -z-10 w-full lg:w-[62%]">
-        <div
-          className="h-full w-full bg-cover bg-center opacity-90"
-          style={{
-            backgroundImage: `linear-gradient(90deg,rgba(6,17,46,1) 0%,rgba(6,17,46,.80) 28%,rgba(6,17,46,.20) 100%),url('${pageSettings.heroImage || "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80"}')`,
-          }}
+      <div className="absolute inset-y-0 right-0 -z-10 w-full overflow-hidden lg:w-[62%]">
+        <img
+          src={pageSettings.heroImage || fallbackPageSettings.heroImage}
+          alt={pageSettings.heroImageAlt || "Smart infrastructure and sustainable buildings"}
+          className="h-full w-full object-cover object-center opacity-90"
         />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#06112e] via-[#06112ecc] to-[#06112e33]" />
       </div>
 
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(45,212,191,.06)_1px,transparent_1px),linear-gradient(90deg,rgba(45,212,191,.06)_1px,transparent_1px)] bg-[size:42px_42px] opacity-35" />
@@ -415,6 +423,14 @@ function LatestChannels({ onOpenContent, channelPosts, channels }) {
     [filter, channelPosts]
   );
 
+  const availableChannels = useMemo(() => {
+    const names = channelPosts
+      .map((post) => String(post.channel || "").trim())
+      .filter(Boolean);
+
+    return ["All", ...new Set(names)];
+  }, [channelPosts]);
+
   return (
     <section className="bg-white px-5 py-8 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -422,7 +438,7 @@ function LatestChannels({ onOpenContent, channelPosts, channels }) {
           <div>
             <h2 className="text-2xl font-black text-slate-950">Latest from our channels</h2>
             <div className="mt-4 flex flex-wrap gap-2">
-              {["All", "LinkedIn", "X", "YouTube", "Instagram"].map((item) => (
+              {availableChannels.map((item) => (
                 <button
                   key={item}
                   onClick={() => setFilter(item)}
@@ -452,11 +468,20 @@ function LatestChannels({ onOpenContent, channelPosts, channels }) {
                 return (
                   <motion.article
                     layout
-                    key={post.id}
+                    key={post.id || post.itemKey || post.title}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/10"
+                    onClick={() => openContent(post, onOpenContent)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        openContent(post, onOpenContent);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    className="cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/10 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                   >
                     <div className="relative h-32 overflow-hidden bg-slate-900">
                       {isVideoPost && post.videoUrl ? (
@@ -468,6 +493,7 @@ function LatestChannels({ onOpenContent, channelPosts, channels }) {
                           }
                           controls
                           preload="metadata"
+                          onClick={(event) => event.stopPropagation()}
                           className="h-full w-full object-cover"
                         >
                           Your browser does not support
@@ -567,14 +593,20 @@ function EditorPicks({ onOpenContent, editorPicks }) {
                 onClick={() => openContent(item, onOpenContent)}
                 className="grid grid-cols-[96px_1fr] gap-4 rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/10 xl:grid-cols-1">
                 <div className="relative h-24 overflow-hidden rounded-xl bg-slate-100 xl:h-28">
-                  {item.image ? (
+                  {item.mediaType === "video" && item.image ? (
+                    <video
+                      src={item.image}
+                      controls
+                      preload="metadata"
+                      onClick={(event) => event.stopPropagation()}
+                      className="h-full w-full object-cover"
+                    >
+                      Your browser does not support embedded video.
+                    </video>
+                  ) : item.image ? (
                     <img
                       src={item.image}
-                      alt={
-                        item.imageAlt ||
-                        item.title ||
-                        ""
-                      }
+                      alt={item.imageAlt || item.title || ""}
                       className="h-full w-full object-cover"
                     />
                   ) : (
@@ -625,7 +657,17 @@ function PartnerContent({ onOpenContent, partnerContent }) {
               onClick={() => openContent(item, onOpenContent)}
               className="relative min-h-[150px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 p-5 text-left text-white shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
             >
-              {item.image ? (
+              {item.mediaType === "video" && item.image ? (
+                <video
+                  src={item.image}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="absolute inset-0 h-full w-full object-cover"
+                >
+                  Your browser does not support embedded video.
+                </video>
+              ) : item.image ? (
                 <img
                   src={item.image}
                   alt={item.imageAlt || item.title || ""}
@@ -693,11 +735,22 @@ function Events({ onOpenContent, events }) {
               >
                 {event.image && (
                   <div className="h-40 overflow-hidden">
-                    <img
-                      src={event.image}
-                      alt={event.imageAlt || event.title || ""}
-                      className="h-full w-full object-cover"
-                    />
+                    {event.mediaType === "video" ? (
+                      <video
+                        src={event.image}
+                        controls
+                        preload="metadata"
+                        className="h-full w-full object-cover"
+                      >
+                        Your browser does not support embedded video.
+                      </video>
+                    ) : (
+                      <img
+                        src={event.image}
+                        alt={event.imageAlt || event.title || ""}
+                        className="h-full w-full object-cover"
+                      />
+                    )}
                   </div>
                 )}
 
@@ -752,16 +805,25 @@ function QuickActions({ onSubscribe, onOpenContent, quickActions }) {
     <section id="contact" className="bg-white px-5 pb-14 pt-5 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-1 overflow-hidden rounded-3xl bg-[#06112e] p-5 text-white shadow-2xl md:grid-cols-5">
         {quickActions.map((action, index) => {
-          const actionType = action.actionType || action.action || action.itemKey || action.id || (index === 0 ? "subscribe" : "");
-          const presentation = getQuickActionPresentation(actionType);
+          const actionType =
+            action.actionType ||
+            action.action ||
+            action.itemKey ||
+            action.id ||
+            "";
+          const normalizedActionType = String(actionType).trim().toLowerCase();
+          const presentation = getQuickActionPresentation(normalizedActionType);
           const Icon = action.icon || presentation.icon;
           const color = action.color || presentation.color;
-          const click = actionType === "subscribe" || index === 0 ? onSubscribe : () => openContent(action, onOpenContent);
+          const click =
+            normalizedActionType === "subscribe"
+              ? onSubscribe
+              : () => openContent(action, onOpenContent);
           return (
-            <div key={action.title} className="border-white/10 p-5 md:border-l first:md:border-l-0">
+            <div key={action.id || action.itemKey || action.title || index} className="border-white/10 p-5 md:border-l first:md:border-l-0">
               <Icon className="h-9 w-9 text-teal-300" />
               <h3 className="mt-4 text-lg font-black">{action.title}</h3>
-              <p className="mt-2 min-h-[48px] text-sm leading-6 text-white/68">{action.text}</p>
+              <p className="mt-2 min-h-[48px] text-sm leading-6 text-white/68">{action.text || action.description || ""}</p>
               <button onClick={click} className={`mt-4 rounded-full bg-gradient-to-r ${color} px-5 py-2 text-sm font-black text-white shadow-lg transition hover:scale-[1.02]`}>
                 {action.cta} <ArrowRight className="ml-2 inline h-4 w-4" />
               </button>
@@ -896,13 +958,15 @@ export default function SocialMedia({ goToPage, openEnquiryForm }) {
   const cmsQuickActions = getCmsSection(cmsContent, ["quickActions", "quick_actions"]);
   const cmsChannels = getCmsSection(cmsContent, ["channels", "socialChannels"]);
 
-  const heroCards = cmsHeroCards.length ? cmsHeroCards : fallbackHeroCards;
-  const channelPosts = cmsChannelPosts.length ? cmsChannelPosts : fallbackChannelPosts;
-  const editorPicks = cmsEditorPicks.length ? cmsEditorPicks : fallbackEditorPicks;
-  const partnerContent = cmsPartnerContent.length ? cmsPartnerContent : fallbackPartnerContent;
-  const events = cmsEvents.length ? cmsEvents : fallbackEvents;
-  const quickActions = cmsQuickActions.length ? cmsQuickActions : fallbackQuickActions;
-  const channels = cmsChannels.length ? cmsChannels : fallbackChannels;
+  const useFallbackContent = Boolean(cmsError);
+
+  const heroCards = useFallbackContent ? fallbackHeroCards : cmsHeroCards;
+  const channelPosts = useFallbackContent ? fallbackChannelPosts : cmsChannelPosts;
+  const editorPicks = useFallbackContent ? fallbackEditorPicks : cmsEditorPicks;
+  const partnerContent = useFallbackContent ? fallbackPartnerContent : cmsPartnerContent;
+  const events = useFallbackContent ? fallbackEvents : cmsEvents;
+  const quickActions = useFallbackContent ? fallbackQuickActions : cmsQuickActions;
+  const channels = useFallbackContent ? fallbackChannels : cmsChannels;
 
   const subscribe = async (email, consent) => {
     await subscribeToUpdates(email, consent);

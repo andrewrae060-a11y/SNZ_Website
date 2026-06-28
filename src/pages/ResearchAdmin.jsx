@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import {
   Check,
   CheckCircle2,
@@ -40,13 +46,30 @@ const STATUS_OPTIONS = [
 ];
 
 async function readJsonResponse(response) {
-  const contentType = response.headers.get("content-type") || "";
+  const contentType =
+    response.headers.get("content-type") || "";
 
-  if (!contentType.includes("application/json")) {
-    return {};
+  if (contentType.includes("application/json")) {
+    try {
+      return await response.json();
+    } catch {
+      return {};
+    }
   }
 
-  return response.json();
+  try {
+    const text = await response.text();
+
+    return {
+      message:
+        text ||
+        `Unexpected server response (${response.status}).`,
+    };
+  } catch {
+    return {
+      message: `Unexpected server response (${response.status}).`,
+    };
+  }
 }
 
 function formatDate(value) {
@@ -110,20 +133,21 @@ function LoginPanel({ onLogin }) {
     setStatus("submitting");
 
     try {
-      await onLogin(form);
+      await onLogin({
+        email: form.email.trim(),
+        password: form.password,
+      });
 
       setForm({
         email: "",
         password: "",
       });
-
-      setStatus("idle");
     } catch (loginError) {
       setError(
-        loginError.message ||
+        loginError?.message ||
           "The administrator login was unsuccessful."
       );
-
+    } finally {
       setStatus("idle");
     }
   };
@@ -145,11 +169,14 @@ function LoginPanel({ onLogin }) {
           </h1>
 
           <p className="mt-3 leading-7 text-white/65">
-            Sign in to review and manage research-library access
-            applications.
+            Sign in to review and manage research-library
+            access applications.
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <form
+            onSubmit={handleSubmit}
+            className="mt-8 space-y-5"
+          >
             <div>
               <label
                 htmlFor="admin-email"
@@ -167,7 +194,7 @@ function LoginPanel({ onLogin }) {
                 value={form.email}
                 onChange={handleChange}
                 className="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition placeholder:text-white/35 focus:border-teal-300 focus:ring-2 focus:ring-teal-300/20"
-                placeholder="admin@smartnetzero.co.uk"
+                placeholder="research@smartnetzero.co.uk"
               />
             </div>
 
@@ -231,12 +258,17 @@ function PinModal({ approval, onClose }) {
   }
 
   const handleCopy = async () => {
-    if (!approval.pin) {
+    if (
+      !approval.pin ||
+      !navigator.clipboard?.writeText
+    ) {
+      setCopied(false);
       return;
     }
 
     try {
       await navigator.clipboard.writeText(approval.pin);
+
       setCopied(true);
 
       window.setTimeout(() => {
@@ -316,15 +348,16 @@ function PinModal({ approval, onClose }) {
             </button>
 
             <p className="mt-4 text-sm leading-6 text-amber-700">
-              This plain PIN is displayed only during development.
-              Copy it now. The database stores only its secure hash.
+              This plain PIN is displayed only during
+              development. Copy it now. The database stores only
+              its secure hash.
             </p>
           </>
         ) : (
           <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-800">
-            The application was approved, but no plain PIN was returned.
-            In production, the PIN should be delivered through the
-            email-notification service.
+            The application was approved, but no plain PIN was
+            returned. In production, the PIN should be delivered
+            through the email-notification service.
           </div>
         )}
       </section>
@@ -350,6 +383,7 @@ function ConfirmationModal({
       <section
         role="dialog"
         aria-modal="true"
+        aria-labelledby="confirmation-modal-title"
         className="w-full max-w-lg rounded-3xl bg-white p-7 shadow-2xl"
       >
         <div
@@ -366,7 +400,10 @@ function ConfirmationModal({
           )}
         </div>
 
-        <h2 className="mt-6 text-2xl font-black text-slate-950">
+        <h2
+          id="confirmation-modal-title"
+          className="mt-6 text-2xl font-black text-slate-950"
+        >
           {isApproval
             ? "Approve this application?"
             : "Reject this application?"}
@@ -382,11 +419,14 @@ function ConfirmationModal({
           <p className="font-black text-slate-950">
             {request.fullName}
           </p>
+
           <p className="mt-1 text-sm text-slate-600">
             {request.email}
           </p>
+
           <p className="mt-1 text-sm text-slate-600">
-            {request.organisation || "No organisation supplied"}
+            {request.organisation ||
+              "No organisation supplied"}
           </p>
         </div>
 
@@ -395,7 +435,7 @@ function ConfirmationModal({
             type="button"
             disabled={busy}
             onClick={onCancel}
-            className="rounded-xl border border-slate-300 px-5 py-3 font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-xl border border-slate-300 px-5 py-3 font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>
@@ -458,21 +498,30 @@ function RequestCard({
 
           <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
             <div>
-              <p className="font-bold text-slate-800">Email</p>
-              <p className="mt-1 break-all">{request.email}</p>
+              <p className="font-bold text-slate-800">
+                Email
+              </p>
+
+              <p className="mt-1 break-all">
+                {request.email}
+              </p>
             </div>
 
             <div>
               <p className="font-bold text-slate-800">
                 Organisation
               </p>
+
               <p className="mt-1">
                 {request.organisation || "Not supplied"}
               </p>
             </div>
 
             <div>
-              <p className="font-bold text-slate-800">Role</p>
+              <p className="font-bold text-slate-800">
+                Role
+              </p>
+
               <p className="mt-1">
                 {request.role || "Not supplied"}
               </p>
@@ -482,6 +531,7 @@ function RequestCard({
               <p className="font-bold text-slate-800">
                 Requested
               </p>
+
               <p className="mt-1">
                 {formatDate(request.createdAt)}
               </p>
@@ -492,6 +542,7 @@ function RequestCard({
                 <p className="font-bold text-slate-800">
                   Approved
                 </p>
+
                 <p className="mt-1">
                   {formatDate(request.approvedAt)}
                 </p>
@@ -503,6 +554,7 @@ function RequestCard({
                 <p className="font-bold text-slate-800">
                   Rejected
                 </p>
+
                 <p className="mt-1">
                   {formatDate(request.rejectedAt)}
                 </p>
@@ -538,14 +590,20 @@ function RequestCard({
 }
 
 export default function ResearchAdmin() {
+  useEffect(() => {
+        document.title = "Research Admin | Smart Net Zero";
+      }, []);
+
   const [sessionStatus, setSessionStatus] =
     useState("checking");
 
   const [admin, setAdmin] = useState(null);
+
   const [selectedStatus, setSelectedStatus] =
     useState("PENDING");
 
   const [requests, setRequests] = useState([]);
+
   const [requestStatus, setRequestStatus] =
     useState("idle");
 
@@ -561,54 +619,82 @@ export default function ResearchAdmin() {
 
   const checkSession = useCallback(async () => {
     try {
-      const response = await fetch("/api/admin/session", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-        },
-      });
+      const response = await fetch(
+        "/api/admin/session",
+        {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+          headers: {
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+          },
+        }
+      );
 
       const result = await readJsonResponse(response);
 
-      if (result.authenticated) {
+      if (
+        response.ok &&
+        result.authenticated === true
+      ) {
         setAdmin(result.admin || null);
         setSessionStatus("authenticated");
-      } else {
-        setAdmin(null);
-        setSessionStatus("unauthenticated");
+        return true;
       }
-    } catch {
+
       setAdmin(null);
+      setRequests([]);
       setSessionStatus("unauthenticated");
+      return false;
+    } catch (sessionError) {
+      console.error(
+        "Administrator session check failed:",
+        sessionError
+      );
+
+      setAdmin(null);
+      setRequests([]);
+      setSessionStatus("unauthenticated");
+      return false;
     }
   }, []);
 
   const loadRequests = useCallback(
-    async (status = selectedStatus) => {
+    async (status) => {
+      const requestedStatus =
+        status || selectedStatus;
+
       setRequestStatus("loading");
       setError("");
 
       try {
         const response = await fetch(
           `/api/admin/research-access?status=${encodeURIComponent(
-            status
+            requestedStatus
           )}`,
           {
             method: "GET",
             credentials: "include",
+            cache: "no-store",
             headers: {
               Accept: "application/json",
+              "Cache-Control": "no-cache",
             },
           }
         );
 
-        const result = await readJsonResponse(response);
+        const result =
+          await readJsonResponse(response);
 
-        if (response.status === 401) {
+        if (
+          response.status === 401 ||
+          response.status === 403
+        ) {
           setAdmin(null);
-          setSessionStatus("unauthenticated");
           setRequests([]);
+          setRequestStatus("idle");
+          setSessionStatus("unauthenticated");
           return;
         }
 
@@ -627,10 +713,16 @@ export default function ResearchAdmin() {
 
         setRequestStatus("loaded");
       } catch (loadError) {
+        console.error(
+          "Research access request loading failed:",
+          loadError
+        );
+
         setRequests([]);
         setRequestStatus("error");
+
         setError(
-          loadError.message ||
+          loadError?.message ||
             "The access requests could not be loaded."
         );
       }
@@ -652,32 +744,63 @@ export default function ResearchAdmin() {
     loadRequests,
   ]);
 
-  const handleLogin = async ({ email, password }) => {
-    const response = await fetch("/api/admin/login", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
+  const handleLogin = async ({
+    email,
+    password,
+  }) => {
+    setError("");
+    setMessage("");
 
-    const result = await readJsonResponse(response);
+    const response = await fetch(
+      "/api/admin/login",
+      {
+        method: "POST",
+        credentials: "include",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "Cache-Control": "no-cache",
+        },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+      }
+    );
 
-    if (!response.ok || !result.authenticated) {
+    const result =
+      await readJsonResponse(response);
+
+    if (
+      !response.ok ||
+      result.authenticated !== true
+    ) {
       throw new Error(
         result.message ||
           "The administrator login was unsuccessful."
       );
     }
 
-    setAdmin(result.admin || null);
-    setSessionStatus("authenticated");
-    setMessage("Administrator login successful.");
+    /*
+     * The backend has now set the administrator cookie.
+     * Re-check the session immediately so the dashboard
+     * appears without requiring a browser refresh.
+     */
+    setSessionStatus("checking");
+
+    const authenticated = await checkSession();
+
+    if (!authenticated) {
+      throw new Error(
+        "Login succeeded, but the administrator session could not be confirmed. Check the backend cookie configuration."
+      );
+    }
+
+    setMessage(
+      "Administrator login successful."
+    );
+
     setError("");
   };
 
@@ -685,20 +808,43 @@ export default function ResearchAdmin() {
     setError("");
 
     try {
-      await fetch("/api/admin/logout", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-        },
-      });
+      const response = await fetch(
+        "/api/admin/logout",
+        {
+          method: "POST",
+          credentials: "include",
+          cache: "no-store",
+          headers: {
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const result =
+          await readJsonResponse(response);
+
+        console.warn(
+          result.message ||
+            "The server did not confirm logout."
+        );
+      }
+    } catch (logoutError) {
+      console.error(
+        "Administrator logout failed:",
+        logoutError
+      );
     } finally {
       setAdmin(null);
       setRequests([]);
+      setRequestStatus("idle");
       setSessionStatus("unauthenticated");
       setMessage("");
+      setError("");
       setConfirmation(null);
       setApprovalResult(null);
+      setSearchTerm("");
     }
   };
 
@@ -730,7 +876,8 @@ export default function ResearchAdmin() {
       return;
     }
 
-    const { action, request } = confirmation;
+    const { action, request } =
+      confirmation;
 
     setConfirmation((current) => ({
       ...current,
@@ -742,17 +889,40 @@ export default function ResearchAdmin() {
 
     try {
       const response = await fetch(
-        `/api/admin/research-access/${request.id}/${action}`,
+        `/api/admin/research-access/${encodeURIComponent(
+          request.id
+        )}/${encodeURIComponent(action)}`,
         {
           method: "POST",
           credentials: "include",
+          cache: "no-store",
           headers: {
             Accept: "application/json",
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache",
           },
+          body: JSON.stringify({}),
         }
       );
 
-      const result = await readJsonResponse(response);
+      const result =
+        await readJsonResponse(response);
+
+      if (
+        response.status === 401 ||
+        response.status === 403
+      ) {
+        setConfirmation(null);
+        setAdmin(null);
+        setRequests([]);
+        setRequestStatus("idle");
+        setSessionStatus("unauthenticated");
+
+        throw new Error(
+          result.message ||
+            "Your administrator session has expired. Please log in again."
+        );
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -765,8 +935,13 @@ export default function ResearchAdmin() {
 
       if (action === "approve") {
         setApprovalResult({
-          email: result.user?.email || request.email,
-          pin: result.developmentPin || "",
+          email:
+            result.user?.email ||
+            request.email,
+          pin:
+            result.developmentPin ||
+            result.pin ||
+            "",
         });
 
         setMessage(
@@ -780,6 +955,11 @@ export default function ResearchAdmin() {
 
       await loadRequests(selectedStatus);
     } catch (actionError) {
+      console.error(
+        "Research access update failed:",
+        actionError
+      );
+
       setConfirmation((current) =>
         current
           ? {
@@ -790,7 +970,7 @@ export default function ResearchAdmin() {
       );
 
       setError(
-        actionError.message ||
+        actionError?.message ||
           "The application could not be updated."
       );
     }
@@ -817,7 +997,9 @@ export default function ResearchAdmin() {
         .join(" ")
         .toLowerCase();
 
-      return searchableText.includes(searchValue);
+      return searchableText.includes(
+        searchValue
+      );
     });
   }, [requests, searchTerm]);
 
@@ -826,6 +1008,7 @@ export default function ResearchAdmin() {
       <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
         <div className="text-center">
           <RefreshCw className="mx-auto h-9 w-9 animate-spin text-teal-300" />
+
           <p className="mt-4 font-bold">
             Checking administrator session
           </p>
@@ -834,8 +1017,12 @@ export default function ResearchAdmin() {
     );
   }
 
-  if (sessionStatus !== "authenticated") {
-    return <LoginPanel onLogin={handleLogin} />;
+  if (
+    sessionStatus !== "authenticated"
+  ) {
+    return (
+      <LoginPanel onLogin={handleLogin} />
+    );
   }
 
   return (
@@ -860,7 +1047,9 @@ export default function ResearchAdmin() {
             </div>
 
             <p className="mt-3 text-sm text-white/60">
-              Signed in as {admin?.email || "administrator"}
+              Signed in as{" "}
+              {admin?.email ||
+                "administrator"}
             </p>
           </div>
 
@@ -935,7 +1124,8 @@ export default function ResearchAdmin() {
                 </h2>
 
                 <p className="mt-2 text-slate-600">
-                  Review and manage applicant access status.
+                  Review and manage applicant
+                  access status.
                 </p>
               </div>
 
@@ -944,8 +1134,10 @@ export default function ResearchAdmin() {
                 onClick={() =>
                   loadRequests(selectedStatus)
                 }
-                disabled={requestStatus === "loading"}
-                className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 py-3 font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                disabled={
+                  requestStatus === "loading"
+                }
+                className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 py-3 font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RefreshCw
                   className={`h-5 w-5 ${
@@ -954,27 +1146,33 @@ export default function ResearchAdmin() {
                       : ""
                   }`}
                 />
+
                 Refresh
               </button>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {STATUS_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() =>
-                    handleStatusChange(option.value)
-                  }
-                  className={`rounded-full px-4 py-2 text-sm font-black transition ${
-                    selectedStatus === option.value
-                      ? "bg-slate-950 text-white"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
+              {STATUS_OPTIONS.map(
+                (option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      handleStatusChange(
+                        option.value
+                      )
+                    }
+                    className={`rounded-full px-4 py-2 text-sm font-black transition ${
+                      selectedStatus ===
+                      option.value
+                        ? "bg-slate-950 text-white"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                )
+              )}
             </div>
 
             <div className="relative">
@@ -984,7 +1182,9 @@ export default function ResearchAdmin() {
                 type="search"
                 value={searchTerm}
                 onChange={(event) =>
-                  setSearchTerm(event.target.value)
+                  setSearchTerm(
+                    event.target.value
+                  )
                 }
                 className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-12 pr-4 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/15"
                 placeholder="Search by name, email, organisation or role"
@@ -1011,33 +1211,44 @@ export default function ResearchAdmin() {
               <div className="flex min-h-52 items-center justify-center">
                 <div className="text-center">
                   <RefreshCw className="mx-auto h-8 w-8 animate-spin text-teal-600" />
+
                   <p className="mt-3 font-bold text-slate-600">
                     Loading applications
                   </p>
                 </div>
               </div>
-            ) : filteredRequests.length === 0 ? (
+            ) : filteredRequests.length ===
+              0 ? (
               <div className="flex min-h-52 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-7">
                 <div className="text-center">
                   <Clock3 className="mx-auto h-9 w-9 text-slate-400" />
+
                   <p className="mt-4 font-black text-slate-800">
-                    No {selectedStatus.toLowerCase()} applications
+                    No{" "}
+                    {selectedStatus.toLowerCase()}{" "}
+                    applications
                   </p>
+
                   <p className="mt-2 text-sm text-slate-500">
-                    New or matching records will appear here.
+                    New or matching records will
+                    appear here.
                   </p>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredRequests.map((request) => (
-                  <RequestCard
-                    key={request.id}
-                    request={request}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
-                  />
-                ))}
+                {filteredRequests.map(
+                  (request) => (
+                    <RequestCard
+                      key={request.id}
+                      request={request}
+                      onApprove={
+                        handleApprove
+                      }
+                      onReject={handleReject}
+                    />
+                  )
+                )}
               </div>
             )}
           </div>
@@ -1049,12 +1260,16 @@ export default function ResearchAdmin() {
         request={confirmation?.request}
         busy={confirmation?.busy}
         onConfirm={performAction}
-        onCancel={() => setConfirmation(null)}
+        onCancel={() =>
+          setConfirmation(null)
+        }
       />
 
       <PinModal
         approval={approvalResult}
-        onClose={() => setApprovalResult(null)}
+        onClose={() =>
+          setApprovalResult(null)
+        }
       />
     </main>
   );

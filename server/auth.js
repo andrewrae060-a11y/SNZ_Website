@@ -1,19 +1,35 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-function getRequiredEnvironmentValue(
-  name
-) {
-  const value =
-    process.env[name];
+import sql from "../backend/src/database.js";
 
-  if (!value) {
+
+const CMS_ROLES = new Set([
+  "content_manager",
+  "super_admin",
+]);
+
+function getJwtSecret() {
+  const secret =
+    process.env.ADMIN_TOKEN_SECRET;
+
+  if (!secret) {
     throw new Error(
-      `${name} is not configured.`
+      "ADMIN_TOKEN_SECRET is not configured."
     );
   }
 
-  return value;
+  return secret;
+}
+
+function publicAdministrator(
+  administrator
+) {
+  return {
+    id: administrator.id,
+    email: administrator.email,
+    role: administrator.role,
+  };
 }
 
 export async function loginAdministrator(
@@ -22,187 +38,219 @@ export async function loginAdministrator(
   next
 ) {
   try {
-    const configuredEmail =
-      getRequiredEnvironmentValue(
-        "ADMIN_EMAIL"
-      );
+    const email = String(
+      req.body?.email || ""
+    )
+      .trim()
+      .toLowerCase();
 
-    const configuredPasswordHash =
-      getRequiredEnvironmentValue(
-        "ADMIN_PASSWORD_HASH"
-      );
-
-    const jwtSecret =
-      getRequiredEnvironmentValue(
-        "ADMIN_JWT_SECRET"
-      );
-
-    const email =
-      String(
-        req.body?.email || ""
-      )
-        .trim()
-        .toLowerCase();
-
-    const password =
-      String(
-        req.body?.password || ""
-      );
+    const password = String(
+      req.body?.password || ""
+    );
 
     if (!email || !password) {
       return res
         .status(400)
         .json({
+          success: false,
           message:
-            "Email and password are required.",
+            "Email address and password are required.",
         });
     }
 
+    const administrators =
+      await sql`
+        SELECT
+          id,
+          email,
+          password_hash,
+          role,
+          is_active
+        FROM admin_users
+        WHERE LOWER(email) = ${email}
+        LIMIT 1
+      `;
+
+    const administrator =
+      administrators[0];
+
     if (
-      email !==
-      configuredEmail
-        .trim()
-        .toLowerCase()
+      !administrator ||
+      !administrator.is_active
     ) {
       return res
         .status(401)
         .json({
+          success: false,
           message:
-            "The email or password is incorrect.",
+            "The email address or password is incorrect.",
         });
     }
 
     const passwordMatches =
       await bcrypt.compare(
         password,
-        configuredPasswordHash
+        administrator.password_hash
       );
 
     if (!passwordMatches) {
       return res
         .status(401)
         .json({
+          success: false,
           message:
-            "The email or password is incorrect.",
+            "The email address or password is incorrect.",
+        });
+    }
+
+    const role = String(
+      administrator.role || ""
+    ).toLowerCase();
+
+    if (!CMS_ROLES.has(role)) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message:
+            "This account does not have Content Manager access.",
         });
     }
 
     const token = jwt.sign(
       {
-        sub: configuredEmail,
-        email: configuredEmail,
-        role: "careers-admin",
+        adminId:
+          administrator.id,
+        email:
+          administrator.email,
+        role,
       },
-      jwtSecret,
+      getJwtSecret(),
       {
         expiresIn: "8h",
-        issuer: "snz-careers",
+        issuer:
+          "smart-net-zero",
         audience:
-          "snz-administration",
+          "snz-content-manager",
       }
     );
 
     return res.json({
+      success: true,
       token,
-
-      administrator: {
-        email:
-          configuredEmail,
-        role:
-          "careers-admin",
-      },
+      administrator:
+        publicAdministrator(
+          administrator
+        ),
     });
   } catch (error) {
     next(error);
   }
 }
 
-export function requireAdministrator(
+export async function requireAdministrator(
   req,
   res,
   next
 ) {
   try {
-    const jwtSecret =
-      getRequiredEnvironmentValue(
-        "ADMIN_JWT_SECRET"
-      );
-
-    const authorizationHeader =
+    const authorization =
       String(
         req.headers
           .authorization || ""
       );
 
     if (
-      !authorizationHeader.startsWith(
+      !authorization.startsWith(
         "Bearer "
       )
     ) {
       return res
         .status(401)
         .json({
+          success: false,
           message:
-            "Administrator authentication is required.",
+            "Content Manager login is required.",
         });
     }
 
     const token =
-      authorizationHeader
+      authorization
         .slice(7)
         .trim();
 
-    if (!token) {
+    let payload;
+
+    try {
+      payload = jwt.verify(
+        token,
+        getJwtSecret(),
+        {
+          issuer:
+            "smart-net-zero",
+          audience:
+            "snz-content-manager",
+        }
+      );
+    } catch {
       return res
         .status(401)
         .json({
+          success: false,
           message:
-            "Administrator authentication is required.",
+            "Your Content Manager session has expired. Please sign in again.",
         });
     }
 
-    const decoded =
-      jwt.verify(
-        token,
-        jwtSecret,
-        {
-          issuer:
-            "snz-careers",
-          audience:
-            "snz-administration",
-        }
-      );
+    const administrators =
+      await sql`
+        SELECT
+          id,
+          email,
+          role,
+          is_active
+        FROM admin_users
+        WHERE id = ${payload.adminId}
+        LIMIT 1
+      `;
+
+    const administrator =
+      administrators[0];
 
     if (
-      decoded.role !==
-      "careers-admin"
+      !administrator ||
+      !administrator.is_active
     ) {
       return res
         .status(403)
         .json({
+          success: false,
           message:
-            "You do not have permission to access this resource.",
+            "Content Manager access is not available.",
         });
     }
 
-    req.admin = decoded;
+    const role = String(
+      administrator.role || ""
+    ).toLowerCase();
+
+    if (!CMS_ROLES.has(role)) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message:
+            "This account does not have Content Manager access.",
+        });
+    }
+
+    req.admin =
+      publicAdministrator(
+        administrator
+      );
 
     next();
   } catch (error) {
-    if (
-      error?.name ===
-        "JsonWebTokenError" ||
-      error?.name ===
-        "TokenExpiredError"
-    ) {
-      return res
-        .status(401)
-        .json({
-          message:
-            "Your administrator session is invalid or has expired.",
-        });
-    }
-
     next(error);
   }
 }

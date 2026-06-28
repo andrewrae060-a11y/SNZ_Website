@@ -4,6 +4,12 @@ import {
   verifyAdminToken,
 } from "../services/adminToken.service.js";
 
+const ALLOWED_ADMIN_ROLES = new Set([
+  "RESEARCH_ADMIN",
+  "CAREERS_ADMIN",
+  "SUPER_ADMIN",
+]);
+
 export async function requireAdmin(req, res, next) {
   try {
     const cookieName = getAdminCookieName();
@@ -48,15 +54,22 @@ export async function requireAdmin(req, res, next) {
       });
     }
 
-    if (admin.role !== "RESEARCH_ADMIN") {
+    const normalisedRole = String(admin.role || "")
+      .trim()
+      .toUpperCase();
+
+    if (!ALLOWED_ADMIN_ROLES.has(normalisedRole)) {
       return res.status(403).json({
         success: false,
         message:
-          "You do not have permission to administer research access.",
+          "You do not have permission to access administration.",
       });
     }
 
-    req.admin = admin;
+    req.admin = {
+      ...admin,
+      role: normalisedRole,
+    };
 
     next();
   } catch (error) {

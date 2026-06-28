@@ -1,116 +1,4 @@
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
-import "dotenv/config";
-
-const databaseFilename =
-  process.env.DATABASE_FILE ||
-  "./data/snz-cms.sqlite";
-
-const databaseDirectory =
-  path.dirname(databaseFilename);
-
-fs.mkdirSync(databaseDirectory, {
-  recursive: true,
-});
-
-export const db =
-  new Database(databaseFilename);
-
-db.pragma("journal_mode = WAL");
-db.pragma("foreign_keys = ON");
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    name TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'editor',
-    active INTEGER NOT NULL DEFAULT 1,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  );
-
-  CREATE TABLE IF NOT EXISTS content_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    section TEXT NOT NULL,
-    item_key TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'draft',
-    sort_order INTEGER NOT NULL DEFAULT 0,
-    data_json TEXT NOT NULL,
-    published_at TEXT,
-    created_by INTEGER,
-    updated_by INTEGER,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    UNIQUE(section, item_key),
-
-    FOREIGN KEY(created_by)
-      REFERENCES users(id),
-
-    FOREIGN KEY(updated_by)
-      REFERENCES users(id)
-  );
-
-  CREATE TABLE IF NOT EXISTS revisions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    content_item_id INTEGER NOT NULL,
-    data_json TEXT NOT NULL,
-    status TEXT NOT NULL,
-    changed_by INTEGER,
-    changed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY(content_item_id)
-      REFERENCES content_items(id)
-      ON DELETE CASCADE,
-
-    FOREIGN KEY(changed_by)
-      REFERENCES users(id)
-  );
-
-  CREATE TABLE IF NOT EXISTS subscribers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
-    source TEXT NOT NULL DEFAULT 'social-hub',
-    consent_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    active INTEGER NOT NULL DEFAULT 1
-  );
-
-  CREATE TABLE IF NOT EXISTS social_connections (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    platform TEXT UNIQUE NOT NULL,
-    account_name TEXT,
-    access_token TEXT,
-    refresh_token TEXT,
-    expires_at TEXT,
-    metadata_json TEXT,
-    active INTEGER NOT NULL DEFAULT 1,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  );
-
-  CREATE TABLE IF NOT EXISTS audit_log (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    action TEXT NOT NULL,
-    entity_type TEXT NOT NULL,
-    entity_id TEXT,
-    detail_json TEXT,
-    ip_address TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY(user_id)
-      REFERENCES users(id)
-  );
-`);
-
-function parseJson(value, fallback = {}) {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return fallback;
-  }
-}
+import sql from "../../backend/src/database.js";
 
 function mapContentItem(row) {
   if (!row) {
@@ -123,40 +11,68 @@ function mapContentItem(row) {
     itemKey: row.item_key,
     status: row.status,
     sortOrder: row.sort_order,
-    data: parseJson(row.data_json),
-    publishedAt: row.published_at,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+
+    data:
+      row.data &&
+      typeof row.data === "object"
+        ? row.data
+        : {},
+
+    publishedAt:
+      row.published_at,
+
+    createdAt:
+      row.created_at,
+
+    updatedAt:
+      row.updated_at,
   };
 }
 
-function getAdministratorId(email) {
-  if (!email) {
+async function getAdministratorId(
+  email
+) {
+  const normalizedEmail =
+    String(email || "")
+      .trim()
+      .toLowerCase();
+
+  if (!normalizedEmail) {
     return null;
   }
 
-  const user = db
-    .prepare(`
+  const administrators =
+    await sql`
       SELECT id
-      FROM users
-      WHERE LOWER(email) = LOWER(?)
-      AND active = 1
-    `)
-    .get(String(email).trim());
+      FROM admin_users
+      WHERE LOWER(email) =
+        ${normalizedEmail}
+      AND is_active = TRUE
+      LIMIT 1
+    `;
 
-  return user?.id || null;
+  return (
+    administrators[0]?.id ||
+    null
+  );
 }
 
 function groupContentItems(rows) {
   return rows.reduce(
     (content, row) => {
-      const item = mapContentItem(row);
+      const item =
+        mapContentItem(row);
 
-      if (!content[item.section]) {
-        content[item.section] = [];
+      if (
+        !content[item.section]
+      ) {
+        content[item.section] =
+          [];
       }
 
-      content[item.section].push(item);
+      content[
+        item.section
+      ].push(item);
 
       return content;
     },
@@ -164,38 +80,68 @@ function groupContentItems(rows) {
   );
 }
 
-export function getPublishedContent() {
-  const rows = db
-    .prepare(`
-      SELECT *
-      FROM content_items
-      WHERE status = 'published'
-      ORDER BY
-        section ASC,
-        sort_order ASC,
-        id ASC
-    `)
-    .all();
+/**
+ * Returns published CMS content
+ * for the public Social Media page.
+ */
+export async function getPublishedContent() {
+  const rows = await sql`
+    SELECT
+      id,
+      section,
+      item_key,
+      status,
+      sort_order,
+      data,
+      published_at,
+      created_at,
+      updated_at
+    FROM content_items
+    WHERE status = 'published'
+    ORDER BY
+      section ASC,
+      sort_order ASC,
+      id ASC
+  `;
 
-  return groupContentItems(rows);
+  return groupContentItems(
+    rows
+  );
 }
 
-export function getAdminContent() {
-  const rows = db
-    .prepare(`
-      SELECT *
-      FROM content_items
-      ORDER BY
-        section ASC,
-        sort_order ASC,
-        id ASC
-    `)
-    .all();
+/**
+ * Returns all CMS content for
+ * authenticated administrators.
+ */
+export async function getAdminContent() {
+  const rows = await sql`
+    SELECT
+      id,
+      section,
+      item_key,
+      status,
+      sort_order,
+      data,
+      published_at,
+      created_at,
+      updated_at
+    FROM content_items
+    ORDER BY
+      section ASC,
+      sort_order ASC,
+      id ASC
+  `;
 
-  return groupContentItems(rows);
+  return groupContentItems(
+    rows
+  );
 }
 
-export function createContentItem({
+/**
+ * Creates a CMS content item and
+ * records its first revision.
+ */
+export async function createContentItem({
   section,
   itemKey,
   status = "draft",
@@ -204,84 +150,110 @@ export function createContentItem({
   updatedBy,
 }) {
   const administratorId =
-    getAdministratorId(updatedBy);
+    await getAdministratorId(
+      updatedBy
+    );
 
   const publishedAt =
     status === "published"
-      ? new Date().toISOString()
+      ? new Date()
       : null;
 
-  const result = db
-    .prepare(`
-      INSERT INTO content_items (
+  const rows = await sql.begin(
+    async (transaction) => {
+      const inserted =
+        await transaction`
+          INSERT INTO content_items (
+            section,
+            item_key,
+            status,
+            sort_order,
+            data,
+            published_at,
+            created_by,
+            updated_by
+          )
+          VALUES (
+            ${section},
+            ${itemKey},
+            ${status},
+            ${sortOrder},
+            ${transaction.json(data)},
+            ${publishedAt},
+            ${administratorId},
+            ${administratorId}
+          )
+          RETURNING
+            id,
+            section,
+            item_key,
+            status,
+            sort_order,
+            data,
+            published_at,
+            created_at,
+            updated_at
+        `;
+
+      const item =
+        inserted[0];
+
+      await transaction`
+        INSERT INTO content_revisions (
+          content_item_id,
+          data,
+          status,
+          changed_by
+        )
+        VALUES (
+          ${item.id},
+          ${transaction.json(data)},
+          ${status},
+          ${administratorId}
+        )
+      `;
+
+      return inserted;
+    }
+  );
+
+  return mapContentItem(
+    rows[0]
+  );
+}
+
+/**
+ * Updates an existing CMS item and
+ * records a revision.
+ */
+export async function updateContentItem(
+  id,
+  changes = {}
+) {
+  const existingRows =
+    await sql`
+      SELECT
+        id,
         section,
         item_key,
         status,
         sort_order,
-        data_json,
-        published_at,
-        created_by,
-        updated_by
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `)
-    .run(
-      section,
-      itemKey,
-      status,
-      sortOrder,
-      JSON.stringify(data),
-      publishedAt,
-      administratorId,
-      administratorId
-    );
-
-  const item = db
-    .prepare(`
-      SELECT *
+        data,
+        published_at
       FROM content_items
-      WHERE id = ?
-    `)
-    .get(result.lastInsertRowid);
+      WHERE id = ${id}
+      LIMIT 1
+    `;
 
-  if (item) {
-    db.prepare(`
-      INSERT INTO revisions (
-        content_item_id,
-        data_json,
-        status,
-        changed_by
-      )
-      VALUES (?, ?, ?, ?)
-    `).run(
-      item.id,
-      item.data_json,
-      item.status,
-      administratorId
-    );
-  }
-
-  return mapContentItem(item);
-}
-
-export function updateContentItem(
-  id,
-  changes = {}
-) {
-  const existing = db
-    .prepare(`
-      SELECT *
-      FROM content_items
-      WHERE id = ?
-    `)
-    .get(id);
+  const existing =
+    existingRows[0];
 
   if (!existing) {
     return null;
   }
 
   const administratorId =
-    getAdministratorId(
+    await getAdministratorId(
       changes.updatedBy
     );
 
@@ -303,157 +275,246 @@ export function updateContentItem(
 
   const nextData =
     changes.data ??
-    parseJson(existing.data_json);
+    existing.data ??
+    {};
 
   let nextPublishedAt =
     existing.published_at;
 
   if (
-    nextStatus === "published" &&
+    nextStatus ===
+      "published" &&
     !nextPublishedAt
   ) {
     nextPublishedAt =
-      new Date().toISOString();
+      new Date();
   }
 
-  if (nextStatus !== "published") {
+  if (
+    nextStatus !==
+    "published"
+  ) {
     nextPublishedAt = null;
   }
 
-  db.prepare(`
-    UPDATE content_items
-    SET
-      section = ?,
-      item_key = ?,
-      status = ?,
-      sort_order = ?,
-      data_json = ?,
-      published_at = ?,
-      updated_by = ?,
-      updated_at = CURRENT_TIMESTAMP
-    WHERE id = ?
-  `).run(
-    nextSection,
-    nextItemKey,
-    nextStatus,
-    nextSortOrder,
-    JSON.stringify(nextData),
-    nextPublishedAt,
-    administratorId,
-    id
+  const rows = await sql.begin(
+    async (transaction) => {
+      const updated =
+        await transaction`
+          UPDATE content_items
+          SET
+            section =
+              ${nextSection},
+
+            item_key =
+              ${nextItemKey},
+
+            status =
+              ${nextStatus},
+
+            sort_order =
+              ${nextSortOrder},
+
+            data =
+              ${transaction.json(
+                nextData
+              )},
+
+            published_at =
+              ${nextPublishedAt},
+
+            updated_by =
+              ${administratorId},
+
+            updated_at = NOW()
+
+          WHERE id = ${id}
+
+          RETURNING
+            id,
+            section,
+            item_key,
+            status,
+            sort_order,
+            data,
+            published_at,
+            created_at,
+            updated_at
+        `;
+
+      await transaction`
+        INSERT INTO content_revisions (
+          content_item_id,
+          data,
+          status,
+          changed_by
+        )
+        VALUES (
+          ${id},
+          ${transaction.json(
+            nextData
+          )},
+          ${nextStatus},
+          ${administratorId}
+        )
+      `;
+
+      return updated;
+    }
   );
 
-  db.prepare(`
-    INSERT INTO revisions (
-      content_item_id,
-      data_json,
-      status,
-      changed_by
-    )
-    VALUES (?, ?, ?, ?)
-  `).run(
-    id,
-    JSON.stringify(nextData),
-    nextStatus,
-    administratorId
+  return mapContentItem(
+    rows[0]
   );
-
-  const updated = db
-    .prepare(`
-      SELECT *
-      FROM content_items
-      WHERE id = ?
-    `)
-    .get(id);
-
-  return mapContentItem(updated);
 }
 
-export function deleteContentItem(
+/**
+ * Deletes an item after recording
+ * an audit-log entry.
+ */
+export async function deleteContentItem(
   id,
-  { deletedBy } = {}
+  {
+    deletedBy,
+    ipAddress = null,
+  } = {}
 ) {
-  const existing = db
-    .prepare(`
-      SELECT *
+  const existingRows =
+    await sql`
+      SELECT
+        id,
+        section,
+        item_key,
+        data
       FROM content_items
-      WHERE id = ?
-    `)
-    .get(id);
+      WHERE id = ${id}
+      LIMIT 1
+    `;
+
+  const existing =
+    existingRows[0];
 
   if (!existing) {
     return false;
   }
 
   const administratorId =
-    getAdministratorId(deletedBy);
+    await getAdministratorId(
+      deletedBy
+    );
 
-  const transaction =
-    db.transaction(() => {
-      db.prepare(`
-        INSERT INTO audit_log (
-          user_id,
+  await sql.begin(
+    async (transaction) => {
+      await transaction`
+        INSERT INTO cms_audit_log (
+          admin_user_id,
           action,
           entity_type,
           entity_id,
-          detail_json
+          detail,
+          ip_address
         )
-        VALUES (?, ?, ?, ?, ?)
-      `).run(
-        administratorId,
-        "delete",
-        "content_item",
-        String(id),
-        JSON.stringify({
-          section: existing.section,
-          itemKey: existing.item_key,
-          data: parseJson(
-            existing.data_json
-          ),
-        })
-      );
+        VALUES (
+          ${administratorId},
+          'delete',
+          'content_item',
+          ${String(id)},
+          ${transaction.json({
+            section:
+              existing.section,
 
-      db.prepare(`
+            itemKey:
+              existing.item_key,
+
+            data:
+              existing.data ||
+              {},
+          })},
+          ${ipAddress}
+        )
+      `;
+
+      await transaction`
         DELETE FROM content_items
-        WHERE id = ?
-      `).run(id);
-    });
-
-  transaction();
+        WHERE id = ${id}
+      `;
+    }
+  );
 
   return true;
 }
 
-export function createSubscriber({
+/**
+ * Creates or renews a public
+ * newsletter subscription.
+ */
+export async function createSubscriber({
   email,
   source = "social-hub",
 }) {
-  db.prepare(`
+  const rows = await sql`
     INSERT INTO subscribers (
       email,
       source,
       consent_at,
-      active
+      active,
+      updated_at
     )
-    VALUES (?, ?, CURRENT_TIMESTAMP, 1)
+    VALUES (
+      ${email},
+      ${source},
+      NOW(),
+      TRUE,
+      NOW()
+    )
 
-    ON CONFLICT(email)
+    ON CONFLICT (email)
     DO UPDATE SET
-      source = excluded.source,
-      consent_at = CURRENT_TIMESTAMP,
-      active = 1
-  `).run(email, source);
+      source =
+        EXCLUDED.source,
 
-  return db
-    .prepare(`
-      SELECT
-        id,
-        email,
-        source,
-        consent_at AS consentAt,
-        active
-      FROM subscribers
-      WHERE email = ?
-    `)
-    .get(email);
+      consent_at =
+        NOW(),
+
+      active =
+        TRUE,
+
+      updated_at =
+        NOW()
+
+    RETURNING
+      id,
+      email,
+      source,
+      consent_at,
+      active,
+      created_at,
+      updated_at
+  `;
+
+  const subscriber =
+    rows[0];
+
+  return {
+    id:
+      subscriber.id,
+
+    email:
+      subscriber.email,
+
+    source:
+      subscriber.source,
+
+    consentAt:
+      subscriber.consent_at,
+
+    active:
+      subscriber.active,
+
+    createdAt:
+      subscriber.created_at,
+
+    updatedAt:
+      subscriber.updated_at,
+  };
 }

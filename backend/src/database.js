@@ -1,5 +1,26 @@
 import postgres from "postgres";
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "node:path";
+import "../../backend/src/loadEnvironment.js";
+import {
+  fileURLToPath,
+} from "node:url";
+
+const currentFilePath =
+  fileURLToPath(import.meta.url);
+
+const currentDirectory =
+  path.dirname(currentFilePath);
+
+dotenv.config({
+  path: path.resolve(
+    currentDirectory,
+    "../.env"
+  ),
+});
+
+const databaseUrl =
+  process.env.DATABASE_URL?.trim();
 
 const requiredVariables = [
   "DATABASE_HOST",
@@ -9,42 +30,105 @@ const requiredVariables = [
   "DATABASE_PASSWORD",
 ];
 
-const missingVariables = requiredVariables.filter(
-  (variableName) => !process.env[variableName]
-);
+const missingVariables = databaseUrl
+  ? []
+  : requiredVariables.filter(
+      (variableName) =>
+        !process.env[variableName]
+    );
 
 if (missingVariables.length > 0) {
   throw new Error(
-    `Missing database settings in backend/.env: ${missingVariables.join(", ")}`
+    `Missing database settings: ${missingVariables.join(", ")}`
   );
 }
 
-console.log("Database settings loaded:", {
-  host: process.env.DATABASE_HOST,
-  port: process.env.DATABASE_PORT,
-  database: process.env.DATABASE_NAME,
-  user: process.env.DATABASE_USER,
-  passwordLoaded: Boolean(process.env.DATABASE_PASSWORD),
-});
+const isTransactionPooler =
+  databaseUrl?.includes(":6543/") ||
+  process.env.DATABASE_PORT === "6543";
 
-const sql = postgres({
-  host: process.env.DATABASE_HOST,
-  port: Number(process.env.DATABASE_PORT),
-  database: process.env.DATABASE_NAME,
-  username: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
+const connectionOptions = {
   ssl: "require",
-  max: 5,
+
+  // Required when using Supabase transaction pooling.
+  prepare: !isTransactionPooler,
+
+  max:
+    process.env.NODE_ENV === "production"
+      ? 3
+      : 5,
+
   idle_timeout: 20,
   connect_timeout: 10,
+};
+
+const sql = databaseUrl
+  ? postgres(
+      databaseUrl,
+      connectionOptions
+    )
+  : postgres({
+      host:
+        process.env.DATABASE_HOST,
+
+      port: Number(
+        process.env.DATABASE_PORT
+      ),
+
+      database:
+        process.env.DATABASE_NAME,
+
+      username:
+        process.env.DATABASE_USER,
+
+      password:
+        process.env.DATABASE_PASSWORD,
+
+      ...connectionOptions,
+    });
+
+console.log("Database settings loaded:", {
+  connectionType: databaseUrl
+    ? "DATABASE_URL"
+    : "individual variables",
+
+  host: databaseUrl
+    ? "loaded from DATABASE_URL"
+    : process.env.DATABASE_HOST,
+
+  port: databaseUrl
+    ? "loaded from DATABASE_URL"
+    : process.env.DATABASE_PORT,
+
+  database: databaseUrl
+    ? "loaded from DATABASE_URL"
+    : process.env.DATABASE_NAME,
+
+  user: databaseUrl
+    ? "loaded from DATABASE_URL"
+    : process.env.DATABASE_USER,
+
+  passwordLoaded: databaseUrl
+    ? true
+    : Boolean(
+        process.env.DATABASE_PASSWORD
+      ),
+
+  transactionPooler:
+    isTransactionPooler,
 });
 
 export async function testDatabaseConnection() {
   const result = await sql`
-    SELECT
-      current_database() AS database_name,
-      current_user AS database_user,
-      NOW() AS connected_at
+    select
+      current_database()
+        as database_name,
+
+      current_user
+        as database_user,
+
+      now()
+        as connected_at
   `;
 
   return result[0];

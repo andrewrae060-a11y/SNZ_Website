@@ -330,7 +330,7 @@ function ApplyForm({
       return "CV must be a PDF or DOCX file only.";
     }
 
-    const maxSizeMb = 10;
+    const maxSizeMb = 4;
     const maxSizeBytes =
       maxSizeMb * 1024 * 1024;
 
@@ -476,6 +476,7 @@ function ApplyForm({
         {
           method: "POST",
           body: payload,
+          credentials: "include",
         }
       );
 
@@ -522,12 +523,14 @@ function ApplyForm({
         fullName: "",
         email: "",
         phone: "",
-        roleId: "",
+
+        roleId:
+          selectedJob?.id || "",
+
         linkedin: "",
         message: "",
       });
 
-      setSelectedJob(null);
       setCvFile(null);
       setFileError("");
 
@@ -702,7 +705,7 @@ function ApplyForm({
             </p>
 
             <p className="mt-1 text-xs font-semibold text-slate-500">
-              PDF or DOCX, maximum 10MB
+              PDF or DOCX, maximum 4MB
             </p>
 
             <input
@@ -965,7 +968,7 @@ export default function Careers({
   openEnquiryForm,
 }) {
   useEffect(() => {
-      document.title = "Careers @ | Smart Net Zero";
+      document.title = "Careers | Smart Net Zero";
   }, []);
 
   const [jobs, setJobs] =

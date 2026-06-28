@@ -1,52 +1,53 @@
-const TOKEN_STORAGE_KEY = "snz-careers-admin-token";
-
-export const adminToken = {
-  get() {
-    return sessionStorage.getItem(TOKEN_STORAGE_KEY);
-  },
-
-  set(token) {
-    sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
-  },
-
-  clear() {
-    sessionStorage.removeItem(TOKEN_STORAGE_KEY);
-  },
-};
-
 async function request(
   path,
-  options = {},
-  requiresAuthentication = false
+  options = {}
 ) {
-  const headers = new Headers(options.headers || {});
+  const headers = new Headers(
+    options.headers || {}
+  );
 
-  if (!(options.body instanceof FormData)) {
-    headers.set("Content-Type", "application/json");
+  if (
+    options.body &&
+    !(options.body instanceof FormData)
+  ) {
+    headers.set(
+      "Content-Type",
+      "application/json"
+    );
   }
 
-  if (requiresAuthentication) {
-    const token = adminToken.get();
-
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
+  const response = await fetch(
+    path,
+    {
+      ...options,
+      headers,
+      credentials: "include",
     }
-  }
-
-  const response = await fetch(path, {
-    ...options,
-    headers,
-  });
+  );
 
   if (response.status === 204) {
     return null;
   }
 
-  const data = await response.json().catch(() => ({}));
+  const contentType =
+    response.headers.get(
+      "content-type"
+    ) || "";
+
+  const data =
+    contentType.includes(
+      "application/json"
+    )
+      ? await response.json()
+      : {
+          message:
+            await response.text(),
+        };
 
   if (!response.ok) {
     throw new Error(
-      data.message || "The request failed."
+      data.message ||
+        `Request failed with status ${response.status}.`
     );
   }
 
@@ -59,20 +60,36 @@ export const careersApi = {
   },
 
   login(email, password) {
-    return request("/api/admin/login", {
-      method: "POST",
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
+    return request(
+      "/api/admin/login",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
+      }
+    );
+  },
+
+  logout() {
+    return request(
+      "/api/admin/logout",
+      {
+        method: "POST",
+      }
+    );
+  },
+
+  getAdminSession() {
+    return request(
+      "/api/admin/session"
+    );
   },
 
   getAdminJobs() {
     return request(
-      "/api/jobs/admin",
-      {},
-      true
+      "/api/jobs/admin"
     );
   },
 
@@ -82,8 +99,7 @@ export const careersApi = {
       {
         method: "POST",
         body: JSON.stringify(job),
-      },
-      true
+      }
     );
   },
 
@@ -93,8 +109,7 @@ export const careersApi = {
       {
         method: "PUT",
         body: JSON.stringify(job),
-      },
-      true
+      }
     );
   },
 
@@ -103,8 +118,7 @@ export const careersApi = {
       `/api/jobs/${id}`,
       {
         method: "DELETE",
-      },
-      true
+      }
     );
   },
 };

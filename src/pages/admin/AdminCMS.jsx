@@ -20,11 +20,15 @@ import {
 
 import SectionForm from "./forms/SectionForm";
 
-const API_BASE =
+const API_BASE = String(
+  import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_CMS_API_URL ||
-  "http://localhost:5000";
+  ""
+).replace(/\/+$/, "");
 
-const TOKEN_KEY = "snz_admin_token";
+const TOKEN_KEY = "snz_content_manager_token";
+const CONTENT_MANAGER_EMAIL = "ContentManger@smartnetzero.co.uk";
+const ALLOWED_CMS_ROLES = new Set(["content_manager", "super_admin"]);
 const STARTING_SECTION = "channelPosts";
 
 const CMS_SECTIONS = [
@@ -302,6 +306,10 @@ function getItemTitle(item) {
 }
 
 export default function AdminCMS({ goToPage }) {
+  useEffect(() => {
+        document.title = "Content Manager Admin | Smart Net Zero";
+      }, []);
+
   const [authenticated, setAuthenticated] = useState(
     Boolean(getStoredToken())
   );
@@ -593,7 +601,7 @@ export default function AdminCMS({ goToPage }) {
 }
 
 function AdminLogin({ onLogin, goToPage }) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(CONTENT_MANAGER_EMAIL);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -619,6 +627,15 @@ function AdminLogin({ onLogin, goToPage }) {
         );
       }
 
+      const administrator = result?.administrator || result?.admin;
+      const role = String(administrator?.role || "").toLowerCase();
+
+      if (!ALLOWED_CMS_ROLES.has(role)) {
+        throw new Error(
+          "This account does not have Content Manager access."
+        );
+      }
+
       onLogin(result.token);
     } catch (requestError) {
       setError(requestError.message);
@@ -640,7 +657,7 @@ function AdminLogin({ onLogin, goToPage }) {
           Administrator login
         </h1>
         <p className="mt-3 leading-7 text-slate-600">
-          Sign in to manage Social Media and Content Hub content.
+          Sign in with the authorised Content Manager account to manage Social Media and Content Hub content.
         </p>
 
         {error && (

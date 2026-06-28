@@ -217,7 +217,7 @@ router.post(
               : 0,
           data,
           updatedBy:
-            req.admin?.sub ||
+            req.admin?.email ||
             "administrator",
         });
 
@@ -304,9 +304,9 @@ router.put(
         });
       }
 
-      const changes = {
+     const changes = {
         updatedBy:
-          req.admin?.sub ||
+          req.admin?.email ||
           "administrator",
       };
 
@@ -388,7 +388,7 @@ router.delete(
           id,
           {
             deletedBy:
-              req.admin?.sub ||
+              req.admin?.email ||
               "administrator",
           }
         );
