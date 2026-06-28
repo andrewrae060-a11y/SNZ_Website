@@ -11,7 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 
-import siteSearchData from "../data/siteSearchData";
+import siteSearchData from "../data/siteSearchData.js";
 
 export default function SNZHeader({
   goToPage,
