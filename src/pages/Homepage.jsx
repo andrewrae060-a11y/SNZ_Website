@@ -560,25 +560,29 @@ function Hero() {
 
       <div className="absolute bottom-0 left-0 right-0 z-10 h-20 bg-gradient-to-t from-white to-transparent" />
 
-      <div className="relative z-20 mx-auto grid max-w-7xl items-center gap-10 px-5 pb-32 pt-36 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:pb-36 lg:pt-40">
+      <div className="relative z-20 mx-auto grid max-w-[1500px] items-center gap-8 px-5 pb-32 pt-36 lg:grid-cols-[1.25fr_0.75fr] lg:px-8 lg:pb-36 lg:pt-40">
         <motion.div
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           className="relative z-20"
         >
-          <h1 className="max-w-4xl text-5xl font-black leading-[1.04] tracking-tight md:text-7xl">
-            Build the future.
-            <br />
-            Secure smart
-            <br />
-            net zero
+          <h1 className="text-[2.55rem] font-black leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-[4.2rem] xl:text-[4.7rem]">
+            <span className="block lg:whitespace-nowrap">
+              Making Infrastructure
+            </span>
+            <span className="block lg:whitespace-nowrap">
+              Smarter, Safer and
+            </span>
+            <span className="block lg:whitespace-nowrap">
+              Built to Last.
+            </span>
           </h1>
 
           <div className="mt-7 h-1.5 w-24 rounded-full bg-gradient-to-r from-pink-500 to-violet-500" />
 
           <p className="mt-7 max-w-xl text-lg leading-8 text-white/82">
-            We turn sustainability, smart energy, resilience and regulation into one powerful competitive advantage - helping organisations operate smarter, decarbonise faster and stay secure, resilient and compliant.
+           We turn disconnected infrastructure, systems and data into trusted intelligence so organisations can perform better, manage risk, strengthen resilience and move faster towards net zero.
           </p>
 
          <div className="mt-7 max-w-5xl">
@@ -603,6 +607,149 @@ function Hero() {
   );
 }
 
+function WhatWeDoSection() {
+  const capabilities = [
+    {
+      title: "Connect systems and data",
+      text: "Bring building, energy, operational and business data into one trusted view.",
+      icon: Wifi,
+      iconStyle: "bg-violet-50 text-violet-700",
+    },
+    {
+      title: "Create trusted intelligence",
+      text: "Turn complex infrastructure information into clear and useful insight.",
+      icon: BarChart3,
+      iconStyle: "bg-purple-50 text-purple-700",
+    },
+    {
+      title: "Protect connected operations",
+      text: "Build security, resilience and governance into the connected environment.",
+      icon: ShieldCheck,
+      iconStyle: "bg-fuchsia-50 text-fuchsia-700",
+    },
+    {
+      title: "Turn insight into action",
+      text: "Improve decisions, performance and measurable operational outcomes.",
+      icon: ArrowRight,
+      iconStyle: "bg-violet-50 text-violet-700",
+    },
+  ];
+
+  return (
+    <section className="bg-white px-5 pb-14 pt-8 lg:px-8 lg:pb-18 lg:pt-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-stretch">
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.65 }}
+            className="relative min-h-[420px] overflow-hidden rounded-[2rem] shadow-xl shadow-slate-950/10 lg:min-h-[500px]"
+          >
+            <img
+              src="/what-we-do-intelligent-infrastructure.png"
+              alt="Infrastructure intelligence operations centre displaying connected systems and live data"
+              className="absolute inset-0 h-full w-full object-cover object-center"
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-t from-[#09072f]/55 via-transparent to-transparent" />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.65 }}
+            className="flex h-full flex-col justify-center py-1 lg:py-3"
+          >
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-violet-700">
+              What we do
+            </p>
+
+            <h2 className="mt-2 max-w-2xl text-4xl font-black leading-[1.08] text-slate-950 md:text-5xl">
+              Creating intelligent infrastructure to drive insights into action.
+            </h2>
+
+            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
+              We connect infrastructure, systems, frameworks and data so organisations can
+              understand what is happening, manage risk and make better decisions.
+            </p>
+
+            <div className="mt-6 grid gap-x-7 gap-y-4 sm:grid-cols-2">
+              {capabilities.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <div
+                    key={item.title}
+                    className="grid grid-cols-[46px_1fr] gap-3 border-t border-slate-200 pt-4"
+                  >
+                    <div
+                      className={`grid h-11 w-11 place-items-center rounded-xl ${item.iconStyle}`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-black text-slate-950 md:text-base">
+                        {item.title}
+                      </h3>
+
+                      <p className="mt-1 text-sm leading-5 text-slate-600">
+                        {item.text}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TransformingTypicalSection() {
+  return (
+    <section className="bg-[#f7f6fb] px-5 pb-20 pt-8 lg:px-8 lg:pb-24 lg:pt-10">
+      <div className="mx-auto max-w-7xl">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.65 }}
+          className="text-center"
+        >
+          <p className="text-sm font-black uppercase tracking-[0.22em] text-violet-700">
+            Transforming the typical
+          </p>
+
+          <h2 className="mx-auto mt-4 max-w-4xl text-4xl font-black leading-tight text-slate-950 md:text-5xl">
+            Most organisations see parts. 
+             <br />
+             We see the whole.
+          </h2>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.75, delay: 0.1 }}
+          className="mt-12"
+        >
+          <img
+            src="/transforming-the-typical.png"
+            alt="Comparison between siloed infrastructure data and a connected 360 degree intelligent infrastructure view"
+            className="mx-auto h-auto w-full rounded-[2rem] object-contain shadow-xl shadow-violet-950/10"
+          />
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 function ServicesSection({ goToPage }) {
   const navigateToService = (page) => {
     if (!page || !goToPage) return;
@@ -612,70 +759,87 @@ function ServicesSection({ goToPage }) {
   };
 
   return (
-    <section id="services" className="relative z-20 -mt-24 px-5 pb-10 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {services.map((card, index) => {
-          const Icon = card.icon;
+    <section
+      id="services"
+      className="bg-white px-5 pb-20 pt-6 lg:px-8 lg:pb-24 lg:pt-8"
+    >
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-12">
+          <p className="text-sm font-black uppercase tracking-[0.22em] text-violet-700">
+            Solutions
+          </p>
 
-          return (
-            <motion.article
-              key={card.title}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.08 }}
-              onClick={() => navigateToService(card.page)}
-              className="group relative min-h-[470px] cursor-pointer overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-950/10"
-            >
-              {card.badge && (
-                <span className="absolute right-5 top-5 z-20 rounded-lg bg-violet-700 px-3 py-1 text-xs font-black text-white">
-                  {card.badge}
-                </span>
-              )}
+          <h2 className="mt-3 max-w-3xl text-4xl font-black leading-tight text-slate-950 md:text-5xl">
+            Connected solutions for smarter, safer and more sustainable
+            infrastructure.
+          </h2>
+        </div>
 
-              <div className="relative z-10 p-6 pb-48">
-                <span
-                  className={`inline-grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br ${card.accent} text-white shadow-lg`}
-                >
-                  <Icon className="h-8 w-8" />
-                </span>
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {services.map((card, index) => {
+            const Icon = card.icon;
 
-                <h3 className="mt-6 text-2xl font-black leading-tight text-slate-950">
-                  {card.title}
-                </h3>
+            return (
+              <motion.article
+                key={card.title}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.08 }}
+                onClick={() => navigateToService(card.page)}
+                className="group relative min-h-[470px] cursor-pointer overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-950/10"
+              >
+                {card.badge && (
+                  <span className="absolute right-5 top-5 z-20 rounded-lg bg-violet-700 px-3 py-1 text-xs font-black text-white">
+                    {card.badge}
+                  </span>
+                )}
 
-                <p className="mt-4 text-sm leading-6 text-slate-600">
-                  {card.text}
-                </p>
+                <div className="relative z-10 p-6 pb-48">
+                  <span
+                    className={`inline-grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br ${card.accent} text-white shadow-lg`}
+                  >
+                    <Icon className="h-8 w-8" />
+                  </span>
 
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    navigateToService(card.page);
-                  }}
-                  className={`mt-6 inline-flex cursor-pointer items-center text-sm font-black ${card.textAccent}`}
-                >
-                  {card.cta} <ArrowRight className="ml-2 h-4 w-4" />
-                </button>
-              </div>
+                  <h3 className="mt-6 text-2xl font-black leading-tight text-slate-950">
+                    {card.title}
+                  </h3>
 
-              <div className="absolute inset-x-0 bottom-0 h-48 overflow-hidden">
-                <div
-                  className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-105"
-                  style={{ backgroundImage: card.image }}
-                />
-                <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-white via-white/80 to-transparent" />
-              </div>
-            </motion.article>
-          );
-        })}
+                  <p className="mt-4 text-sm leading-6 text-slate-600">
+                    {card.text}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      navigateToService(card.page);
+                    }}
+                    className={`mt-6 inline-flex cursor-pointer items-center text-sm font-black ${card.textAccent}`}
+                  >
+                    {card.cta}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="absolute inset-x-0 bottom-0 h-48 overflow-hidden">
+                  <div
+                    className="h-full w-full bg-cover bg-center transition duration-500 group-hover:scale-105"
+                    style={{ backgroundImage: card.image }}
+                  />
+
+                  <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-white via-white/80 to-transparent" />
+                </div>
+              </motion.article>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
 }
-
 function ImpactSection() {
   return (
     <section className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
@@ -794,6 +958,10 @@ export default function Homepage({
 
       <main>
         <Hero />
+
+        <WhatWeDoSection />
+
+        <TransformingTypicalSection />
 
         <ServicesSection goToPage={goToPage} />
 

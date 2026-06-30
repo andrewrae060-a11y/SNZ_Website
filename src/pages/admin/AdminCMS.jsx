@@ -26,7 +26,6 @@ const API_BASE = String(
   ""
 ).replace(/\/+$/, "");
 
-const TOKEN_KEY = "snz_content_manager_token";
 const CONTENT_MANAGER_EMAIL = "ContentManger@smartnetzero.co.uk";
 const ALLOWED_CMS_ROLES = new Set(["content_manager", "super_admin"]);
 const STARTING_SECTION = "channelPosts";
@@ -42,20 +41,7 @@ const CMS_SECTIONS = [
   { key: "channels", label: "Social channels" },
 ];
 
-function getStoredToken() {
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-function storeToken(token) {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-function removeToken() {
-  localStorage.removeItem(TOKEN_KEY);
-}
-
 async function apiRequest(path, options = {}) {
-  const token = getStoredToken();
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), 15000);
   const isFormData = options.body instanceof FormData;
@@ -64,7 +50,6 @@ async function apiRequest(path, options = {}) {
     ...(options.body && !isFormData
       ? { "Content-Type": "application/json" }
       : {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   };
 
@@ -72,6 +57,7 @@ async function apiRequest(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
       ...options,
       headers,
+      credentials: "include",
       signal: controller.signal,
     });
 
@@ -310,9 +296,8 @@ export default function AdminCMS({ goToPage }) {
         document.title = "Content Manager Admin | Smart Net Zero";
       }, []);
 
-  const [authenticated, setAuthenticated] = useState(
-    Boolean(getStoredToken())
-  );
+  const [authenticated, setAuthenticated] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [selectedSection, setSelectedSection] = useState(
     STARTING_SECTION
   );
@@ -327,12 +312,32 @@ export default function AdminCMS({ goToPage }) {
     [content, selectedSection]
   );
 
-  const loadContent = useCallback(async () => {
-    if (!getStoredToken()) {
-      setAuthenticated(false);
-      return;
-    }
+  const checkSession = useCallback(async () => {
+    try {
+      setCheckingSession(true);
 
+      const result = await apiRequest("/api/admin/session");
+      const administrator = result?.administrator || result?.admin;
+      const role = String(administrator?.role || "").toLowerCase();
+
+      if (!administrator || !ALLOWED_CMS_ROLES.has(role)) {
+        setAuthenticated(false);
+        return;
+      }
+
+      setAuthenticated(true);
+    } catch (requestError) {
+      setAuthenticated(false);
+
+      if (requestError.status !== 401) {
+        setError(requestError.message);
+      }
+    } finally {
+      setCheckingSession(false);
+    }
+  }, []);
+
+  const loadContent = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -341,9 +346,9 @@ export default function AdminCMS({ goToPage }) {
       setContent(result?.content || result || {});
       setAuthenticated(true);
     } catch (requestError) {
-      if (requestError.status === 401) {
-        removeToken();
+      if (requestError.status === 401 || requestError.status === 403) {
         setAuthenticated(false);
+        setContent({});
       }
 
       setError(requestError.message);
@@ -353,17 +358,30 @@ export default function AdminCMS({ goToPage }) {
   }, []);
 
   useEffect(() => {
-    if (authenticated) loadContent();
-  }, [authenticated, loadContent]);
+    checkSession();
+  }, [checkSession]);
 
-  const handleLogin = (token) => {
-    storeToken(token);
+  useEffect(() => {
+    if (authenticated && !checkingSession) {
+      loadContent();
+    }
+  }, [authenticated, checkingSession, loadContent]);
+
+  const handleLogin = () => {
     setAuthenticated(true);
     setMessage("Administrator signed in.");
+    setError("");
   };
 
-  const handleSignOut = () => {
-    removeToken();
+  const handleSignOut = async () => {
+    try {
+      await apiRequest("/api/admin/logout", {
+        method: "POST",
+      });
+    } catch {
+      // Clear the interface even if the server-side logout request fails.
+    }
+
     setAuthenticated(false);
     setContent({});
     setEditingItem(null);
@@ -400,6 +418,16 @@ export default function AdminCMS({ goToPage }) {
       setLoading(false);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-slate-100 px-5">
+        <div className="rounded-2xl bg-white px-8 py-6 text-center font-bold text-slate-700 shadow-lg">
+          Checking administrator session…
+        </div>
+      </div>
+    );
+  }
 
   if (!authenticated) {
     return <AdminLogin onLogin={handleLogin} goToPage={goToPage} />;
@@ -621,13 +649,13 @@ function AdminLogin({ onLogin, goToPage }) {
         }),
       });
 
-      if (!result?.token) {
+      const administrator = result?.administrator || result?.admin;
+
+      if (!administrator) {
         throw new Error(
-          "The server did not return an administrator token."
+          "The server did not return administrator account details."
         );
       }
-
-      const administrator = result?.administrator || result?.admin;
       const role = String(administrator?.role || "").toLowerCase();
 
       if (!ALLOWED_CMS_ROLES.has(role)) {
@@ -636,7 +664,7 @@ function AdminLogin({ onLogin, goToPage }) {
         );
       }
 
-      onLogin(result.token);
+      onLogin();
     } catch (requestError) {
       setError(requestError.message);
     } finally {
