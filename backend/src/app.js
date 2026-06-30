@@ -25,6 +25,9 @@ import jobsRoutes from
 import careersApplicationsRoutes from
   "./routes/careersApplications.routes.js";
 
+import cmsRoutes from
+  "../../server/routes/cmsRoutes.js";
+
 const app = express();
 
 app.disable("x-powered-by");
@@ -82,6 +85,11 @@ app.use(
 app.use(
   "/api/careers",
   careersApplicationsRoutes
+);
+
+app.use(
+  "/api",
+  cmsRoutes
 );
 
 app.get(
