@@ -1,8 +1,8 @@
 import express from "express";
 
 import {
-  requireAdministrator,
-} from "../auth.js";
+  requireAdmin,
+} from "../../backend/src/middleware/requireAdmin.js";
 
 import {
   getPublishedContent,
@@ -15,20 +15,56 @@ import {
 
 const router = express.Router();
 
+/**
+ * Restrict CMS administration routes to approved roles.
+ *
+ * requireAdmin verifies the administrator session cookie
+ * and adds the administrator record to req.admin.
+ */
+function requireCmsRole(req, res, next) {
+  const role = String(
+    req.admin?.role || ""
+  )
+    .trim()
+    .toLowerCase();
+
+  const allowedRoles = new Set([
+    "content_manager",
+    "super_admin",
+  ]);
+
+  if (!allowedRoles.has(role)) {
+    return res.status(403).json({
+      success: false,
+      message:
+        "This account does not have Content Manager access.",
+    });
+  }
+
+  return next();
+}
+
+/**
+ * GET /api/content/test
+ *
+ * Simple route used to confirm that the CMS router
+ * has been mounted correctly.
+ */
 router.get(
   "/content/test",
   (_req, res) => {
-    res.json({
+    return res.status(200).json({
+      success: true,
       status: "CMS router is working",
     });
   }
 );
 
-/*
+/**
  * GET /api/content/social-hub
  *
  * Public route used by the Social Media page.
- * Returns only published CMS content.
+ * Returns published CMS content only.
  */
 router.get(
   "/content/social-hub",
@@ -37,18 +73,19 @@ router.get(
       const content =
         await getPublishedContent();
 
-      res.json({
+      return res.status(200).json({
+        success: true,
         content,
         generatedAt:
           new Date().toISOString(),
       });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 );
 
-/*
+/**
  * POST /api/subscribers
  *
  * Public newsletter subscription route.
@@ -75,6 +112,7 @@ router.post(
 
       if (!emailIsValid) {
         return res.status(400).json({
+          success: false,
           message:
             "Please enter a valid email address.",
         });
@@ -82,6 +120,7 @@ router.post(
 
       if (consent !== true) {
         return res.status(400).json({
+          success: false,
           message:
             "Consent is required before subscribing.",
         });
@@ -91,56 +130,61 @@ router.post(
         await createSubscriber({
           email: normalizedEmail,
           consent: true,
-          source:
-            String(source || "social-hub")
-              .trim()
-              .slice(0, 100),
+          source: String(
+            source || "social-hub"
+          )
+            .trim()
+            .slice(0, 100),
         });
 
-      res.status(201).json({
+      return res.status(201).json({
+        success: true,
         message:
           "Subscription recorded.",
         subscriber,
       });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 );
 
-/*
+/**
  * GET /api/admin/content
  *
- * Protected route.
- * Returns all CMS content, including drafts
- * and archived content.
+ * Protected CMS route.
+ * Returns all content, including draft,
+ * published and archived records.
  */
 router.get(
   "/admin/content",
-  requireAdministrator,
+  requireAdmin,
+  requireCmsRole,
   async (_req, res, next) => {
     try {
       const content =
         await getAdminContent();
 
-      res.json({
+      return res.status(200).json({
+        success: true,
         content,
       });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 );
 
-/*
+/**
  * POST /api/admin/content
  *
- * Protected route.
- * Creates a new CMS content item.
+ * Protected CMS route.
+ * Creates a CMS content item.
  */
 router.post(
   "/admin/content",
-  requireAdministrator,
+  requireAdmin,
+  requireCmsRole,
   async (req, res, next) => {
     try {
       const {
@@ -159,16 +203,30 @@ router.post(
           .trim()
           .toLowerCase();
 
-      const allowedStatuses = [
+      const normalizedStatus =
+        String(status)
+          .trim()
+          .toLowerCase();
+
+      const allowedStatuses = new Set([
         "draft",
         "published",
         "archived",
-      ];
+      ]);
 
       if (!normalizedSection) {
         return res.status(400).json({
+          success: false,
           message:
             "A content section is required.",
+        });
+      }
+
+      if (!normalizedItemKey) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "A content item key is required.",
         });
       }
 
@@ -178,15 +236,19 @@ router.post(
         )
       ) {
         return res.status(400).json({
+          success: false,
           message:
             "The item key may contain only lowercase letters, numbers and hyphens.",
         });
       }
 
       if (
-        !allowedStatuses.includes(status)
+        !allowedStatuses.has(
+          normalizedStatus
+        )
       ) {
         return res.status(400).json({
+          success: false,
           message:
             "Status must be draft, published or archived.",
         });
@@ -198,47 +260,55 @@ router.post(
         Array.isArray(data)
       ) {
         return res.status(400).json({
+          success: false,
           message:
             "Content data must be a JSON object.",
         });
       }
 
+      const normalizedSortOrder =
+        Number.isFinite(
+          Number(sortOrder)
+        )
+          ? Number(sortOrder)
+          : 0;
+
       const item =
         await createContentItem({
-          section: normalizedSection,
+          section:
+            normalizedSection,
           itemKey:
             normalizedItemKey,
-          status,
+          status:
+            normalizedStatus,
           sortOrder:
-            Number.isFinite(
-              Number(sortOrder)
-            )
-              ? Number(sortOrder)
-              : 0,
+            normalizedSortOrder,
           data,
           updatedBy:
             req.admin?.email ||
             "administrator",
         });
 
-      res.status(201).json({
+      return res.status(201).json({
+        success: true,
         item,
       });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 );
 
-/*
+/**
  * PUT /api/admin/content/:id
  *
- * Protected route.
+ * Protected CMS route.
  * Updates an existing CMS content item.
  */
 router.put(
   "/admin/content/:id",
-  requireAdministrator,
+  requireAdmin,
+  requireCmsRole,
   async (req, res, next) => {
     try {
       const id =
@@ -255,75 +325,83 @@ router.put(
 
       if (!id) {
         return res.status(400).json({
+          success: false,
           message:
             "A content item ID is required.",
         });
       }
 
-      const allowedStatuses = [
+      const allowedStatuses = new Set([
         "draft",
         "published",
         "archived",
-      ];
+      ]);
 
-      if (
-        status !== undefined &&
-        !allowedStatuses.includes(status)
-      ) {
-        return res.status(400).json({
-          message:
-            "Status must be draft, published or archived.",
-        });
-      }
-
-      if (
-        itemKey !== undefined &&
-        !/^[a-z0-9-]+$/.test(
-          String(itemKey)
-            .trim()
-            .toLowerCase()
-        )
-      ) {
-        return res.status(400).json({
-          message:
-            "The item key may contain only lowercase letters, numbers and hyphens.",
-        });
-      }
-
-      if (
-        data !== undefined &&
-        (
-          !data ||
-          typeof data !== "object" ||
-          Array.isArray(data)
-        )
-      ) {
-        return res.status(400).json({
-          message:
-            "Content data must be a JSON object.",
-        });
-      }
-
-     const changes = {
+      const changes = {
         updatedBy:
           req.admin?.email ||
           "administrator",
       };
 
       if (section !== undefined) {
-        changes.section =
+        const normalizedSection =
           String(section).trim();
+
+        if (!normalizedSection) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "The content section cannot be empty.",
+          });
+        }
+
+        changes.section =
+          normalizedSection;
       }
 
       if (itemKey !== undefined) {
-        changes.itemKey =
+        const normalizedItemKey =
           String(itemKey)
             .trim()
             .toLowerCase();
+
+        if (
+          !normalizedItemKey ||
+          !/^[a-z0-9-]+$/.test(
+            normalizedItemKey
+          )
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "The item key may contain only lowercase letters, numbers and hyphens.",
+          });
+        }
+
+        changes.itemKey =
+          normalizedItemKey;
       }
 
       if (status !== undefined) {
-        changes.status = status;
+        const normalizedStatus =
+          String(status)
+            .trim()
+            .toLowerCase();
+
+        if (
+          !allowedStatuses.has(
+            normalizedStatus
+          )
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Status must be draft, published or archived.",
+          });
+        }
+
+        changes.status =
+          normalizedStatus;
       }
 
       if (sortOrder !== undefined) {
@@ -336,6 +414,18 @@ router.put(
       }
 
       if (data !== undefined) {
+        if (
+          !data ||
+          typeof data !== "object" ||
+          Array.isArray(data)
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Content data must be a JSON object.",
+          });
+        }
+
         changes.data = data;
       }
 
@@ -347,29 +437,32 @@ router.put(
 
       if (!item) {
         return res.status(404).json({
+          success: false,
           message:
             "The content item was not found.",
         });
       }
 
-      res.json({
+      return res.status(200).json({
+        success: true,
         item,
       });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 );
 
-/*
+/**
  * DELETE /api/admin/content/:id
  *
- * Protected route.
+ * Protected CMS route.
  * Deletes an existing CMS content item.
  */
 router.delete(
   "/admin/content/:id",
-  requireAdministrator,
+  requireAdmin,
+  requireCmsRole,
   async (req, res, next) => {
     try {
       const id =
@@ -378,6 +471,7 @@ router.delete(
 
       if (!id) {
         return res.status(400).json({
+          success: false,
           message:
             "A content item ID is required.",
         });
@@ -395,14 +489,15 @@ router.delete(
 
       if (deleted === false) {
         return res.status(404).json({
+          success: false,
           message:
             "The content item was not found.",
         });
       }
 
-      res.status(204).send();
+      return res.status(204).send();
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 );
