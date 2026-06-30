@@ -26,11 +26,11 @@ function requireCmsRole(req, res, next) {
     req.admin?.role || ""
   )
     .trim()
-    .toLowerCase();
+    .toUpperCase();
 
   const allowedRoles = new Set([
-    "content_manager",
-    "super_admin",
+    "CONTENT_MANAGER",
+    "SUPER_ADMIN",
   ]);
 
   if (!allowedRoles.has(role)) {

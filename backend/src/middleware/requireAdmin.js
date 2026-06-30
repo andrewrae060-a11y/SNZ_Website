@@ -1,4 +1,5 @@
 import sql from "../database.js";
+
 import {
   getAdminCookieName,
   verifyAdminToken,
@@ -7,25 +8,35 @@ import {
 const ALLOWED_ADMIN_ROLES = new Set([
   "RESEARCH_ADMIN",
   "CAREERS_ADMIN",
+  "CONTENT_MANAGER",
   "SUPER_ADMIN",
 ]);
 
-export async function requireAdmin(req, res, next) {
+export async function requireAdmin(
+  req,
+  res,
+  next
+) {
   try {
-    const cookieName = getAdminCookieName();
-    const token = req.cookies?.[cookieName];
+    const cookieName =
+      getAdminCookieName();
+
+    const token =
+      req.cookies?.[cookieName];
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Administrator login required.",
+        message:
+          "Administrator login required.",
       });
     }
 
     let tokenPayload;
 
     try {
-      tokenPayload = verifyAdminToken(token);
+      tokenPayload =
+        verifyAdminToken(token);
     } catch {
       return res.status(401).json({
         success: false,
@@ -47,18 +58,27 @@ export async function requireAdmin(req, res, next) {
 
     const admin = admins[0];
 
-    if (!admin || !admin.is_active) {
+    if (
+      !admin ||
+      !admin.is_active
+    ) {
       return res.status(403).json({
         success: false,
-        message: "Administrator access is not available.",
+        message:
+          "Administrator access is not available.",
       });
     }
 
-    const normalisedRole = String(admin.role || "")
-      .trim()
-      .toUpperCase();
+    const normalisedRole =
+      String(admin.role || "")
+        .trim()
+        .toUpperCase();
 
-    if (!ALLOWED_ADMIN_ROLES.has(normalisedRole)) {
+    if (
+      !ALLOWED_ADMIN_ROLES.has(
+        normalisedRole
+      )
+    ) {
       return res.status(403).json({
         success: false,
         message:
@@ -71,8 +91,8 @@ export async function requireAdmin(req, res, next) {
       role: normalisedRole,
     };
 
-    next();
+    return next();
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
