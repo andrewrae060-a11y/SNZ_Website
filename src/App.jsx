@@ -1,475 +1,638 @@
 import {
   lazy,
   Suspense,
+  useCallback,
   useEffect,
   useState,
 } from "react";
+
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
 import Homepage from "./pages/Homepage";
 import EnquiryModal from "./components/EnquiryModal";
 
-const AboutUs = lazy(() => import("./pages/AboutUs"));
-const Careers = lazy(() => import("./pages/Careers"));
-const CareersAdmin = lazy(() => import("./admin/CareersAdmin"));
-const SocialMedia = lazy(() => import("./pages/SocialMedia"));
-const AdminCMS = lazy(() => import("./pages/admin/AdminCMS"));
-const Research = lazy(() => import("./pages/Research"));
-const ResearchAdmin = lazy(() => import("./pages/ResearchAdmin"));
+const AboutUs = lazy(() =>
+  import("./pages/AboutUs")
+);
 
-const SustainabilityNetZero = lazy(() => import("./pages/SustainabilityNetZero"));
-const OTSecurityResilience = lazy(() =>  import("./pages/OTSecurityResilience"));
-const SmartRegulations = lazy(() => import("./pages/SmartRegulations"));
-const SmartEnergyManagement = lazy(() =>  import("./pages/SmartEnergyManagement"));
+const Careers = lazy(() =>
+  import("./pages/Careers")
+);
 
-const SmartApplications = lazy(() => import("./pages/SmartApplications"));
-const ImpactDashboard = lazy(() => import("./pages/ImpactDashboard"));
-const SmartDecarb360 = lazy(() => import("./pages/SmartDecarb360"));
-const LabTestingCompliance = lazy(() => import("./pages/LabTestingCompliance"));
-const SpecialistConsultancy = lazy(() => import("./pages/SpecialistConsultancy"));
-const SmartInfrastructureAssurance = lazy(() => import("./pages/SmartInfrastructureAssurance"));
-const EnergyOptimisation = lazy(() => import("./pages/EnergyOptimisation"));
+const CareersAdmin = lazy(() =>
+  import("./admin/CareersAdmin")
+);
 
-const BuiltEnvironment = lazy(() => import("./pages/BuiltEnvironment"));
-const PublicSectorLocalAuthorities = lazy(() => import("./pages/PublicSectorLocalAuthorities"));
-const ManufacturersConnectedProducts = lazy(() => import("./pages/ManufacturersConnectedProducts"));
-const EnergyUtilitiesCriticalInfrastructure = lazy(() => import("./pages/EnergyUtilitiesCriticalInfrastructure"));
-const DataCentres = lazy(() => import("./pages/DataCentres"));
+const SocialMedia = lazy(() =>
+  import("./pages/SocialMedia")
+);
 
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const ModernSlavery = lazy(() => import("./pages/ModernSlavery"));
-const CarbonReductionStatement = lazy(() => import("./pages/CarbonReductionStatement"));
-const AccessibilityStatement = lazy(() => import("./pages/AccessibilityStatement"));
+const AdminCMS = lazy(() =>
+  import("./pages/admin/AdminCMS")
+);
 
-export default function App() {
-  const getInitialPage = () => {
-  const path = window.location.pathname
-    .toLowerCase()
-    .replace(/\/+$/, "") || "/";
+const Research = lazy(() =>
+  import("./pages/Research")
+);
 
-  if (path === "/admin/careers") {
-    return "CareersAdmin";
-  }
+const ResearchAdmin = lazy(() =>
+  import("./pages/ResearchAdmin")
+);
 
-  if (path === "/careers") {
-    return "Careers";
-  }
+const SustainabilityNetZero = lazy(() =>
+  import("./pages/SustainabilityNetZero")
+);
 
-  if (path === "/research-admin") {
-    return "ResearchAdmin";
-  }
+const OTSecurityResilience = lazy(() =>
+  import("./pages/OTSecurityResilience")
+);
 
-  if (path === "/research") {
-    return "Research";
-  }
+const SmartRegulations = lazy(() =>
+  import("./pages/SmartRegulations")
+);
 
-  if (path === "/admin/content") {
-  return "AdminCMS";
-  }
+const SmartEnergyManagement = lazy(() =>
+  import("./pages/SmartEnergyManagement")
+);
 
-  return "Homepage";
+const SmartApplications = lazy(() =>
+  import("./pages/SmartApplications")
+);
+
+const ImpactDashboard = lazy(() =>
+  import("./pages/ImpactDashboard")
+);
+
+const SmartDecarb360 = lazy(() =>
+  import("./pages/SmartDecarb360")
+);
+
+const LabTestingCompliance = lazy(() =>
+  import("./pages/LabTestingCompliance")
+);
+
+const SpecialistConsultancy = lazy(() =>
+  import("./pages/SpecialistConsultancy")
+);
+
+const SmartInfrastructureAssurance = lazy(() =>
+  import("./pages/SmartInfrastructureAssurance")
+);
+
+const EnergyOptimisation = lazy(() =>
+  import("./pages/EnergyOptimisation")
+);
+
+const BuiltEnvironment = lazy(() =>
+  import("./pages/BuiltEnvironment")
+);
+
+const PublicSectorLocalAuthorities = lazy(() =>
+  import("./pages/PublicSectorLocalAuthorities")
+);
+
+const ManufacturersConnectedProducts = lazy(() =>
+  import("./pages/ManufacturersConnectedProducts")
+);
+
+const EnergyUtilitiesCriticalInfrastructure = lazy(() =>
+  import("./pages/EnergyUtilitiesCriticalInfrastructure")
+);
+
+const DataCentres = lazy(() =>
+  import("./pages/DataCentres")
+);
+
+const PrivacyPolicy = lazy(() =>
+  import("./pages/PrivacyPolicy")
+);
+
+const ModernSlavery = lazy(() =>
+  import("./pages/ModernSlavery")
+);
+
+const CarbonReductionStatement = lazy(() =>
+  import("./pages/CarbonReductionStatement")
+);
+
+const AccessibilityStatement = lazy(() =>
+  import("./pages/AccessibilityStatement")
+);
+
+/**
+ * Maps the existing goToPage("PageName") calls
+ * to proper browser URLs.
+ */
+const PAGE_PATHS = {
+  Homepage: "/",
+  AboutUs: "/about",
+
+  Careers: "/careers",
+  CareersAdmin: "/admin/careers",
+
+  Research: "/research",
+  ResearchAdmin: "/admin/research",
+
+  SocialMedia: "/content-hub",
+  AdminCMS: "/admin/content",
+
+  SustainabilityNetZero:
+    "/solutions/sustainability-net-zero",
+
+  OTSecurityResilience:
+    "/solutions/ot-security-resilience",
+
+  SmartRegulations:
+    "/solutions/smart-regulations",
+
+  SmartEnergyManagement:
+    "/solutions/smart-energy-management",
+
+  SmartApplications:
+    "/solutions/smart-applications",
+
+  ImpactDashboard:
+    "/solutions/impact-dashboard",
+
+  SmartDecarb360:
+    "/solutions/smart-decarb360",
+
+  LabTestingCompliance:
+    "/solutions/lab-testing-compliance",
+
+  SpecialistConsultancy:
+    "/solutions/specialist-consultancy",
+
+  SmartInfrastructureAssurance:
+    "/solutions/smart-infrastructure-assurance",
+
+  EnergyOptimisation:
+    "/solutions/energy-optimisation",
+
+  BuiltEnvironment:
+    "/sectors/built-environment",
+
+  PublicSectorLocalAuthorities:
+    "/sectors/public-sector-local-authorities",
+
+  ManufacturersConnectedProducts:
+    "/sectors/manufacturers-connected-products",
+
+  EnergyUtilitiesCriticalInfrastructure:
+    "/sectors/energy-utilities-critical-infrastructure",
+
+  DataCentres:
+    "/sectors/data-centres",
+
+  PrivacyPolicy:
+    "/privacy-policy",
+
+  ModernSlavery:
+    "/modern-slavery-statement",
+
+  CarbonReductionStatement:
+    "/carbon-reduction-statement",
+
+  AccessibilityStatement:
+    "/accessibility-statement",
 };
 
-  const [activePage, setActivePage] = useState(getInitialPage);
-  const [enquiryOpen, setEnquiryOpen] = useState(false);
+function PageLoading({
+  message = "Loading page...",
+}) {
+  return (
+    <div
+      style={{
+        minHeight: "60vh",
+        display: "grid",
+        placeItems: "center",
+        padding: 40,
+      }}
+    >
+      <div
+        style={{
+          fontWeight: 700,
+          color: "#334155",
+        }}
+      >
+        {message}
+      </div>
+    </div>
+  );
+}
 
-  const openEnquiryForm = () => setEnquiryOpen(true);
-  const closeEnquiryForm = () => setEnquiryOpen(false);
+function LazyPage({
+  children,
+  message,
+}) {
+  return (
+    <Suspense
+      fallback={
+        <PageLoading message={message} />
+      }
+    >
+      {children}
+    </Suspense>
+  );
+}
 
-  const goToPage = (page) => {
-    setActivePage(page);
+export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const paths = {
-      Homepage: "/",
-      Careers: "/careers",
-      CareersAdmin: "/admin/careers",
-      AdminCMS: "/admin/content",
-      Research: "/research",
-      ResearchAdmin: "/research-admin",
-      SocialMedia: "/social-media",
-    };
+  const [enquiryOpen, setEnquiryOpen] =
+    useState(false);
 
-    const nextPath = paths[page] || "/";
+  const openEnquiryForm =
+    useCallback(() => {
+      setEnquiryOpen(true);
+    }, []);
 
-      if (window.location.pathname !== nextPath) {
-        window.history.pushState({}, "", nextPath);
-    }
+  const closeEnquiryForm =
+    useCallback(() => {
+      setEnquiryOpen(false);
+    }, []);
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  /**
+   * Keeps existing components working without
+   * having to replace every goToPage call at once.
+   */
+  const goToPage = useCallback(
+    (page) => {
+      const nextPath =
+        PAGE_PATHS[page] || "/";
 
+      navigate(nextPath);
+    },
+    [navigate]
+  );
+
+  /**
+   * Scroll to the top whenever the route changes.
+   */
   useEffect(() => {
-    const handlePopState = () => {
-      const path = window.location.pathname
-        .toLowerCase()
-        .replace(/\/+$/, "") || "/";
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+  }, [location.pathname]);
 
-      if (path === "/admin/careers") {
-        setActivePage("CareersAdmin");
-        return;
-      }
-
-      if (path === "/careers") {
-        setActivePage("Careers");
-        return;
-      }
-
-      if (path === "/admin/content") {
-        setActivePage("AdminCMS");
-        return;
-      }
-
-      if (path === "/social-media") {
-        setActivePage("SocialMedia");
-        return;
-      }
-
-      if (path === "/research-admin") {
-        setActivePage("ResearchAdmin");
-        return;
-      }
-
-      if (path === "/research") {
-        setActivePage("Research");
-        return;
-      }
-
-      setActivePage("Homepage");
-    };
-
-    window.addEventListener(
-      "popstate",
-      handlePopState
-    );
-
-    return () => {
-      window.removeEventListener(
-        "popstate",
-        handlePopState
-      );
-    };
-  }, []);   
+  const sharedPageProps = {
+    goToPage,
+    openEnquiryForm,
+  };
 
   return (
     <>
-      {activePage === "Homepage" && (
-        <Homepage goToPage={goToPage} openEnquiryForm={openEnquiryForm} />
-      )}
-
-      {activePage === "SocialMedia" && (
-        <Suspense
-          fallback={<div style={{ padding: 40 }}>Loading Social Media page...</div>}
-        >
-          <SocialMedia goToPage={goToPage} openEnquiryForm={openEnquiryForm} />
-        </Suspense>
-      )}
-
-      {activePage === "AboutUs" && (
-        <Suspense fallback={<div style={{ padding: 40 }}>Loading About Us...</div>}>
-          <AboutUs goToPage={goToPage} openEnquiryForm={openEnquiryForm} />
-        </Suspense>
-      )}
-
-      {activePage === "Careers" && (
-      <Suspense fallback={<div style={{ padding: 40 }}>Loading Careers...</div>}>
-        <Careers goToPage={goToPage} openEnquiryForm={openEnquiryForm} />
-      </Suspense>
-      )}
-
-      {activePage === "CareersAdmin" && (
-      <Suspense
-        fallback={
-          <div style={{ padding: 40 }}>
-            Loading Careers Administration...
-          </div>
-        }
-      >
-        <CareersAdmin />
-      </Suspense>
-    )}
-
-    {activePage === "AdminCMS" && (
-      <Suspense
-        fallback={
-          <div style={{ padding: 40 }}>
-            Loading Content Administration...
-          </div>
-        }
-      >
-        <AdminCMS goToPage={goToPage} />
-      </Suspense>
-    )}
-
-      {activePage === "Research" && (
-        <Suspense fallback={<div style={{ padding: 40 }}>Loading Research page...</div>}>
-          <Research goToPage={goToPage} openEnquiryForm={openEnquiryForm} />
-        </Suspense>
-      )}
-
-      {activePage === "ResearchAdmin" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Research Administration...
-            </div>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Homepage
+              {...sharedPageProps}
+            />
           }
-        >
-          <ResearchAdmin />
-        </Suspense>
-      )}
-
-      {activePage === "SmartRegulations" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>Loading Smart Regulations page...</div>
-          }
-        >
-          <SmartRegulations
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}    
-
-      {activePage === "SustainabilityNetZero" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Sustainability & Net Zero...
-            </div>
-          }
-        >
-          <SustainabilityNetZero
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
-
-      {activePage === "ImpactDashboard" && (
-        <Suspense
-          fallback={<div style={{ padding: 40 }}>Loading Impact Dashboard...</div>}
-        >
-          <ImpactDashboard
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
-
-      {activePage === "OTSecurityResilience" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading OT Security & Resilience...
-            </div>
-          }
-        >
-          <OTSecurityResilience
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
-
-      {activePage === "SmartApplications" && (
-        <Suspense
-          fallback={
-            <div className="p-10">
-              Loading Smart Applications...
-            </div>
-          }
-        >
-          <SmartApplications
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
-            
-      {activePage === "SmartDecarb360" && (
-        <Suspense
-          fallback={<div style={{ padding: 40 }}>Loading SmartDecarb360...</div>}
-        >
-          <SmartDecarb360
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
-
-      {activePage === "LabTestingCompliance" && (
-        <LabTestingCompliance
-          goToPage={goToPage}
-          openEnquiryForm={openEnquiryForm}
         />
-      )}
 
-      {activePage === "SpecialistConsultancy" && (
-        <SpecialistConsultancy
-          goToPage={goToPage}
-          openEnquiryForm={openEnquiryForm}
+        <Route
+          path="/about"
+          element={
+            <LazyPage message="Loading About Us...">
+              <AboutUs
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
         />
-      )}
 
-      {activePage === "SmartInfrastructureAssurance" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Smart Infrastructure Assurance...
-            </div>
+        <Route
+          path="/careers"
+          element={
+            <LazyPage message="Loading Careers...">
+              <Careers
+                {...sharedPageProps}
+              />
+            </LazyPage>
           }
-        >
-          <SmartInfrastructureAssurance
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
+        />
 
-      {activePage === "EnergyOptimisation" && (
-        <Suspense fallback={<div style={{ padding: 40 }}>Loading Energy Optimisation...</div>}>
-          <EnergyOptimisation
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
-
-            {activePage === "SmartEnergyManagement" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Smart Energy Management...
-            </div>
+        <Route
+          path="/research"
+          element={
+            <LazyPage message="Loading Research...">
+              <Research
+                {...sharedPageProps}
+              />
+            </LazyPage>
           }
-        >
-          <SmartEnergyManagement
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
+        />
 
-      {activePage === "BuiltEnvironment" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Built Environment...
-            </div>
+        <Route
+          path="/content-hub"
+          element={
+            <LazyPage message="Loading Content Hub...">
+              <SocialMedia
+                {...sharedPageProps}
+              />
+            </LazyPage>
           }
-        >
-          <BuiltEnvironment
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
+        />
 
-      {activePage === "PublicSectorLocalAuthorities" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Public Sector & Local Authorities...
-            </div>
+        <Route
+          path="/solutions/sustainability-net-zero"
+          element={
+            <LazyPage message="Loading Sustainability and Net Zero...">
+              <SustainabilityNetZero
+                {...sharedPageProps}
+              />
+            </LazyPage>
           }
-        >
-          <PublicSectorLocalAuthorities
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
+        />
 
-      {activePage === "ManufacturersConnectedProducts" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Manufacturers & Connected Products...
-            </div>
+        <Route
+          path="/solutions/ot-security-resilience"
+          element={
+            <LazyPage message="Loading OT Security and Resilience...">
+              <OTSecurityResilience
+                {...sharedPageProps}
+              />
+            </LazyPage>
           }
-        >
-          <ManufacturersConnectedProducts
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
+        />
 
-      {activePage === "EnergyUtilitiesCriticalInfrastructure" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Energy, Utilities & Critical Infrastructure...
-            </div>
+        <Route
+          path="/solutions/smart-regulations"
+          element={
+            <LazyPage message="Loading Smart Regulations...">
+              <SmartRegulations
+                {...sharedPageProps}
+              />
+            </LazyPage>
           }
-        >
-          <EnergyUtilitiesCriticalInfrastructure
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
+        />
 
-      {activePage === "DataCentres" && (
-        <Suspense fallback={<div style={{ padding: 40 }}>Loading Data Centres...</div>}>
-          <DataCentres goToPage={goToPage} openEnquiryForm={openEnquiryForm} />
-        </Suspense>
-      )}
-
-        {activePage === "PrivacyPolicy" && (
-        <Suspense fallback={<div style={{ padding: 40 }}>Loading Privacy Policy...</div>}>
-          <PrivacyPolicy
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
-
-      {activePage === "ModernSlavery" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Modern Slavery Statement...
-            </div>
+        <Route
+          path="/solutions/smart-energy-management"
+          element={
+            <LazyPage message="Loading Smart Energy Management...">
+              <SmartEnergyManagement
+                {...sharedPageProps}
+              />
+            </LazyPage>
           }
-        >
-          <ModernSlavery
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
+        />
 
-      {activePage === "CarbonReductionStatement" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Carbon Reduction Statement...
-            </div>
+        <Route
+          path="/solutions/smart-applications"
+          element={
+            <LazyPage message="Loading Smart Applications...">
+              <SmartApplications
+                {...sharedPageProps}
+              />
+            </LazyPage>
           }
-        >
-          <CarbonReductionStatement
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
+        />
 
-      {activePage === "AccessibilityStatement" && (
-        <Suspense
-          fallback={
-            <div style={{ padding: 40 }}>
-              Loading Accessibility Statement...
-            </div>
+        <Route
+          path="/solutions/impact-dashboard"
+          element={
+            <LazyPage message="Loading Impact Dashboard...">
+              <ImpactDashboard
+                {...sharedPageProps}
+              />
+            </LazyPage>
           }
-        >
-          <AccessibilityStatement
-            goToPage={goToPage}
-            openEnquiryForm={openEnquiryForm}
-          />
-        </Suspense>
-      )}
+        />
 
-      <EnquiryModal open={enquiryOpen} onClose={closeEnquiryForm} />
+        <Route
+          path="/solutions/smart-decarb360"
+          element={
+            <LazyPage message="Loading SmartDecarb360...">
+              <SmartDecarb360
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/solutions/lab-testing-compliance"
+          element={
+            <LazyPage message="Loading Lab Testing and Compliance...">
+              <LabTestingCompliance
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/solutions/specialist-consultancy"
+          element={
+            <LazyPage message="Loading Specialist Consultancy...">
+              <SpecialistConsultancy
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/solutions/smart-infrastructure-assurance"
+          element={
+            <LazyPage message="Loading Smart Infrastructure Assurance...">
+              <SmartInfrastructureAssurance
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/solutions/energy-optimisation"
+          element={
+            <LazyPage message="Loading Energy Optimisation...">
+              <EnergyOptimisation
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/sectors/built-environment"
+          element={
+            <LazyPage message="Loading Built Environment...">
+              <BuiltEnvironment
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/sectors/public-sector-local-authorities"
+          element={
+            <LazyPage message="Loading Public Sector and Local Authorities...">
+              <PublicSectorLocalAuthorities
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/sectors/manufacturers-connected-products"
+          element={
+            <LazyPage message="Loading Manufacturers and Connected Products...">
+              <ManufacturersConnectedProducts
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/sectors/energy-utilities-critical-infrastructure"
+          element={
+            <LazyPage message="Loading Energy, Utilities and Critical Infrastructure...">
+              <EnergyUtilitiesCriticalInfrastructure
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/sectors/data-centres"
+          element={
+            <LazyPage message="Loading Data Centres...">
+              <DataCentres
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/privacy-policy"
+          element={
+            <LazyPage message="Loading Privacy Policy...">
+              <PrivacyPolicy
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/modern-slavery-statement"
+          element={
+            <LazyPage message="Loading Modern Slavery Statement...">
+              <ModernSlavery
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/carbon-reduction-statement"
+          element={
+            <LazyPage message="Loading Carbon Reduction Statement...">
+              <CarbonReductionStatement
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/accessibility-statement"
+          element={
+            <LazyPage message="Loading Accessibility Statement...">
+              <AccessibilityStatement
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/admin/careers"
+          element={
+            <LazyPage message="Loading Careers Administration...">
+              <CareersAdmin />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/admin/content"
+          element={
+            <LazyPage message="Loading Content Administration...">
+              <AdminCMS
+                goToPage={goToPage}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/admin/research"
+          element={
+            <LazyPage message="Loading Research Administration...">
+              <ResearchAdmin />
+            </LazyPage>
+          }
+        />
+
+        {/*
+          Redirect old links so existing bookmarks
+          and previously shared links still work.
+        */}
+        <Route
+          path="/social-media"
+          element={
+            <Navigate
+              to="/content-hub"
+              replace
+            />
+          }
+        />
+
+        <Route
+          path="/research-admin"
+          element={
+            <Navigate
+              to="/admin/research"
+              replace
+            />
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
+        />
+      </Routes>
+
+      <EnquiryModal
+        open={enquiryOpen}
+        onClose={closeEnquiryForm}
+      />
     </>
   );
 }
