@@ -1,6 +1,8 @@
 import { useMemo, useEffect, useState } from "react";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import FAQSection from "../components/FAQSection";
+import { getPageFaqs } from "../data/pageFaqs";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -840,7 +842,7 @@ function Hero() {
         <div className="hidden lg:block" />
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-1/2 px-5 lg:px-8">
+      <div className="relative z-20 px-5 pb-8 lg:absolute lg:bottom-0 lg:left-0 lg:right-0 lg:translate-y-1/2 lg:px-8 lg:pb-0">
         <div className="mx-auto max-w-7xl">
           <div className="grid overflow-hidden rounded-3xl border-2 border-white/80 bg-[#06112e]/92 shadow-2xl shadow-slate-950/30 ring-4 ring-white/35 backdrop-blur md:grid-cols-4">
             {heroPillars.map((item, index) => {
@@ -877,7 +879,7 @@ function Hero() {
 
 function AudienceSection() {
   return (
-    <section className="bg-white px-5 pb-10 pt-28 lg:px-8">
+    <section className="bg-white px-5 pb-10 pt-10 lg:px-8 lg:pt-28">
       <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-3">
         {audienceCards.map((item) => {
           const Icon = item.icon;
@@ -901,8 +903,6 @@ function AudienceSection() {
                   {item.text}
                 </p>
               </div>
-
-              <ArrowRight className="ml-auto h-6 w-6 text-slate-400 transition group-hover:translate-x-1 group-hover:text-teal-600" />
             </article>
           );
         })}
@@ -2068,7 +2068,7 @@ function CTASection({ openEnquiryForm }) {
 }
 
 export default function SustainabilityNetZero({ goToPage, openEnquiryForm }) {
-
+  const sustainabilityFaqContent = getPageFaqs("SustainabilityNetZero");
   useEffect(() => {
     document.title = "Sustainability & Net Zero | Smart Net Zero";
   }, []);
@@ -2089,8 +2089,15 @@ export default function SustainabilityNetZero({ goToPage, openEnquiryForm }) {
             goToPage={goToPage}
         />
         <SolutionsSection openEnquiryForm={openEnquiryForm} />
-        <AdvisoryServicesSection openEnquiryForm={openEnquiryForm} />
+       <AdvisoryServicesSection openEnquiryForm={openEnquiryForm} />
         <JourneySection />
+
+        { sustainabilityFaqContent && (
+          <FAQSection
+            {...sustainabilityFaqContent}
+          />
+        )}
+
         <CTASection openEnquiryForm={openEnquiryForm} />
       </main>
 

@@ -292,7 +292,11 @@ export default function AccessibilityStatement({ goToPage, openEnquiryForm }) {
 
             <div className="space-y-6">
               {sections.map((section) => (
-                <div key={section.number} id={`section-${section.number}`}>
+                <div
+                  key={section.number}
+                  id={`section-${section.number}`}
+                  className="scroll-mt-32"
+                >
                   <PolicySection section={section} />
                 </div>
               ))}

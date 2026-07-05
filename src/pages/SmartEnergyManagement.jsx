@@ -427,7 +427,8 @@ export default function SmartEnergyManagement({ goToPage, openEnquiryForm }) {
 
                 <a
                   href="/Smart_Net_Zero_Smart_Energy_Brochure_2026.pdf"
-                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center rounded-2xl border border-white/25 bg-white/5 px-7 py-4 text-sm font-black text-white backdrop-blur transition hover:bg-white/10"
                 >
                   Download Brochure <Download className="ml-2 h-5 w-5" />

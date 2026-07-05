@@ -45,22 +45,30 @@ export default function SNZFooter({ goToPage }) {
             </p>
           </div>
 
-          {/* Footer page links */}
-          <nav
-            aria-label="Legal and policy links"
-            className="flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:flex-nowrap sm:items-center sm:gap-x-6 md:justify-end"
-          >
-            {footerLinks.map(({ label, page }) => (
-              <button
-                key={page}
-                type="button"
-                onClick={() => navigateToPage(page)}
-                className="cursor-pointer whitespace-nowrap transition-colors hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2"
-              >
-                {label}
-              </button>
-            ))}
-          </nav>
+          {/* Right-hand strapline and footer page links */}
+          <div className="flex flex-col items-start gap-5 md:items-end">
+            <p className="max-w-md text-left text-lg font-semibold leading-snug tracking-tight text-slate-900 md:text-right">
+              Making Infrastructure Smarter.
+              <br className="hidden sm:block" />
+              Safer. Future Ready.
+            </p>
+
+            <nav
+              aria-label="Legal and policy links"
+              className="flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:flex-nowrap sm:items-center sm:gap-x-6 md:justify-end"
+            >
+              {footerLinks.map(({ label, page }) => (
+                <button
+                  key={page}
+                  type="button"
+                  onClick={() => navigateToPage(page)}
+                  className="cursor-pointer whitespace-nowrap transition-colors hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2"
+                >
+                  {label}
+                </button>
+              ))}
+            </nav>
+          </div>
         </div>
       </div>
     </footer>

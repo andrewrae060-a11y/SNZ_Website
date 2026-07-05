@@ -22,54 +22,97 @@ import SectionForm from "./forms/SectionForm";
 
 const API_BASE = String(
   import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_CMS_API_URL ||
-  ""
+    import.meta.env.VITE_CMS_API_URL ||
+    ""
 ).replace(/\/+$/, "");
 
-const CONTENT_MANAGER_EMAIL = "ContentManger@smartnetzero.co.uk";
-const ALLOWED_CMS_ROLES = new Set(["content_manager", "super_admin"]);
+const CONTENT_MANAGER_EMAIL =
+  "ContentManger@smartnetzero.co.uk";
+
+const ALLOWED_CMS_ROLES = new Set([
+  "content_manager",
+  "super_admin",
+]);
+
 const STARTING_SECTION = "channelPosts";
 
 const CMS_SECTIONS = [
-  { key: "page", label: "Page settings" },
-  { key: "heroCards", label: "Hero cards" },
-  { key: "channelPosts", label: "Social posts" },
-  { key: "editorPicks", label: "Editor’s picks" },
-  { key: "partnerContent", label: "Partner content" },
-  { key: "events", label: "Events" },
-  { key: "quickActions", label: "Quick actions" },
-  { key: "channels", label: "Social channels" },
+  {
+    key: "page",
+    label: "Page settings",
+  },
+  {
+    key: "heroCards",
+    label: "Hero cards",
+  },
+  {
+    key: "channelPosts",
+    label: "Social posts",
+  },
+  {
+    key: "editorPicks",
+    label: "Editor’s picks",
+  },
+  {
+    key: "partnerContent",
+    label: "Partner content",
+  },
+  {
+    key: "events",
+    label: "Events",
+  },
+  {
+    key: "quickActions",
+    label: "Quick actions",
+  },
+  {
+    key: "channels",
+    label: "Social channels",
+  },
 ];
 
 async function apiRequest(path, options = {}) {
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 15000);
-  const isFormData = options.body instanceof FormData;
+  const timeoutId = window.setTimeout(
+    () => controller.abort(),
+    15000
+  );
+
+  const isFormData =
+    options.body instanceof FormData;
 
   const headers = {
     ...(options.body && !isFormData
-      ? { "Content-Type": "application/json" }
+      ? {
+          "Content-Type": "application/json",
+        }
       : {}),
     ...(options.headers || {}),
   };
 
   try {
-    const response = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      headers,
-      credentials: "include",
-      signal: controller.signal,
-    });
+    const response = await fetch(
+      `${API_BASE}${path}`,
+      {
+        ...options,
+        headers,
+        credentials: "include",
+        signal: controller.signal,
+      }
+    );
 
     let responseBody = null;
 
     if (response.status !== 204) {
-      const contentType = response.headers.get("content-type") || "";
+      const contentType =
+        response.headers.get("content-type") || "";
 
       if (contentType.includes("application/json")) {
         responseBody = await response.json();
       } else {
-        responseBody = { message: await response.text() };
+        responseBody = {
+          message: await response.text(),
+        };
       }
     }
 
@@ -79,6 +122,7 @@ async function apiRequest(path, options = {}) {
           responseBody?.error ||
           "The request could not be completed."
       );
+
       error.status = response.status;
       throw error;
     }
@@ -86,13 +130,42 @@ async function apiRequest(path, options = {}) {
     return responseBody;
   } catch (error) {
     if (error.name === "AbortError") {
-      throw new Error("The server did not respond within 15 seconds.");
+      throw new Error(
+        "The server did not respond within 15 seconds."
+      );
     }
 
     throw error;
   } finally {
     window.clearTimeout(timeoutId);
   }
+}
+
+async function uploadMediaFile(file) {
+  if (!file) {
+    throw new Error("Select a file to upload.");
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const result = await apiRequest(
+    "/api/admin/media/upload",
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  const asset = result?.asset;
+
+  if (!asset?.url) {
+    throw new Error(
+      "The upload completed, but the server did not return a media URL."
+    );
+  }
+
+  return asset;
 }
 
 function createSlug(value) {
@@ -127,19 +200,49 @@ function normaliseDestinationUrl(value) {
 }
 
 function normaliseContentUrls(data) {
-  if (!data || typeof data !== "object" || Array.isArray(data)) {
+  if (
+    !data ||
+    typeof data !== "object" ||
+    Array.isArray(data)
+  ) {
     return data;
   }
 
-  const normalised = { ...data };
+  const normalised = {
+    ...data,
+  };
 
-  for (const field of ["url", "videoUrl", "heroImage", "image"]) {
+  for (const field of [
+    "url",
+    "videoUrl",
+    "heroImage",
+    "image",
+    "canonicalUrl",
+    "ogImage",
+  ]) {
     if (typeof normalised[field] === "string") {
-      normalised[field] = normaliseDestinationUrl(normalised[field]);
+      normalised[field] =
+        normaliseDestinationUrl(normalised[field]);
     }
   }
 
   return normalised;
+}
+
+function getDefaultSeoData(
+  structuredDataType = "WebPage"
+) {
+  return {
+    seoTitle: "",
+    seoDescription: "",
+    seoKeywords: "",
+    canonicalUrl: "",
+    ogTitle: "",
+    ogDescription: "",
+    ogImage: "",
+    robots: "index,follow",
+    structuredDataType,
+  };
 }
 
 function getDefaultData(section) {
@@ -155,14 +258,22 @@ function getDefaultData(section) {
         heroImage: "",
         heroImageAlt: "",
         heroMediaId: null,
+        ...getDefaultSeoData("WebPage"),
       };
 
     case "heroCards":
       return {
+        heroSourceSection: "custom",
+        heroSourceId: "",
+        sourceItemKey: "",
         type: "Article",
         title: "",
         cta: "Read more",
         url: "",
+        image: "",
+        imageAlt: "",
+        mediaType: "image",
+        ...getDefaultSeoData("WebPage"),
       };
 
     case "channelPosts":
@@ -182,6 +293,7 @@ function getDefaultData(section) {
         shares: 0,
         video: false,
         url: "",
+        ...getDefaultSeoData("SocialMediaPosting"),
       };
 
     case "editorPicks":
@@ -195,6 +307,15 @@ function getDefaultData(section) {
         mediaType: "image",
         iconType: "article",
         url: "",
+
+        detailEyebrow: "",
+        detailHeading: "",
+        detailIntro: "",
+        detailBody: "",
+        detailQuote: "",
+        detailCtaLabel: "Close",
+
+        ...getDefaultSeoData("Article"),
       };
 
     case "partnerContent":
@@ -208,6 +329,7 @@ function getDefaultData(section) {
         mediaId: null,
         mediaType: "image",
         url: "",
+        ...getDefaultSeoData("Article"),
       };
 
     case "events":
@@ -223,6 +345,14 @@ function getDefaultData(section) {
         mediaId: null,
         mediaType: "image",
         url: "",
+
+        registrationMode: "external",
+        registrationRecipient:
+          "michael.sweenie@smartnetzero.co.uk",
+        registrationIntro:
+          "Register your interest and a member of the Smart Net Zero team will contact you.",
+
+        ...getDefaultSeoData("Event"),
       };
 
     case "quickActions":
@@ -233,6 +363,7 @@ function getDefaultData(section) {
         description: "",
         cta: "Learn more",
         url: "",
+        ...getDefaultSeoData("WebPage"),
       };
 
     case "channels":
@@ -240,10 +371,14 @@ function getDefaultData(section) {
         name: "LinkedIn",
         action: "Follow",
         url: "",
+        ...getDefaultSeoData("WebPage"),
       };
 
     default:
-      return { title: "" };
+      return {
+        title: "",
+        ...getDefaultSeoData("WebPage"),
+      };
   }
 }
 
@@ -259,10 +394,15 @@ function createNewItem(section, sortOrder) {
 }
 
 function normaliseItems(content, section) {
-  if (!content || typeof content !== "object") return [];
+  if (!content || typeof content !== "object") {
+    return [];
+  }
 
   const sectionItems = content[section];
-  if (!Array.isArray(sectionItems)) return [];
+
+  if (!Array.isArray(sectionItems)) {
+    return [];
+  }
 
   return sectionItems.map((item) => ({
     id: item.id,
@@ -293,16 +433,23 @@ function getItemTitle(item) {
 
 export default function AdminCMS({ goToPage }) {
   useEffect(() => {
-        document.title = "Content Manager Admin | Smart Net Zero";
-      }, []);
+    document.title =
+      "Content Manager Admin | Smart Net Zero";
+  }, []);
 
-  const [authenticated, setAuthenticated] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
-  const [selectedSection, setSelectedSection] = useState(
-    STARTING_SECTION
-  );
+  const [authenticated, setAuthenticated] =
+    useState(false);
+
+  const [checkingSession, setCheckingSession] =
+    useState(true);
+
+  const [selectedSection, setSelectedSection] =
+    useState(STARTING_SECTION);
+
   const [content, setContent] = useState({});
-  const [editingItem, setEditingItem] = useState(null);
+  const [editingItem, setEditingItem] =
+    useState(null);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -316,11 +463,21 @@ export default function AdminCMS({ goToPage }) {
     try {
       setCheckingSession(true);
 
-      const result = await apiRequest("/api/admin/session");
-      const administrator = result?.administrator || result?.admin;
-      const role = String(administrator?.role || "").toLowerCase();
+      const result = await apiRequest(
+        "/api/admin/session"
+      );
 
-      if (!administrator || !ALLOWED_CMS_ROLES.has(role)) {
+      const administrator =
+        result?.administrator || result?.admin;
+
+      const role = String(
+        administrator?.role || ""
+      ).toLowerCase();
+
+      if (
+        !administrator ||
+        !ALLOWED_CMS_ROLES.has(role)
+      ) {
         setAuthenticated(false);
         return;
       }
@@ -342,11 +499,17 @@ export default function AdminCMS({ goToPage }) {
       setLoading(true);
       setError("");
 
-      const result = await apiRequest("/api/admin/content");
+      const result = await apiRequest(
+        "/api/admin/content"
+      );
+
       setContent(result?.content || result || {});
       setAuthenticated(true);
     } catch (requestError) {
-      if (requestError.status === 401 || requestError.status === 403) {
+      if (
+        requestError.status === 401 ||
+        requestError.status === 403
+      ) {
         setAuthenticated(false);
         setContent({});
       }
@@ -365,7 +528,11 @@ export default function AdminCMS({ goToPage }) {
     if (authenticated && !checkingSession) {
       loadContent();
     }
-  }, [authenticated, checkingSession, loadContent]);
+  }, [
+    authenticated,
+    checkingSession,
+    loadContent,
+  ]);
 
   const handleLogin = () => {
     setAuthenticated(true);
@@ -406,9 +573,12 @@ export default function AdminCMS({ goToPage }) {
       setLoading(true);
       setError("");
 
-      await apiRequest(`/api/admin/content/${item.id}`, {
-        method: "DELETE",
-      });
+      await apiRequest(
+        `/api/admin/content/${item.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       setMessage("Content deleted.");
       await loadContent();
@@ -430,7 +600,12 @@ export default function AdminCMS({ goToPage }) {
   }
 
   if (!authenticated) {
-    return <AdminLogin onLogin={handleLogin} goToPage={goToPage} />;
+    return (
+      <AdminLogin
+        onLogin={handleLogin}
+        goToPage={goToPage}
+      />
+    );
   }
 
   return (
@@ -441,9 +616,11 @@ export default function AdminCMS({ goToPage }) {
             <p className="text-xs font-black uppercase tracking-[0.2em] text-teal-300">
               Smart Net Zero
             </p>
+
             <h1 className="mt-1 text-2xl font-black sm:text-3xl">
               Content administration
             </h1>
+
             <p className="mt-2 text-sm text-white/70">
               Manage the Social Media and Content Hub.
             </p>
@@ -453,7 +630,9 @@ export default function AdminCMS({ goToPage }) {
             {goToPage && (
               <button
                 type="button"
-                onClick={() => goToPage("SocialMedia")}
+                onClick={() =>
+                  goToPage("SocialMedia")
+                }
                 className="inline-flex items-center rounded-xl border border-white/20 px-4 py-2 text-sm font-bold transition hover:bg-white/10"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -468,7 +647,9 @@ export default function AdminCMS({ goToPage }) {
               className="inline-flex items-center rounded-xl border border-white/20 px-4 py-2 text-sm font-bold transition hover:bg-white/10 disabled:opacity-50"
             >
               <RefreshCw
-                className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                className={`mr-2 h-4 w-4 ${
+                  loading ? "animate-spin" : ""
+                }`}
               />
               Refresh
             </button>
@@ -521,8 +702,14 @@ export default function AdminCMS({ goToPage }) {
                 }`}
               >
                 {section.label}
+
                 <span className="ml-2 text-xs font-normal text-slate-400">
-                  {normaliseItems(content, section.key).length}
+                  {
+                    normaliseItems(
+                      content,
+                      section.key
+                    ).length
+                  }
                 </span>
               </button>
             ))}
@@ -534,10 +721,15 @@ export default function AdminCMS({ goToPage }) {
                 <p className="text-xs font-black uppercase tracking-[0.15em] text-teal-700">
                   Section
                 </p>
+
                 <h2 className="text-2xl font-black">
-                  {CMS_SECTIONS.find(
-                    (section) => section.key === selectedSection
-                  )?.label}
+                  {
+                    CMS_SECTIONS.find(
+                      (section) =>
+                        section.key ===
+                        selectedSection
+                    )?.label
+                  }
                 </h2>
               </div>
 
@@ -545,7 +737,10 @@ export default function AdminCMS({ goToPage }) {
                 type="button"
                 onClick={() =>
                   setEditingItem(
-                    createNewItem(selectedSection, items.length)
+                    createNewItem(
+                      selectedSection,
+                      items.length
+                    )
                   )
                 }
                 className="inline-flex items-center justify-center rounded-xl bg-teal-600 px-4 py-3 text-sm font-black text-white transition hover:bg-teal-700"
@@ -564,8 +759,10 @@ export default function AdminCMS({ goToPage }) {
                 <p className="font-bold text-slate-700">
                   No content exists in this section.
                 </p>
+
                 <p className="mt-2 text-sm text-slate-500">
-                  Select Add item to create the first record.
+                  Select Add item to create the first
+                  record.
                 </p>
               </div>
             ) : (
@@ -580,11 +777,16 @@ export default function AdminCMS({ goToPage }) {
                         <h3 className="truncate font-black">
                           {getItemTitle(item)}
                         </h3>
-                        <StatusBadge status={item.status} />
+
+                        <StatusBadge
+                          status={item.status}
+                        />
                       </div>
+
                       <p className="mt-1 text-sm text-slate-500">
                         Key: {item.itemKey}
                       </p>
+
                       <p className="mt-1 text-xs text-slate-400">
                         Display order: {item.sortOrder}
                       </p>
@@ -593,7 +795,9 @@ export default function AdminCMS({ goToPage }) {
                     <div className="flex shrink-0 gap-2">
                       <button
                         type="button"
-                        onClick={() => setEditingItem(item)}
+                        onClick={() =>
+                          setEditingItem(item)
+                        }
                         className="inline-flex items-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold transition hover:bg-slate-50"
                       >
                         <Edit3 className="mr-2 h-4 w-4" />
@@ -602,7 +806,9 @@ export default function AdminCMS({ goToPage }) {
 
                       <button
                         type="button"
-                        onClick={() => handleDelete(item)}
+                        onClick={() =>
+                          handleDelete(item)
+                        }
                         className="inline-flex items-center rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-700 transition hover:bg-red-50"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -620,6 +826,7 @@ export default function AdminCMS({ goToPage }) {
       {editingItem && (
         <ContentEditor
           item={editingItem}
+          content={content}
           onClose={() => setEditingItem(null)}
           onSaved={handleSaved}
         />
@@ -629,10 +836,14 @@ export default function AdminCMS({ goToPage }) {
 }
 
 function AdminLogin({ onLogin, goToPage }) {
-  const [email, setEmail] = useState(CONTENT_MANAGER_EMAIL);
+  const [email, setEmail] = useState(
+    CONTENT_MANAGER_EMAIL
+  );
+
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] =
+    useState(false);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -641,22 +852,29 @@ function AdminLogin({ onLogin, goToPage }) {
       setSubmitting(true);
       setError("");
 
-      const result = await apiRequest("/api/admin/login", {
-        method: "POST",
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-        }),
-      });
+      const result = await apiRequest(
+        "/api/admin/login",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email: email.trim(),
+            password,
+          }),
+        }
+      );
 
-      const administrator = result?.administrator || result?.admin;
+      const administrator =
+        result?.administrator || result?.admin;
 
       if (!administrator) {
         throw new Error(
           "The server did not return administrator account details."
         );
       }
-      const role = String(administrator?.role || "").toLowerCase();
+
+      const role = String(
+        administrator?.role || ""
+      ).toLowerCase();
 
       if (!ALLOWED_CMS_ROLES.has(role)) {
         throw new Error(
@@ -681,11 +899,15 @@ function AdminLogin({ onLogin, goToPage }) {
         <p className="text-xs font-black uppercase tracking-[0.2em] text-teal-700">
           Smart Net Zero
         </p>
+
         <h1 className="mt-2 text-3xl font-black">
           Administrator login
         </h1>
+
         <p className="mt-3 leading-7 text-slate-600">
-          Sign in with the authorised Content Manager account to manage Social Media and Content Hub content.
+          Sign in with the authorised Content Manager
+          account to manage Social Media and Content Hub
+          content.
         </p>
 
         {error && (
@@ -699,11 +921,14 @@ function AdminLogin({ onLogin, goToPage }) {
           <span className="text-sm font-bold text-slate-700">
             Email address
           </span>
+
           <input
             type="email"
             autoComplete="username"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) =>
+              setEmail(event.target.value)
+            }
             required
             className="mt-2 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-teal-500"
           />
@@ -713,11 +938,14 @@ function AdminLogin({ onLogin, goToPage }) {
           <span className="text-sm font-bold text-slate-700">
             Password
           </span>
+
           <input
             type="password"
             autoComplete="current-password"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(event) =>
+              setPassword(event.target.value)
+            }
             required
             className="mt-2 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-teal-500"
           />
@@ -734,7 +962,9 @@ function AdminLogin({ onLogin, goToPage }) {
         {goToPage && (
           <button
             type="button"
-            onClick={() => goToPage("SocialMedia")}
+            onClick={() =>
+              goToPage("SocialMedia")
+            }
             className="mt-3 w-full rounded-xl border border-slate-200 p-3 font-bold text-slate-700"
           >
             Return to website
@@ -745,13 +975,19 @@ function AdminLogin({ onLogin, goToPage }) {
   );
 }
 
-function ContentEditor({ item, onClose, onSaved }) {
+function ContentEditor({
+  item,
+  content,
+  onClose,
+  onSaved,
+}) {
   const [form, setForm] = useState({
     ...item,
     data: {
       ...(item.data || {}),
     },
   });
+
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -772,7 +1008,9 @@ function ContentEditor({ item, onClose, onSaved }) {
         : createSlug(suggestedTitle);
 
       if (!itemKey) {
-        throw new Error("Please enter a title or name before saving.");
+        throw new Error(
+          "Please enter a title or name before saving."
+        );
       }
 
       if (
@@ -784,13 +1022,18 @@ function ContentEditor({ item, onClose, onSaved }) {
             ""
         ).trim()
       ) {
-        throw new Error("Please enter a title or name.");
+        throw new Error(
+          "Please enter a title or name."
+        );
       }
 
       const requestBody = {
         section: form.section,
         itemKey,
-        status: requestedStatus || form.status || "draft",
+        status:
+          requestedStatus ||
+          form.status ||
+          "draft",
         sortOrder: Number(form.sortOrder) || 0,
         data: normaliseContentUrls(form.data),
       };
@@ -820,19 +1063,26 @@ function ContentEditor({ item, onClose, onSaved }) {
     >
       <div
         className="mx-auto my-8 w-full max-w-5xl rounded-3xl bg-white p-6 shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) =>
+          event.stopPropagation()
+        }
       >
         <div className="flex items-start justify-between gap-5">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.15em] text-teal-700">
-              {form.id ? "Edit content" : "Create content"}
+              {form.id
+                ? "Edit content"
+                : "Create content"}
             </p>
+
             <h2 className="mt-1 text-2xl font-black">
               {getItemTitle(form)}
             </h2>
+
             <p className="mt-2 text-sm text-slate-500">
-              Complete the fields below. External addresses are automatically
-              saved with https:// when needed.
+              Complete the fields below. External addresses
+              are automatically saved with https:// when
+              needed.
             </p>
           </div>
 
@@ -858,6 +1108,7 @@ function ContentEditor({ item, onClose, onSaved }) {
             <span className="text-sm font-bold text-slate-700">
               Display order
             </span>
+
             <input
               type="number"
               min="0"
@@ -865,11 +1116,14 @@ function ContentEditor({ item, onClose, onSaved }) {
               onChange={(event) =>
                 setForm({
                   ...form,
-                  sortOrder: Number(event.target.value),
+                  sortOrder: Number(
+                    event.target.value
+                  ),
                 })
               }
               className="mt-2 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-teal-500"
             />
+
             <span className="mt-1 block text-xs text-slate-500">
               Lower numbers appear first.
             </span>
@@ -879,9 +1133,13 @@ function ContentEditor({ item, onClose, onSaved }) {
             <p className="text-sm font-bold text-slate-700">
               Current status
             </p>
+
             <div className="mt-2">
-              <StatusBadge status={form.status || "draft"} />
+              <StatusBadge
+                status={form.status || "draft"}
+              />
             </div>
+
             {form.id && (
               <p className="mt-2 text-xs text-slate-500">
                 Internal key: {form.itemKey}
@@ -894,20 +1152,24 @@ function ContentEditor({ item, onClose, onSaved }) {
           <h3 className="text-lg font-black text-slate-950">
             Content details
           </h3>
+
           <p className="mt-1 text-sm text-slate-500">
-            These fields control what appears on the Social Media page.
+            These fields control what appears on the Social
+            Media page.
           </p>
 
           <div className="mt-5">
             <SectionForm
               section={form.section}
               value={form.data}
+              content={content}
               onChange={(data) =>
                 setForm({
                   ...form,
                   data,
                 })
               }
+              onUploadMedia={uploadMediaFile}
             />
           </div>
         </div>
@@ -975,7 +1237,11 @@ function StatusBadge({ status }) {
   );
 }
 
-function StatusMessage({ type, message, onClose }) {
+function StatusMessage({
+  type,
+  message,
+  onClose,
+}) {
   const success = type === "success";
 
   return (
@@ -992,6 +1258,7 @@ function StatusMessage({ type, message, onClose }) {
         ) : (
           <AlertCircle className="h-5 w-5 shrink-0" />
         )}
+
         {message}
       </div>
 

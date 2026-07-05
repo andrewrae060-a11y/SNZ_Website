@@ -38,6 +38,12 @@ const XIcon = ({ className = "" }) => <BrandIcon label="𝕏" className={classNa
 const YouTubeIcon = ({ className = "" }) => <BrandIcon label="▶" className={className} />;
 const InstagramIcon = ({ className = "" }) => <BrandIcon label="◎" className={className} />;
 
+const API_BASE = String(
+  import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_CMS_API_URL ||
+    ""
+).replace(/\/+$/, "");
+
 const fallbackChannelPosts = [
   {
     id: 1,
@@ -248,6 +254,175 @@ function getCmsSection(content, names) {
   return [];
 }
 
+function findReferencedHeroItem(
+  card,
+  sourceCollections
+) {
+  const sourceSection =
+    card.heroSourceSection ||
+    card.sourceSection ||
+    "";
+
+  const sourceId = String(
+    card.heroSourceId ||
+      card.sourceItemKey ||
+      ""
+  );
+
+  if (
+    !sourceSection ||
+    sourceSection === "custom" ||
+    !sourceId
+  ) {
+    return null;
+  }
+
+  const sourceItems =
+    sourceCollections[sourceSection] ||
+    [];
+
+  return (
+    sourceItems.find((item) => {
+      const possibleIds = [
+        item.id,
+        item.itemKey,
+        item.key,
+        item.title,
+      ].map((value) =>
+        String(value || "")
+      );
+
+      return possibleIds.includes(
+        sourceId
+      );
+    }) || null
+  );
+}
+
+function getHeroSourceType(
+  section,
+  item
+) {
+  if (!item) return "";
+
+  if (section === "channelPosts") {
+    return item.channel || "Social post";
+  }
+
+  if (section === "editorPicks") {
+    return item.type || "Editor’s Pick";
+  }
+
+  if (section === "partnerContent") {
+    return item.type || item.partner || "Partner content";
+  }
+
+  if (section === "events") {
+    return item.type || "Event";
+  }
+
+  return item.type || "Article";
+}
+
+function getHeroSourceCta(
+  section,
+  item
+) {
+  if (!item) return "Read more";
+
+  if (section === "channelPosts") {
+    return item.cta || "View post";
+  }
+
+  if (section === "events") {
+    return item.action || item.cta || "Learn more";
+  }
+
+  return item.cta || "Read more";
+}
+
+function resolveHeroCards(
+  heroCards,
+  sourceCollections
+) {
+  return heroCards.map((card) => {
+    const sourceSection =
+      card.heroSourceSection ||
+      card.sourceSection ||
+      "";
+
+    const sourceItem =
+      findReferencedHeroItem(
+        card,
+        sourceCollections
+      );
+
+    if (!sourceItem) {
+      return card;
+    }
+
+    return {
+      ...card,
+      linkedSourceItem: sourceItem,
+      type:
+        getHeroSourceType(
+          sourceSection,
+          sourceItem
+        ) ||
+        card.type,
+      title:
+        sourceItem.title ||
+        sourceItem.name ||
+        sourceItem.partner ||
+        card.title,
+      cta:
+        getHeroSourceCta(
+          sourceSection,
+          sourceItem
+        ) ||
+        card.cta,
+      url:
+        sourceItem.url ||
+        card.url ||
+        "",
+      image:
+        sourceItem.image ||
+        card.image ||
+        "",
+      imageAlt:
+        sourceItem.imageAlt ||
+        card.imageAlt ||
+        "",
+      mediaType:
+        sourceItem.mediaType ||
+        card.mediaType ||
+        "image",
+      videoUrl:
+        sourceItem.videoUrl ||
+        card.videoUrl ||
+        "",
+      detailEyebrow:
+        sourceItem.detailEyebrow ||
+        card.detailEyebrow,
+      detailHeading:
+        sourceItem.detailHeading ||
+        card.detailHeading,
+      detailIntro:
+        sourceItem.detailIntro ||
+        card.detailIntro,
+      detailBody:
+        sourceItem.detailBody ||
+        card.detailBody,
+      detailQuote:
+        sourceItem.detailQuote ||
+        card.detailQuote,
+      detailCtaLabel:
+        sourceItem.detailCtaLabel ||
+        card.detailCtaLabel,
+    };
+  });
+}
+
 function getChannelPresentation(name = "") {
   const value = String(name).toLowerCase();
   if (value.includes("linkedin")) return channelPresentation.linkedin;
@@ -394,16 +569,50 @@ function Hero({ onOpenContent, pageSettings, heroCards }) {
             </div>
           </div>
 
-          <div className="absolute right-0 top-0 grid w-64 gap-4">
+          <div className="absolute right-0 top-0 grid w-72 gap-4">
             {heroCards.map((item) => (
               <button
-                key={item.id || item.itemKey || item.title}
-                onClick={() => openContent(item, onOpenContent)} className="rounded-2xl border border-violet-300/35 bg-violet-950/45 p-4 text-left shadow-xl shadow-violet-950/30 backdrop-blur-xl transition hover:scale-[1.02]">
-                <span className="rounded-full bg-violet-500 px-3 py-1 text-[10px] font-black">{item.type}</span>
-                <h3 className="mt-3 font-black leading-tight">{item.title}</h3>
-                <p className="mt-3 inline-flex items-center text-sm font-bold text-emerald-300">
-                  {item.cta} <ArrowRight className="ml-2 h-4 w-4" />
-                </p>
+                key={
+                  item.id ||
+                  item.itemKey ||
+                  item.title
+                }
+                onClick={() =>
+                  openContent(
+                    item.linkedSourceItem || item,
+                    onOpenContent
+                  )
+                }
+                className="group relative overflow-hidden rounded-2xl border border-violet-300/35 bg-violet-950/45 p-4 text-left shadow-xl shadow-violet-950/30 backdrop-blur-xl transition hover:scale-[1.02]"
+              >
+                {item.image && (
+                  <img
+                    src={item.image}
+                    alt={
+                      item.imageAlt ||
+                      item.title ||
+                      ""
+                    }
+                    className="absolute inset-0 h-full w-full object-cover opacity-35 transition group-hover:scale-105"
+                  />
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-950/85 via-violet-950/70 to-slate-950/40" />
+
+                <div className="relative z-10">
+                  <span className="rounded-full bg-violet-500 px-3 py-1 text-[10px] font-black">
+                    {item.type}
+                  </span>
+
+                  <h3 className="mt-3 font-black leading-tight">
+                    {item.title}
+                  </h3>
+
+                  <p className="mt-3 inline-flex items-center text-sm font-bold text-emerald-300">
+                    {item.cta || "Read more"}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </p>
+                </div>
               </button>
             ))}
           </div>
@@ -706,7 +915,11 @@ function PartnerContent({ onOpenContent, partnerContent }) {
   );
 }
 
-function Events({ onOpenContent, events }) {
+function Events({
+  onOpenContent,
+  onRegisterEvent,
+  events,
+}) {
   return (
     <section className="bg-white px-5 py-3 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -727,6 +940,9 @@ function Events({ onOpenContent, events }) {
         <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {events.map((event) => {
             const displayDate = getEventDisplayDate(event);
+            const externalUrl = String(event.url || "").trim();
+            const registrationMode =
+              event.registrationMode || (externalUrl ? "external" : "internal");
 
             return (
               <article
@@ -784,10 +1000,17 @@ function Events({ onOpenContent, events }) {
 
                   <button
                     type="button"
-                    onClick={() => openContent(event, onOpenContent)}
+                    onClick={() => {
+                      if (externalUrl && registrationMode !== "internal") {
+                        openContent(event, onOpenContent);
+                        return;
+                      }
+
+                      onRegisterEvent(event);
+                    }}
                     className="mt-5 w-full rounded-xl border border-violet-400 px-4 py-3 text-sm font-black text-violet-700 transition hover:bg-violet-50"
                   >
-                    {event.action || event.cta || "Learn more"}
+                    {event.action || event.cta || "Register now"}
                     <ArrowRight className="ml-2 inline h-4 w-4" />
                   </button>
                 </div>
@@ -836,28 +1059,443 @@ function QuickActions({ onSubscribe, onOpenContent, quickActions }) {
 }
 
 function ContentModal({ item, onClose }) {
+  if (!item) {
+    return null;
+  }
+
+  const hasEditorPickDetail =
+    Boolean(item.detailHeading) ||
+    Boolean(item.detailIntro) ||
+    Boolean(item.detailBody) ||
+    Boolean(item.detailQuote);
+
+  const heading =
+    item.detailHeading ||
+    item.title ||
+    item.name ||
+    "Content preview";
+
+  const eyebrow =
+    item.detailEyebrow ||
+    item.type ||
+    item.partner ||
+    "Smart Net Zero";
+
+  const intro =
+    item.detailIntro ||
+    item.description ||
+    item.text ||
+    "";
+
+  const body =
+    item.detailBody || "";
+
+  const quote =
+    item.detailQuote || "";
+
+  const closeLabel =
+    item.detailCtaLabel ||
+    "Close";
+
   return (
     <AnimatePresence>
       {item && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[90] grid place-items-center bg-slate-950/70 p-5 backdrop-blur-sm" onClick={onClose}>
-          <motion.div initial={{ opacity: 0, y: 24, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: 0.98 }} className="max-w-xl rounded-3xl bg-white p-7 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <p className="text-sm font-black uppercase tracking-[0.2em] text-teal-700">Preview</p>
-                <h2 className="mt-2 text-3xl font-black leading-tight text-slate-950">{item.title || item.name}</h2>
+        <motion.div
+          initial={{
+            opacity: 0,
+          }}
+          animate={{
+            opacity: 1,
+          }}
+          exit={{
+            opacity: 0,
+          }}
+          className="fixed inset-0 z-[90] overflow-y-auto bg-slate-950/70 p-5 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 24,
+              scale: 0.96,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+            }}
+            exit={{
+              opacity: 0,
+              y: 18,
+              scale: 0.98,
+            }}
+            className="mx-auto my-8 max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            {item.image && (
+              <div className="relative h-72 overflow-hidden bg-slate-100">
+                {item.mediaType === "video" ? (
+                  <video
+                    src={item.image}
+                    controls
+                    preload="metadata"
+                    className="h-full w-full bg-black object-contain"
+                  >
+                    Your browser does not support embedded video.
+                  </video>
+                ) : (
+                  <img
+                    src={item.image}
+                    alt={
+                      item.imageAlt ||
+                      item.title ||
+                      ""
+                    }
+                    className="h-full w-full object-cover"
+                  />
+                )}
+
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/5 to-slate-950/55" />
+
+                <div className="absolute bottom-5 left-5 right-5">
+                  <span className="inline-flex rounded-full bg-white/90 px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-slate-950 shadow">
+                    {eyebrow}
+                  </span>
+                </div>
               </div>
-              <button onClick={onClose} className="rounded-full border border-slate-200 p-2 hover:bg-slate-50"><X className="h-5 w-5" /></button>
-            </div>
-            <p className="mt-5 leading-7 text-slate-600">{item.description || item.text || "Add a destination URL in the CMS to link this item to its social post, article, partner story, webinar registration page, or embedded media."}</p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              {item.url && (
-                <a href={item.url} target="_blank" rel="noreferrer" className="rounded-xl bg-gradient-to-r from-teal-400 to-emerald-500 px-5 py-3 font-black text-white">
-                  <ExternalLink className="mr-2 inline h-4 w-4" /> Open content
-                </a>
+            )}
+
+            <div className="p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-6">
+                <div>
+                  {!item.image && (
+                    <p className="text-sm font-black uppercase tracking-[0.2em] text-teal-700">
+                      {eyebrow}
+                    </p>
+                  )}
+
+                  <h2 className="mt-2 text-3xl font-black leading-tight text-slate-950 sm:text-4xl">
+                    {heading}
+                  </h2>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="shrink-0 rounded-full border border-slate-200 p-2 transition hover:bg-slate-50"
+                  aria-label="Close content popup"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {intro && (
+                <p className="mt-5 text-lg leading-8 text-slate-700">
+                  {intro}
+                </p>
               )}
-              <button onClick={onClose} className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700">Close</button>
+
+              {quote && (
+                <blockquote className="mt-6 rounded-2xl border-l-4 border-teal-500 bg-teal-50 p-5 text-lg font-bold leading-8 text-slate-900">
+                  “{quote}”
+                </blockquote>
+              )}
+
+              {body && (
+                <div className="mt-6 whitespace-pre-line text-base leading-8 text-slate-700">
+                  {body}
+                </div>
+              )}
+
+              {!intro &&
+                !quote &&
+                !body &&
+                hasEditorPickDetail && (
+                  <p className="mt-6 leading-7 text-slate-600">
+                    Further information is being prepared for this story.
+                  </p>
+                )}
+
+              {!hasEditorPickDetail &&
+                !intro &&
+                !body &&
+                !quote && (
+                  <p className="mt-6 leading-7 text-slate-600">
+                    Add a destination URL in the CMS to link this item to its social post, article, partner story, webinar registration page, or add internal popup content in the Editor’s Pick admin form.
+                  </p>
+                )}
+
+              <div className="mt-8 flex flex-wrap justify-end gap-3">
+                {item.url && (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-xl bg-gradient-to-r from-teal-400 to-emerald-500 px-5 py-3 font-black text-white"
+                  >
+                    <ExternalLink className="mr-2 inline h-4 w-4" />
+                    Open content
+                  </a>
+                )}
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50"
+                >
+                  {closeLabel}
+                </button>
+              </div>
             </div>
           </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+function EventRegistrationModal({
+  event,
+  onClose,
+  onSubmit,
+}) {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    organisation: "",
+    role: "",
+    phone: "",
+    message: "",
+    consent: false,
+  });
+
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  if (!event) {
+    return null;
+  }
+
+  const update = (field, value) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const submit = async (submitEvent) => {
+    submitEvent.preventDefault();
+
+    try {
+      setError("");
+      setSubmitting(true);
+
+      await onSubmit({
+        eventTitle: event.title,
+        eventDate: event.date,
+        eventTime: event.time,
+        recipient:
+          event.registrationRecipient ||
+          "michael.sweenie@smartnetzero.co.uk",
+        ...form,
+      });
+    } catch (submissionError) {
+      setError(
+        submissionError?.message ||
+          "The registration could not be submitted."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {event && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[95] overflow-y-auto bg-slate-950/70 p-5 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.form
+            onSubmit={submit}
+            initial={{
+              opacity: 0,
+              y: 24,
+              scale: 0.96,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+            }}
+            exit={{
+              opacity: 0,
+              y: 18,
+              scale: 0.98,
+            }}
+            className="mx-auto my-8 max-w-2xl rounded-3xl bg-white p-7 shadow-2xl"
+            onClick={(clickEvent) =>
+              clickEvent.stopPropagation()
+            }
+          >
+            <div className="flex items-start justify-between gap-6">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-teal-700">
+                  Event registration
+                </p>
+
+                <h2 className="mt-2 text-3xl font-black leading-tight text-slate-950">
+                  {event.title}
+                </h2>
+
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {event.registrationIntro ||
+                    "Register your interest and a member of the Smart Net Zero team will contact you."}
+                </p>
+
+                {(event.date || event.time) && (
+                  <p className="mt-3 text-sm font-bold text-slate-700">
+                    {[event.date, event.time]
+                      .filter(Boolean)
+                      .join(" • ")}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-full border border-slate-200 p-2 hover:bg-slate-50"
+                aria-label="Close registration form"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="text-sm font-bold text-slate-700">
+                  Name *
+                </span>
+                <input
+                  value={form.name}
+                  onChange={(inputEvent) =>
+                    update("name", inputEvent.target.value)
+                  }
+                  required
+                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-teal-500"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-bold text-slate-700">
+                  Email *
+                </span>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(inputEvent) =>
+                    update("email", inputEvent.target.value)
+                  }
+                  required
+                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-teal-500"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-bold text-slate-700">
+                  Organisation
+                </span>
+                <input
+                  value={form.organisation}
+                  onChange={(inputEvent) =>
+                    update(
+                      "organisation",
+                      inputEvent.target.value
+                    )
+                  }
+                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-teal-500"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-bold text-slate-700">
+                  Role
+                </span>
+                <input
+                  value={form.role}
+                  onChange={(inputEvent) =>
+                    update("role", inputEvent.target.value)
+                  }
+                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-teal-500"
+                />
+              </label>
+
+              <label className="block sm:col-span-2">
+                <span className="text-sm font-bold text-slate-700">
+                  Phone
+                </span>
+                <input
+                  value={form.phone}
+                  onChange={(inputEvent) =>
+                    update("phone", inputEvent.target.value)
+                  }
+                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-teal-500"
+                />
+              </label>
+
+              <label className="block sm:col-span-2">
+                <span className="text-sm font-bold text-slate-700">
+                  Message
+                </span>
+                <textarea
+                  value={form.message}
+                  onChange={(inputEvent) =>
+                    update("message", inputEvent.target.value)
+                  }
+                  rows={4}
+                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-teal-500"
+                  placeholder="Any questions or accessibility requirements?"
+                />
+              </label>
+            </div>
+
+            <label className="mt-5 flex items-start gap-3 text-sm leading-6 text-slate-600">
+              <input
+                type="checkbox"
+                checked={form.consent}
+                onChange={(inputEvent) =>
+                  update("consent", inputEvent.target.checked)
+                }
+                required
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-teal-600"
+              />
+
+              <span>
+                I consent to Smart Net Zero using this information to respond to my event registration.
+              </span>
+            </label>
+
+            {error && (
+              <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="mt-6 w-full rounded-xl bg-gradient-to-r from-teal-400 to-emerald-500 px-5 py-4 font-black text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting
+                ? "Submitting registration…"
+                : "Submit registration"}
+            </button>
+          </motion.form>
         </motion.div>
       )}
     </AnimatePresence>
@@ -938,17 +1576,103 @@ function Toast({ message, onClose }) {
 }
 
 export default function SocialMedia({ goToPage, openEnquiryForm }) {
-  useEffect(() => {
-    document.title = "Content Hub | Smart Net Zero";
-  }, []);
-
   const { content: cmsContent, loading: cmsLoading, error: cmsError } = useSocialHubContent();
   const [content, setContent] = useState(null);
+  const [eventRegistration, setEventRegistration] =
+    useState(null);
   const [subscribeOpen, setSubscribeOpen] = useState(false);
   const [toast, setToast] = useState("");
 
   const pageItems = getCmsSection(cmsContent, ["page", "pageSettings", "settings"]);
   const pageSettings = { ...fallbackPageSettings, ...(pageItems[0] || {}) };
+
+  useEffect(() => {
+    const title =
+      pageSettings.seoTitle ||
+      pageSettings.ogTitle ||
+      "Content Hub | Smart Net Zero";
+
+    const description =
+      pageSettings.seoDescription ||
+      pageSettings.ogDescription ||
+      pageSettings.intro ||
+      "Bringing net zero, smart infrastructure and compliance to life through engaging content, expert insights and meaningful conversations.";
+
+    const image =
+      pageSettings.ogImage ||
+      pageSettings.heroImage ||
+      "";
+
+    const canonicalUrl =
+      pageSettings.canonicalUrl ||
+      window.location.href;
+
+    const robots =
+      pageSettings.robots ||
+      "index,follow";
+
+    document.title = title;
+
+    function setMeta(name, content, attribute = "name") {
+      if (!content) return;
+
+      let tag = document.head.querySelector(
+        `meta[${attribute}="${name}"]`
+      );
+
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute(attribute, name);
+        document.head.appendChild(tag);
+      }
+
+      tag.setAttribute("content", content);
+    }
+
+    function setCanonical(href) {
+      if (!href) return;
+
+      let tag = document.head.querySelector(
+        'link[rel="canonical"]'
+      );
+
+      if (!tag) {
+        tag = document.createElement("link");
+        tag.setAttribute("rel", "canonical");
+        document.head.appendChild(tag);
+      }
+
+      tag.setAttribute("href", href);
+    }
+
+    setMeta("description", description);
+    setMeta("keywords", pageSettings.seoKeywords || "");
+    setMeta("robots", robots);
+
+    setMeta("og:title", pageSettings.ogTitle || title, "property");
+    setMeta(
+      "og:description",
+      pageSettings.ogDescription || description,
+      "property"
+    );
+    setMeta("og:type", "website", "property");
+    setMeta("og:url", canonicalUrl, "property");
+
+    if (image) {
+      setMeta("og:image", image, "property");
+      setMeta("twitter:image", image);
+    }
+
+    setMeta("twitter:card", image ? "summary_large_image" : "summary");
+    setMeta("twitter:title", pageSettings.ogTitle || title);
+    setMeta(
+      "twitter:description",
+      pageSettings.ogDescription || description
+    );
+
+    setCanonical(canonicalUrl);
+  }, [pageSettings]);
+
 
   const cmsHeroCards = getCmsSection(cmsContent, ["heroCards", "hero_cards"]);
   const cmsChannelPosts = getCmsSection(cmsContent, ["channelPosts", "channel_posts", "socialPosts", "social_posts"]);
@@ -965,6 +1689,13 @@ export default function SocialMedia({ goToPage, openEnquiryForm }) {
   const editorPicks = useFallbackContent ? fallbackEditorPicks : cmsEditorPicks;
   const partnerContent = useFallbackContent ? fallbackPartnerContent : cmsPartnerContent;
   const events = useFallbackContent ? fallbackEvents : cmsEvents;
+  const resolvedHeroCards =
+  resolveHeroCards(heroCards, {
+    channelPosts,
+    editorPicks,
+    partnerContent,
+    events,
+  });
   const quickActions = useFallbackContent ? fallbackQuickActions : cmsQuickActions;
   const channels = useFallbackContent ? fallbackChannels : cmsChannels;
 
@@ -972,6 +1703,33 @@ export default function SocialMedia({ goToPage, openEnquiryForm }) {
     await subscribeToUpdates(email, consent);
     setSubscribeOpen(false);
     setToast(`Subscribed ${email}. You’ll receive Smart Net Zero updates.`);
+  };
+
+  const submitEventRegistration = async (payload) => {
+    const response = await fetch(
+      `${API_BASE}/api/events/register`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result?.message ||
+          "The registration could not be submitted."
+      );
+    }
+
+    setEventRegistration(null);
+    setToast(
+      "Registration submitted. The Smart Net Zero team will be in touch."
+    );
   };
 
   return (
@@ -995,11 +1753,19 @@ export default function SocialMedia({ goToPage, openEnquiryForm }) {
       )}
 
       <main>
-        <Hero onOpenContent={setContent} pageSettings={pageSettings} heroCards={heroCards} />
+        <Hero
+          onOpenContent={setContent}
+          pageSettings={pageSettings}
+          heroCards={resolvedHeroCards}
+        />
         <LatestChannels onOpenContent={setContent} channelPosts={channelPosts} channels={channels} />
         <EditorPicks onOpenContent={setContent} editorPicks={editorPicks} />
         <PartnerContent onOpenContent={setContent} partnerContent={partnerContent} />
-        <Events onOpenContent={setContent} events={events} />
+        <Events
+          onOpenContent={setContent}
+          onRegisterEvent={setEventRegistration}
+          events={events}
+        />
         <QuickActions
           onSubscribe={() => setSubscribeOpen(true)}
           onOpenContent={setContent}
@@ -1008,6 +1774,11 @@ export default function SocialMedia({ goToPage, openEnquiryForm }) {
       </main>
 
       <ContentModal item={content} onClose={() => setContent(null)} />
+      <EventRegistrationModal
+        event={eventRegistration}
+        onClose={() => setEventRegistration(null)}
+        onSubmit={submitEventRegistration}
+      />
       <SubscribeModal open={subscribeOpen} onClose={() => setSubscribeOpen(false)} onSubmit={subscribe} />
       <Toast message={toast} onClose={() => setToast("")} />
       <SNZFooter goToPage={goToPage} />

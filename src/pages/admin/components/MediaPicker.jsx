@@ -16,56 +16,62 @@ import {
   TextField,
 } from "./FormFields";
 
-const API_BASE =
-  import.meta.env
-    .VITE_CMS_API_URL ||
-  "http://localhost:5000";
+const API_BASE = String(
+  import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_CMS_API_URL ||
+    ""
+).replace(/\/+$/, "");
 
-const TOKEN_KEY =
-  "snz_admin_token";
-
-async function apiRequest(
-  path,
-  options = {}
-) {
-  const token =
-    localStorage.getItem(
-      TOKEN_KEY
-    );
+async function uploadMediaDirectly(file) {
+  const formData = new FormData();
+  formData.append("file", file);
 
   const response = await fetch(
-    `${API_BASE}${path}`,
+    `${API_BASE}/api/admin/media/upload`,
     {
-      ...options,
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
-        ...(options.headers || {}),
-      },
+      method: "POST",
+      body: formData,
+      credentials: "include",
     }
   );
 
   let result = null;
 
-  if (response.status !== 204) {
-    result =
-      await response.json();
+  const contentType =
+    response.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    result = await response.json();
+  } else {
+    result = {
+      message: await response.text(),
+    };
   }
 
   if (!response.ok) {
     throw new Error(
       result?.message ||
-        "The media request failed."
+        result?.error ||
+        "The media upload failed."
     );
   }
 
-  return result;
+  const asset = result?.asset;
+
+  if (!asset?.url) {
+    throw new Error(
+      "The upload completed, but the server did not return a media URL."
+    );
+  }
+
+  return asset;
 }
 
 export default function MediaPicker({
   label,
   value = {},
   onChange,
+  onUploadMedia,
   imagesOnly = false,
 }) {
   const inputRef = useRef(null);
@@ -90,9 +96,7 @@ export default function MediaPicker({
   const updateMediaUrl = (
     nextUrl
   ) => {
-    if (
-      mediaType === "video"
-    ) {
+    if (mediaType === "video") {
       onChange({
         ...value,
         videoUrl: nextUrl,
@@ -150,59 +154,39 @@ export default function MediaPicker({
         );
       }
 
-      /*
-       * This calls the AWS upload route that will
-       * be added to the Express backend.
-       *
-       * Expected response:
-       * {
-       *   asset: {
-       *     id,
-       *     url,
-       *     mimeType,
-       *     altText
-       *   }
-       * }
-       */
-      const formData =
-        new FormData();
-
-      formData.append(
-        "file",
-        file
-      );
-
-      const result =
-        await apiRequest(
-          "/api/admin/media/upload",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
       const asset =
-        result?.asset;
+        typeof onUploadMedia === "function"
+          ? await onUploadMedia(file)
+          : await uploadMediaDirectly(file);
 
-      if (!asset?.url) {
-        throw new Error(
-          "The server did not return a media URL."
-        );
-      }
+      const uploadedIsVideo =
+        asset.mimeType?.startsWith(
+          "video/"
+        ) || isVideo;
+
+      const nextMediaType =
+        uploadedIsVideo && !imagesOnly
+          ? "video"
+          : "image";
 
       onChange({
         ...value,
-        mediaId: asset.id,
-        image: isVideo
-          ? value.image || ""
-          : asset.url,
-        videoUrl: isVideo
-          ? asset.url
-          : "",
-        mediaType: isVideo
-          ? "video"
-          : "image",
-        video: isVideo,
+        mediaId:
+          asset.id ||
+          asset.storageKey ||
+          null,
+        image:
+          nextMediaType === "image"
+            ? asset.url
+            : value.image || "",
+        videoUrl:
+          nextMediaType === "video"
+            ? asset.url
+            : "",
+        mediaType:
+          nextMediaType,
+        video:
+          nextMediaType === "video",
         imageAlt:
           asset.altText ||
           value.imageAlt ||
@@ -210,7 +194,8 @@ export default function MediaPicker({
       });
     } catch (uploadError) {
       setError(
-        uploadError.message
+        uploadError.message ||
+          "The file could not be uploaded."
       );
     } finally {
       setUploading(false);
@@ -228,9 +213,7 @@ export default function MediaPicker({
       mediaId: null,
       image: "",
       videoUrl: "",
-      mediaType: imagesOnly
-        ? "image"
-        : "",
+      mediaType: "image",
       video: false,
       imageAlt: "",
     });
@@ -336,7 +319,7 @@ export default function MediaPicker({
       )}
 
       {mediaUrl && (
-        <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+        <div className="mt-5 max-w-full overflow-hidden rounded-2xl border border-slate-200">
           {mediaType ===
           "video" ? (
             <video
@@ -355,25 +338,23 @@ export default function MediaPicker({
             />
           )}
 
-          <div className="flex items-center gap-2 p-3 text-sm text-slate-600">
-            {mediaType ===
-            "video" ? (
-              <Video className="h-4 w-4" />
+        <div className="flex items-start gap-2 p-3 text-sm text-slate-600">
+            {mediaType === "video" ? (
+              <Video className="mt-0.5 h-4 w-4 shrink-0" />
             ) : (
-              <Image className="h-4 w-4" />
+              <Image className="mt-0.5 h-4 w-4 shrink-0" />
             )}
 
-            <span className="truncate">
+            <span className="min-w-0 flex-1 break-all leading-5">
               {mediaUrl}
             </span>
 
-            <Link className="ml-auto h-4 w-4" />
+            <Link className="mt-0.5 h-4 w-4 shrink-0" />
           </div>
         </div>
       )}
 
-      {mediaType ===
-        "image" && (
+      {mediaType === "image" && (
         <div className="mt-4">
           <TextField
             label="Image alternative text"

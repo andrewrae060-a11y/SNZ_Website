@@ -7,6 +7,7 @@ export function TextField({
   placeholder = "",
   helpText = "",
   disabled = false,
+  maxLength,
 }) {
   return (
     <label className="block">
@@ -29,12 +30,19 @@ export function TextField({
         required={required}
         disabled={disabled}
         placeholder={placeholder}
+        maxLength={maxLength}
         className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-teal-500 disabled:bg-slate-100"
       />
 
-      {helpText && (
-        <span className="mt-1 block text-xs text-slate-500">
-          {helpText}
+      {(helpText || maxLength) && (
+        <span className="mt-1 flex justify-between gap-3 text-xs text-slate-500">
+          <span>{helpText}</span>
+
+          {maxLength && (
+            <span>
+              {String(value || "").length}/{maxLength}
+            </span>
+          )}
         </span>
       )}
     </label>

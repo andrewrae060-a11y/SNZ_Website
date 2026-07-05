@@ -45,15 +45,6 @@ export default function SNZHeader({
         "border-emerald-300/25 bg-emerald-300/10 text-emerald-200",
     },
 
-    security: {
-      label: "OT Security & Resilience",
-      shortLabel: "OT Security",
-      icon: ShieldCheck,
-      page: "OTSecurityResilience",
-      classes:
-        "border-sky-300/25 bg-sky-300/10 text-sky-200",
-    },
-
     energy: {
       label: "Smart Energy Management",
       shortLabel: "Energy",
@@ -61,6 +52,15 @@ export default function SNZHeader({
       page: "SmartEnergyManagement",
       classes:
         "border-amber-300/25 bg-amber-300/10 text-amber-200",
+    },
+
+    security: {
+      label: "OT Security & Resilience",
+      shortLabel: "OT Security",
+      icon: ShieldCheck,
+      page: "OTSecurityResilience",
+      classes:
+        "border-sky-300/25 bg-sky-300/10 text-sky-200",
     },
 
     compliance: {
@@ -82,16 +82,16 @@ export default function SNZHeader({
         icon: Leaf,
       },
       {
-        title: "OT Security & Resilience",
-        text: "Operational technology security, critical infrastructure resilience and risk management.",
-        page: "OTSecurityResilience",
-        icon: ShieldCheck,
-      },
-      {
         title: "Smart Energy Management",
         text: "Real-time energy insight, optimisation, automation and smarter operational performance.",
         page: "SmartEnergyManagement",
         icon: Zap,
+      },
+      {
+        title: "OT Security & Resilience",
+        text: "Operational technology security, critical infrastructure resilience and risk management.",
+        page: "OTSecurityResilience",
+        icon: ShieldCheck,
       },
       {
         title: "Smart Regulations & Compliance",
@@ -114,7 +114,7 @@ export default function SNZHeader({
           "data analytics",
           "connected data",
         ],
-      },      
+      },
       {
         title: "Decarbonisation Optimisation",
         text: "Prioritise measures, sequence investment and create an optimised decarbonisation pathway using SmartDecarb360.",
@@ -461,6 +461,30 @@ export default function SNZHeader({
     navigateToPage(pageMap[label]);
   };
 
+  const handleDesktopNavHover = (label, hasDropdown) => {
+    if (hasDropdown) {
+      setActiveMenu(label);
+      return;
+    }
+
+    setActiveMenu(null);
+  };
+
+  const handleDesktopNavClick = (label, hasDropdown) => {
+    if (hasDropdown) {
+      setActiveMenu(label);
+      return;
+    }
+
+    handleNavClick(label, hasDropdown);
+  };
+
+  const closeDesktopMenu = () => {
+    if (!mobileMenuOpen) {
+      setActiveMenu(null);
+    }
+  };
+
   const isActive = (label) => {
     const pageMap = {
       Home: "Homepage",
@@ -598,17 +622,26 @@ export default function SNZHeader({
     };
   }, [searchOpen]);
 
-  useEffect(() => {
-    document.body.style.overflow = searchOpen ? "hidden" : "";
+    useEffect(() => {
+      const shouldLockPageScroll = searchOpen || mobileMenuOpen;
 
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [searchOpen]);
+      document.body.style.overflow = shouldLockPageScroll ? "hidden" : "";
+      document.documentElement.style.overflow = shouldLockPageScroll
+        ? "hidden"
+        : "";
+
+      return () => {
+        document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
+      };
+    }, [searchOpen, mobileMenuOpen]);
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#06112e]/95 text-white backdrop-blur-xl">
+      <header
+        className="sticky top-0 z-50 border-b border-white/10 bg-[#06112e]/95 text-white backdrop-blur-xl"
+        onMouseLeave={closeDesktopMenu}
+      >
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-3 lg:px-8">
           <button
             type="button"
@@ -629,8 +662,18 @@ export default function SNZHeader({
               <button
                 key={label}
                 type="button"
+                onMouseEnter={() =>
+                  handleDesktopNavHover(label, hasDropdown)
+                }
+                onFocus={() =>
+                  handleDesktopNavHover(label, hasDropdown)
+                }
                 onClick={() =>
-                  handleNavClick(label, hasDropdown)
+                  handleDesktopNavClick(label, hasDropdown)
+                }
+                aria-haspopup={hasDropdown ? "menu" : undefined}
+                aria-expanded={
+                  hasDropdown ? activeMenu === label : undefined
                 }
                 className={`relative flex cursor-pointer items-center gap-1.5 transition hover:text-white ${
                   isActive(label)
@@ -658,6 +701,8 @@ export default function SNZHeader({
 
             <button
               type="button"
+              onMouseEnter={() => setActiveMenu(null)}
+              onFocus={() => setActiveMenu(null)}
               onClick={() => navigateToPage("SocialMedia")}
               className={`relative cursor-pointer transition hover:text-white ${
                 activePage === "SocialMedia"
@@ -725,7 +770,10 @@ export default function SNZHeader({
         </div>
 
         {activeMenu && menuContent[activeMenu] && (
-          <div className="hidden border-t border-white/10 bg-[#06112e]/98 shadow-2xl shadow-slate-950/30 lg:block">
+          <div
+            className="hidden border-t border-white/10 bg-[#06112e]/98 shadow-2xl shadow-slate-950/30 lg:block"
+            onMouseEnter={() => setActiveMenu(activeMenu)}
+          >
             <div
               className={`mx-auto grid max-w-7xl px-8 py-6 ${
                 activeMenu === "Industries"
@@ -747,34 +795,36 @@ export default function SNZHeader({
                         : "p-5"
                     }`}
                   >
-                  {activeMenu === "Solutions" &&
-                    item.services?.length > 0 && (
-                      <div className="mb-4 flex flex-nowrap items-center gap-2">
-                        {item.services.map((serviceKey) => {
-                          const service = serviceDefinitions[serviceKey];
+                    {activeMenu === "Solutions" &&
+                      item.services?.length > 0 && (
+                        <div className="mb-4 flex flex-nowrap items-center gap-2">
+                          {item.services.map((serviceKey) => {
+                            const service =
+                              serviceDefinitions[serviceKey];
 
-                          if (!service) {
-                            return null;
-                          }
+                            if (!service) {
+                              return null;
+                            }
 
-                          const ServiceIcon = service.icon;
+                            const ServiceIcon = service.icon;
 
-                          return (
-                            <button
-                              key={serviceKey}
-                              type="button"
-                              onClick={() => navigateToPage(service.page)}
-                              title={`View ${service.label}`}
-                              aria-label={`View ${service.label}`}
-                              className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border p-0 transition hover:-translate-y-0.5 hover:brightness-125 ${service.classes}`}
-                            >
-                              <ServiceIcon className="h-4 w-4" />
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
+                            return (
+                              <button
+                                key={serviceKey}
+                                type="button"
+                                onClick={() =>
+                                  navigateToPage(service.page)
+                                }
+                                title={`View ${service.label}`}
+                                aria-label={`View ${service.label}`}
+                                className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border p-0 transition hover:-translate-y-0.5 hover:brightness-125 ${service.classes}`}
+                              >
+                                <ServiceIcon className="h-4 w-4" />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
 
                     <button
                       type="button"
@@ -840,7 +890,7 @@ export default function SNZHeader({
         )}
 
         {mobileMenuOpen && (
-          <div className="border-t border-white/10 bg-[#06112e] px-5 pb-5 lg:hidden">
+          <div className="fixed inset-x-0 bottom-0 top-[88px] z-40 overflow-y-auto overscroll-contain border-t border-white/10 bg-[#06112e] px-5 pb-8 lg:hidden">
             <button
               type="button"
               onClick={openSearch}
@@ -955,9 +1005,7 @@ export default function SNZHeader({
 
               <button
                 type="button"
-                onClick={() =>
-                  navigateToPage("SocialMedia")
-                }
+                onClick={() => navigateToPage("SocialMedia")}
                 className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold hover:bg-white/10 ${
                   activePage === "SocialMedia"
                     ? "text-teal-200"

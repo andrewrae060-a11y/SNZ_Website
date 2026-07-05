@@ -372,7 +372,7 @@ function OurStorySection() {
       text: "SNZ has helped shape the future skills and standards agenda for smart infrastructure and OT cybersecurity.",
       points: [
         "Led in establishing the UK’s first National Occupational Standard in Smart Infrastructure and OT Cybersecurity",
-        "Underway in Global First SMart Infrastructure Skills Centres of Excellence programme",
+        "Underway in Global First Smart Infrastructure Skills Centres of Excellence programme",
         "Supporting the smart skills transition across the UK's Cold Chain",
   
       ],
@@ -1707,7 +1707,7 @@ export default function AboutUs({ goToPage, openEnquiryForm }) {
                 {
                   icon: "building",
                   value: "250+",
-                  label: "Projects deliveted by the team",
+                  label: "Projects delivered by the team",
                   colour: "text-lime-300",
                   ring: "border-teal-300/50 bg-teal-300/10",
                 },

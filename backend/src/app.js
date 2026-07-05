@@ -28,6 +28,12 @@ import careersApplicationsRoutes from
 import cmsRoutes from
   "../../server/routes/cmsRoutes.js";
 
+import mediaRoutes from 
+"./routes/media.routes.js";
+
+import eventRegistrationsRoutes from 
+"./routes/eventRegistrations.routes.js";
+
 const app = express();
 
 app.disable("x-powered-by");
@@ -78,6 +84,11 @@ app.use(
 );
 
 app.use(
+  "/api/admin",
+  mediaRoutes
+);
+
+app.use(
   "/api/jobs",
   jobsRoutes
 );
@@ -90,6 +101,11 @@ app.use(
 app.use(
   "/api",
   cmsRoutes
+);
+
+app.use(
+  "/api/events",
+  eventRegistrationsRoutes
 );
 
 app.get(

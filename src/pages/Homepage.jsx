@@ -575,7 +575,7 @@ function Hero() {
               Smarter, Safer and
             </span>
             <span className="block lg:whitespace-nowrap">
-              Built to Last.
+              Future Ready.
             </span>
           </h1>
 
@@ -766,11 +766,11 @@ function ServicesSection({ goToPage }) {
       <div className="mx-auto max-w-7xl">
         <div className="mb-12">
           <p className="text-sm font-black uppercase tracking-[0.22em] text-violet-700">
-            Solutions
+            Services
           </p>
 
           <h2 className="mt-3 max-w-3xl text-4xl font-black leading-tight text-slate-950 md:text-5xl">
-            Connected solutions for smarter, safer and more sustainable
+            Connected services for smarter, safer and more sustainable
             infrastructure.
           </h2>
         </div>
