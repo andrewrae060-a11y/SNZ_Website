@@ -2,7 +2,7 @@ import { useMemo, useEffect, useState } from "react";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
 import FAQSection from "../components/FAQSection";
-import { getPageFaqs } from "../data/pageFaqs";
+import { getPageFaqs } from "../data/pageFaqs.js";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
