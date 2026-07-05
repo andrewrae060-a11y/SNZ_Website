@@ -622,26 +622,26 @@ export default function SNZHeader({
     };
   }, [searchOpen]);
 
-    useEffect(() => {
-      const shouldLockPageScroll = searchOpen || mobileMenuOpen;
+  useEffect(() => {
+    const shouldLockPageScroll = searchOpen || mobileMenuOpen;
 
-      document.body.style.overflow = shouldLockPageScroll ? "hidden" : "";
-      document.documentElement.style.overflow = shouldLockPageScroll
-        ? "hidden"
-        : "";
+    document.body.style.overflow = shouldLockPageScroll ? "hidden" : "";
+    document.documentElement.style.overflow = shouldLockPageScroll
+      ? "hidden"
+      : "";
 
-      return () => {
-        document.body.style.overflow = "";
-        document.documentElement.style.overflow = "";
-      };
-    }, [searchOpen, mobileMenuOpen]);
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [searchOpen, mobileMenuOpen]);
 
   return (
     <>
       <header
-          className="sticky top-0 z-[99990] border-b border-white/10 bg-[#06112e]/95 text-white backdrop-blur-xl"
-          onMouseLeave={closeDesktopMenu}
-        >
+        className="sticky top-0 z-[100000] border-b border-white/10 bg-[#06112e]/95 text-white backdrop-blur-xl"
+        onMouseLeave={closeDesktopMenu}
+      >
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-3 lg:px-8">
           <button
             type="button"
@@ -744,7 +744,7 @@ export default function SNZHeader({
             </button>
           </div>
 
-          <div className="relative z-[99992] flex items-center gap-2 lg:hidden">
+          <div className="relative z-[100002] flex items-center gap-2 lg:hidden">
             <button
               type="button"
               onClick={openSearch}
@@ -888,156 +888,147 @@ export default function SNZHeader({
             </div>
           </div>
         )}
+      </header>
 
-        {mobileMenuOpen && (
-          <div
-            className="fixed inset-x-0 bottom-0 top-[88px] z-[99991] overflow-y-auto overscroll-contain border-t border-white/10 bg-[#06112e] px-5 pb-8 shadow-2xl shadow-black/40 lg:hidden"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Mobile navigation menu"
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-[99999] overflow-y-auto overscroll-contain bg-[#06112e] px-5 pb-8 pt-[92px] text-white shadow-2xl shadow-black/50 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation menu"
+        >
+          <button
+            type="button"
+            onClick={openSearch}
+            className="flex w-full items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-left text-sm font-bold text-white/85"
           >
+            <Search className="h-5 w-5 text-teal-300" />
+            Search the website
+          </button>
+
+          <div className="mt-4">
+            {navItems.map(([label, hasDropdown]) => (
+              <div key={label}>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick(label, hasDropdown)}
+                  className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold hover:bg-white/10 ${
+                    isActive(label)
+                      ? "text-teal-200"
+                      : "text-white/90"
+                  }`}
+                >
+                  {label}
+
+                  {hasDropdown && (
+                    <ChevronDown
+                      className={`h-4 w-4 transition ${
+                        activeMenu === label ? "rotate-180" : ""
+                      }`}
+                    />
+                  )}
+                </button>
+
+                {activeMenu === label &&
+                  hasDropdown &&
+                  menuContent[label] && (
+                    <div className="mb-3 grid gap-2 rounded-2xl bg-white/5 p-3">
+                      {menuContent[label].map((item) => {
+                        const ItemIcon = item.icon;
+
+                        return (
+                          <button
+                            key={item.title}
+                            type="button"
+                            onClick={() =>
+                              navigateToPage(
+                                item.page,
+                                item.beforeNavigate
+                              )
+                            }
+                            className="rounded-xl p-3 text-left hover:bg-white/10"
+                          >
+                            {label === "Solutions" &&
+                              item.services?.length > 0 && (
+                                <div className="mb-3 flex flex-wrap gap-1.5">
+                                  {item.services.map((serviceKey) => {
+                                    const service =
+                                      serviceDefinitions[serviceKey];
+
+                                    if (!service) {
+                                      return null;
+                                    }
+
+                                    const ServiceIcon = service.icon;
+
+                                    return (
+                                      <span
+                                        key={serviceKey}
+                                        title={service.label}
+                                        className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-[0.05em] ${service.classes}`}
+                                      >
+                                        <ServiceIcon className="h-3 w-3" />
+                                        {service.shortLabel}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+
+                            <div className="flex items-start gap-3">
+                              {label === "Services" && ItemIcon && (
+                                <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-teal-300/20 bg-teal-300/10 text-teal-200">
+                                  <ItemIcon className="h-4 w-4" />
+                                </span>
+                              )}
+
+                              <div className="min-w-0">
+                                <p className="text-sm font-black text-white">
+                                  {item.title}
+                                </p>
+
+                                <p className="mt-1 text-xs leading-5 text-white/65">
+                                  {item.text}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+              </div>
+            ))}
+
             <button
               type="button"
-              onClick={openSearch}
-              className="mt-4 flex w-full items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-left text-sm font-bold text-white/85"
+              onClick={() => navigateToPage("SocialMedia")}
+              className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold hover:bg-white/10 ${
+                activePage === "SocialMedia"
+                  ? "text-teal-200"
+                  : "text-white/90"
+              }`}
             >
-              <Search className="h-5 w-5 text-teal-300" />
-              Search the website
+              Content Hub
             </button>
 
-            <div className="mt-2">
-              {navItems.map(([label, hasDropdown]) => (
-                <div key={label}>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleNavClick(label, hasDropdown)
-                    }
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold hover:bg-white/10 ${
-                      isActive(label)
-                        ? "text-teal-200"
-                        : "text-white/90"
-                    }`}
-                  >
-                    {label}
-
-                    {hasDropdown && (
-                      <ChevronDown
-                        className={`h-4 w-4 transition ${
-                          activeMenu === label
-                            ? "rotate-180"
-                            : ""
-                        }`}
-                      />
-                    )}
-                  </button>
-
-                  {activeMenu === label &&
-                    hasDropdown &&
-                    menuContent[label] && (
-                      <div className="mb-3 grid gap-2 rounded-2xl bg-white/5 p-3">
-                        {menuContent[label].map((item) => {
-                          const ItemIcon = item.icon;
-
-                          return (
-                            <button
-                              key={item.title}
-                              type="button"
-                              onClick={() =>
-                                navigateToPage(
-                                  item.page,
-                                  item.beforeNavigate
-                                )
-                              }
-                              className="rounded-xl p-3 text-left hover:bg-white/10"
-                            >
-                              {label === "Solutions" &&
-                                item.services?.length > 0 && (
-                                  <div className="mb-3 flex flex-wrap gap-1.5">
-                                    {item.services.map(
-                                      (serviceKey) => {
-                                        const service =
-                                          serviceDefinitions[
-                                            serviceKey
-                                          ];
-
-                                        if (!service) {
-                                          return null;
-                                        }
-
-                                        const ServiceIcon =
-                                          service.icon;
-
-                                        return (
-                                          <span
-                                            key={serviceKey}
-                                            title={service.label}
-                                            className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[9px] font-black uppercase tracking-[0.05em] ${service.classes}`}
-                                          >
-                                            <ServiceIcon className="h-3 w-3" />
-                                            {service.shortLabel}
-                                          </span>
-                                        );
-                                      }
-                                    )}
-                                  </div>
-                                )}
-
-                              <div className="flex items-start gap-3">
-                                {label === "Services" && ItemIcon && (
-                                  <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-teal-300/20 bg-teal-300/10 text-teal-200">
-                                    <ItemIcon className="h-4 w-4" />
-                                  </span>
-                                )}
-
-                                <div className="min-w-0">
-                                  <p className="text-sm font-black text-white">
-                                    {item.title}
-                                  </p>
-
-                                  <p className="mt-1 text-xs leading-5 text-white/65">
-                                    {item.text}
-                                  </p>
-                                </div>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={() => navigateToPage("SocialMedia")}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-bold hover:bg-white/10 ${
-                  activePage === "SocialMedia"
-                    ? "text-teal-200"
-                    : "text-white/90"
-                }`}
-              >
-                Content Hub
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  openEnquiryForm?.();
-                }}
-                className="mt-3 w-full rounded-xl bg-gradient-to-r from-pink-600 to-violet-700 px-4 py-3 text-left text-sm font-black text-white"
-              >
-                Contact Us
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openEnquiryForm?.();
+              }}
+              className="mt-3 w-full rounded-xl bg-gradient-to-r from-pink-600 to-violet-700 px-4 py-3 text-left text-sm font-black text-white"
+            >
+              Contact Us
+            </button>
           </div>
-        )}
-      </header>
+        </div>
+      )}
 
       {searchOpen && (
         <div
-          className="fixed inset-0 z-[99999] overflow-y-auto bg-slate-950/80 px-4 py-6 backdrop-blur-md sm:px-6 sm:py-10"
+          className="fixed inset-0 z-[100003] overflow-y-auto bg-slate-950/80 px-4 py-6 backdrop-blur-md sm:px-6 sm:py-10"
           role="dialog"
           aria-modal="true"
           aria-label="Search Smart Net Zero"
