@@ -639,9 +639,9 @@ export default function SNZHeader({
   return (
     <>
       <header
-        className="sticky top-0 z-50 border-b border-white/10 bg-[#06112e]/95 text-white backdrop-blur-xl"
-        onMouseLeave={closeDesktopMenu}
-      >
+          className="sticky top-0 z-[99990] border-b border-white/10 bg-[#06112e]/95 text-white backdrop-blur-xl"
+          onMouseLeave={closeDesktopMenu}
+        >
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-3 lg:px-8">
           <button
             type="button"
@@ -744,7 +744,7 @@ export default function SNZHeader({
             </button>
           </div>
 
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="relative z-[99992] flex items-center gap-2 lg:hidden">
             <button
               type="button"
               onClick={openSearch}
@@ -890,7 +890,12 @@ export default function SNZHeader({
         )}
 
         {mobileMenuOpen && (
-          <div className="fixed inset-x-0 bottom-0 top-[88px] z-40 overflow-y-auto overscroll-contain border-t border-white/10 bg-[#06112e] px-5 pb-8 lg:hidden">
+          <div
+            className="fixed inset-x-0 bottom-0 top-[88px] z-[99991] overflow-y-auto overscroll-contain border-t border-white/10 bg-[#06112e] px-5 pb-8 shadow-2xl shadow-black/40 lg:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation menu"
+          >
             <button
               type="button"
               onClick={openSearch}
