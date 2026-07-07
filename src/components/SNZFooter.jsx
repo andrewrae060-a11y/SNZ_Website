@@ -50,7 +50,7 @@ export default function SNZFooter({ goToPage }) {
             <p className="max-w-md text-left text-lg font-semibold leading-snug tracking-tight text-slate-900 md:text-right">
               Making Infrastructure Smarter.
               <br className="hidden sm:block" />
-              Safer. Future Ready.
+              Safer. More Sustainable.
             </p>
 
             <nav

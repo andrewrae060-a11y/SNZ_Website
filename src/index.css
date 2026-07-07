@@ -5,3 +5,97 @@ button,
 [role="button"] {
   cursor: pointer;
 }
+
+/* Rich text content used by the Content Manager editor and public popups */
+.snz-rich-content h2,
+.rich-text-editor h2 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.snz-rich-content h3,
+.rich-text-editor h3 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  line-height: 1.75rem;
+  font-weight: 900;
+  color: #0f766e;
+}
+
+.snz-rich-content p,
+.rich-text-editor p {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.snz-rich-content ul,
+.rich-text-editor ul {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.snz-rich-content ol,
+.rich-text-editor ol {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  list-style-type: decimal;
+}
+
+.snz-rich-content li,
+.rich-text-editor li {
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.snz-rich-content a,
+.rich-text-editor a {
+  color: #0f766e;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.snz-rich-content strong,
+.rich-text-editor strong,
+.snz-rich-content b,
+.rich-text-editor b {
+  font-weight: 900;
+}
+
+.snz-rich-content em,
+.rich-text-editor em,
+.snz-rich-content i,
+.rich-text-editor i {
+  font-style: italic;
+}
+
+.snz-rich-content font[size="5"],
+.rich-text-editor font[size="5"] {
+  font-size: 1.25rem;
+  line-height: 2rem;
+}
+
+.snz-rich-content font[size="6"],
+.rich-text-editor font[size="6"] {
+  font-size: 1.5rem;
+  line-height: 2.1rem;
+}
+
+.snz-rich-content blockquote,
+.rich-text-editor blockquote {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #14b8a6;
+  background: #f0fdfa;
+  padding: 1rem 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}

@@ -575,7 +575,7 @@ function Hero() {
               Smarter, Safer and
             </span>
             <span className="block lg:whitespace-nowrap">
-              Future Ready.
+              More Sustainable.
             </span>
           </h1>
 

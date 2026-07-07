@@ -1110,7 +1110,7 @@ function ContentModal({ item, onClose }) {
           exit={{
             opacity: 0,
           }}
-          className="fixed inset-0 z-[90] overflow-y-auto bg-slate-950/70 p-5 backdrop-blur-sm"
+          className="fixed inset-0 z-[1000] overflow-y-auto bg-slate-950/70 p-5 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
@@ -1204,9 +1204,10 @@ function ContentModal({ item, onClose }) {
               )}
 
               {body && (
-                <div className="mt-6 whitespace-pre-line text-base leading-8 text-slate-700">
-                  {body}
-                </div>
+                <div
+                  className="snz-rich-content mt-6 text-base leading-8 text-slate-700"
+                  dangerouslySetInnerHTML={{ __html: body }}
+                />
               )}
 
               {!intro &&
@@ -1317,7 +1318,7 @@ function EventRegistrationModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[95] overflow-y-auto bg-slate-950/70 p-5 backdrop-blur-sm"
+         className="fixed inset-0 z-[1000] overflow-y-auto bg-slate-950/70 p-5 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.form

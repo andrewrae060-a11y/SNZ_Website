@@ -639,7 +639,7 @@ export default function SNZHeader({
   return (
     <>
       <header
-        className="sticky top-0 z-[100000] border-b border-white/10 bg-[#06112e]/95 text-white backdrop-blur-xl"
+        className="sticky top-0 z-[100] border-b border-white/10 bg-[#06112e]/95 text-white backdrop-blur-xl"
         onMouseLeave={closeDesktopMenu}
       >
         <div className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-3 lg:px-8">
@@ -744,7 +744,7 @@ export default function SNZHeader({
             </button>
           </div>
 
-          <div className="relative z-[100002] flex items-center gap-2 lg:hidden">
+          <div className="relative z-[101] flex items-center gap-2 lg:hidden">
             <button
               type="button"
               onClick={openSearch}

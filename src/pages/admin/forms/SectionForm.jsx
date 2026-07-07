@@ -7,6 +7,7 @@ import {
 } from "../components/FormFields";
 
 import MediaPicker from "../components/MediaPicker";
+import RichTextEditor from "../components/RichTextEditor";
 
 function update(value, onChange, field, nextValue) {
   onChange({
@@ -873,7 +874,7 @@ function EditorPickForm({
               placeholder="Short opening summary for the popup."
             />
 
-            <TextAreaField
+           <RichTextEditor
               label="Popup story detail"
               value={value.detailBody || ""}
               onChange={(nextValue) =>
@@ -884,10 +885,7 @@ function EditorPickForm({
                   nextValue
                 )
               }
-              rows={8}
-              maxLength={2500}
-              placeholder="Add the fuller story, update, explanation or background detail here."
-              helpText="This appears in the popup when the user clicks to find out more."
+              helpText="Use headings, bold text, lists, links and colours to structure the popup content."
             />
 
             <TextAreaField
