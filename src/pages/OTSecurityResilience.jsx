@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import FAQSection from "../components/FAQSection";
+import { getPageFaqs } from "../data/pageFaqs.js";
 import {
   Activity,
   AlertTriangle,
@@ -1407,6 +1409,7 @@ function CTA({ openEnquiryForm }) {
 }
 
 export default function OTSecurityResilience({ goToPage, openEnquiryForm }) {
+  const otSecurityFaqContent = getPageFaqs("OTSecurityResilience");
 
   useEffect(() => {
     document.title = "OT Security & Resilience | Smart Net Zero";
@@ -1540,6 +1543,12 @@ export default function OTSecurityResilience({ goToPage, openEnquiryForm }) {
         <Outcomes />
 
         <SOCSecretTeaser />
+
+         {otSecurityFaqContent && (
+          <FAQSection
+            {...otSecurityFaqContent}
+          />
+        )}
 
         <CTA openEnquiryForm={openEnquiryForm} />
       </main>

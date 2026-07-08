@@ -8,8 +8,13 @@ import {
   BarChart3,
   Building2,
   CloudLightning,
+  Database,
+  Gauge,
+  GitBranch,
+  Layers3,
   Leaf,
   MessageCircle,
+  Network,
   Scale,
   ShieldCheck,
   Users,
@@ -108,6 +113,14 @@ const impactStats = [
     bg: "bg-pink-50",
     colour: "text-pink-600",
   },
+  {
+  value: "18",
+  label: "critical sectors now within NIS2 scope as cyber obligations expand across connected operations",
+  source: "EC",
+  icon: Scale,
+  bg: "bg-blue-50",
+  colour: "text-blue-700",
+},
 ];
 
 function HeroLighting() {
@@ -750,6 +763,152 @@ function TransformingTypicalSection() {
   );
 }
 
+function IntelligenceLayerSection({ goToPage }) {
+  const intelligenceOutcomes = [
+    {
+      title: "One connected view",
+      text: "Systems, teams, assets and data brought into a clearer operating picture.",
+      icon: Network,
+    },
+    {
+      title: "Data gaps exposed",
+      text: "See what is missing, duplicated, unreliable or slowing decisions down.",
+      icon: Database,
+    },
+    {
+      title: "Risk made visible",
+      text: "Understand where performance, compliance, cyber and resilience risks overlap.",
+      icon: ShieldCheck,
+    },
+    {
+      title: "Actions prioritised",
+      text: "Move from fragmented information to practical next steps and measurable outcomes.",
+      icon: BarChart3,
+    },
+  ];
+
+  const openSmartApplications = () => {
+    if (goToPage) {
+      goToPage("SmartApplications");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    window.location.href = "/solutions/smart-applications";
+  };
+
+  return (
+    <section className="relative isolate overflow-hidden bg-[#06112f] px-5 py-16 text-white lg:px-8 lg:py-20">
+      <div className="absolute inset-0 -z-30 bg-[radial-gradient(circle_at_18%_18%,rgba(34,211,238,.16),transparent_30%),radial-gradient(circle_at_78%_52%,rgba(59,130,246,.22),transparent_34%),linear-gradient(135deg,#020617_0%,#06112f_48%,#03091f_100%)]" />
+
+      <div className="absolute inset-0 -z-20 bg-[linear-gradient(rgba(45,212,191,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,.06)_1px,transparent_1px)] bg-[size:54px_54px] opacity-25" />
+
+      <div className="absolute left-[-12rem] top-[-12rem] -z-10 h-[30rem] w-[30rem] rounded-full bg-cyan-400/15 blur-3xl" />
+      <div className="absolute bottom-[-15rem] right-[-10rem] -z-10 h-[36rem] w-[36rem] rounded-full bg-blue-600/20 blur-3xl" />
+
+      <div className="mx-auto max-w-7xl">
+        <div className="grid items-stretch gap-10 lg:grid-cols-[0.92fr_1.08fr]">
+          <motion.div
+            initial={{ opacity: 0, x: -28 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.65 }}
+            className="flex h-full flex-col justify-center"
+          >
+            <p className="text-sm font-black uppercase tracking-[0.24em] text-cyan-300">
+              The Intelligence Layer
+            </p>
+
+            <h2 className="mt-4 max-w-2xl text-4xl font-black leading-tight md:text-5xl">
+              SmartX360 Engine.
+              <span className="block text-cyan-200">
+                The intelligence layer behind delivery.
+              </span>
+            </h2>
+
+            <p className="mt-5 max-w-2xl text-base leading-7 text-white/76 md:text-lg">
+              SmartX360 connects the information sitting across buildings,
+              assets, systems, teams and suppliers so customers can move from
+              fragmented views to clearer decisions and measurable action.
+            </p>
+
+            <div className="mt-7 rounded-[1.75rem] border border-cyan-300/18 bg-white/[0.055] p-5 shadow-2xl shadow-cyan-950/25 backdrop-blur">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">
+                    What our intelligence delivers
+                  </p>
+
+                  <h3 className="mt-2 text-2xl font-black leading-tight text-white">
+                    Clarity from disconnected complexity.
+                  </h3>
+                </div>
+
+              </div>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {intelligenceOutcomes.map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <div
+                      key={item.title}
+                      className="group rounded-2xl border border-white/10 bg-[#071a42]/70 p-4 transition hover:border-cyan-300/35 hover:bg-cyan-300/10"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
+                          <Icon className="h-5 w-5" />
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-black text-white">
+                            {item.title}
+                          </h4>
+
+                          <p className="mt-1 text-xs leading-5 text-white/66">
+                            {item.text}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={openSmartApplications}
+              className="mt-7 inline-flex w-fit cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-7 py-4 text-sm font-black text-white shadow-xl shadow-cyan-950/30 transition hover:scale-[1.02]"
+            >
+              Explore Smart Applications
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 28 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.7, delay: 0.08 }}
+            className="h-full"
+          >
+            <div className="relative h-full min-h-[520px] overflow-hidden rounded-[2rem] border border-cyan-300/18 bg-[#020817] shadow-2xl shadow-cyan-950/35 lg:min-h-0">
+              <img
+                src="/smart-city-network-interface-at-night.png"
+                alt="SmartX360 Engine acting as a connected intelligence layer across the built environment"
+                className="h-full w-full object-cover object-center"
+              />
+
+              <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-white/10" />
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ServicesSection({ goToPage }) {
   const navigateToService = (page) => {
     if (!page || !goToPage) return;
@@ -766,7 +925,7 @@ function ServicesSection({ goToPage }) {
       <div className="mx-auto max-w-7xl">
         <div className="mb-12">
           <p className="text-sm font-black uppercase tracking-[0.22em] text-violet-700">
-            Services
+            Our Connected Services
           </p>
 
           <h2 className="mt-3 max-w-3xl text-4xl font-black leading-tight text-slate-950 md:text-5xl">
@@ -840,54 +999,227 @@ function ServicesSection({ goToPage }) {
     </section>
   );
 }
+
 function ImpactSection() {
+  const convergenceStyles = [
+    {
+      border: "border-pink-400/20",
+      bg: "bg-pink-500/8",
+      text: "text-pink-300",
+      iconBg: "bg-pink-500/12",
+    },
+    {
+      border: "border-cyan-400/20",
+      bg: "bg-cyan-500/8",
+      text: "text-cyan-300",
+      iconBg: "bg-cyan-500/12",
+    },
+    {
+      border: "border-violet-400/20",
+      bg: "bg-violet-500/8",
+      text: "text-violet-300",
+      iconBg: "bg-violet-500/12",
+    },
+    {
+      border: "border-blue-400/20",
+      bg: "bg-blue-500/8",
+      text: "text-blue-300",
+      iconBg: "bg-blue-500/12",
+    },
+    {
+      border: "border-fuchsia-400/20",
+      bg: "bg-fuchsia-500/8",
+      text: "text-fuchsia-300",
+      iconBg: "bg-fuchsia-500/12",
+    },
+  ];
+
+  const customerBenefits = [
+    {
+      value: "20%+",
+      title: "Lower energy cost",
+      label:
+        "Hidden energy waste becomes visible, prioritised and turned into a clear savings plan.",
+      icon: Zap,
+      accent: "from-pink-500 to-fuchsia-500",
+      border: "border-pink-400/25",
+      bg: "bg-pink-500/10",
+      text: "text-pink-300",
+    },
+    {
+      value: "30% faster",
+      title: "Less time lost",
+      label:
+        "Teams spend less time chasing issues and more time acting on clear operational priorities.",
+      icon: Gauge,
+      accent: "from-violet-500 to-purple-600",
+      border: "border-violet-400/25",
+      bg: "bg-violet-500/10",
+      text: "text-violet-300",
+    },
+    {
+      value: "Lower",
+      title: "Operational risk",
+      label:
+        "Risk exposure is easier to see across assets, systems, suppliers and compliance areas.",
+      icon: ShieldCheck,
+      accent: "from-blue-500 to-cyan-400",
+      border: "border-cyan-400/25",
+      bg: "bg-cyan-500/10",
+      text: "text-cyan-300",
+    },
+    {
+      value: "Stronger",
+      title: "Evidence and reporting",
+      label:
+        "Manual reporting gaps become connected evidence for audits, decisions and board reporting.",
+      icon: BarChart3,
+      accent: "from-sky-500 to-blue-600",
+      border: "border-blue-400/25",
+      bg: "bg-blue-500/10",
+      text: "text-blue-300",
+    },
+  ];
+
   return (
-    <section className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
-      <div className="grid gap-10 lg:grid-cols-[0.85fr_1.5fr] lg:items-center">
-        <div>
-          <p className="text-sm font-black uppercase tracking-[0.22em] text-violet-700">
-            Our Impact
-          </p>
+    <section className="relative isolate overflow-hidden bg-[#050816] px-5 py-16 text-white lg:px-8 lg:py-20">
+      <div className="absolute inset-0 -z-30 bg-[radial-gradient(circle_at_16%_20%,rgba(236,72,153,.16),transparent_28%),radial-gradient(circle_at_48%_16%,rgba(139,92,246,.16),transparent_28%),radial-gradient(circle_at_82%_24%,rgba(34,211,238,.18),transparent_30%),linear-gradient(135deg,#020617_0%,#07142d_48%,#030712_100%)]" />
 
-          <h2 className="mt-3 text-4xl font-black leading-tight text-slate-950">
-            Where sustainability, security and compliance converge
-          </h2>
+      <div className="absolute inset-0 -z-20 bg-[linear-gradient(rgba(255,255,255,.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.03)_1px,transparent_1px)] bg-[size:56px_56px] opacity-20" />
 
-          <p className="mt-5 max-w-md leading-7 text-slate-600">
-            We combine deep expertise and innovative technology to deliver
-            measurable outcomes at scale across industries.
-          </p>
-        </div>
+      <div className="absolute left-[-10rem] top-[-10rem] -z-10 h-[28rem] w-[28rem] rounded-full bg-pink-500/10 blur-3xl" />
+      <div className="absolute right-[-10rem] top-[20%] -z-10 h-[30rem] w-[30rem] rounded-full bg-cyan-400/10 blur-3xl" />
+      <div className="absolute bottom-[-12rem] left-[35%] -z-10 h-[26rem] w-[26rem] rounded-full bg-violet-500/10 blur-3xl" />
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {impactStats.map((stat) => {
-            const Icon = stat.icon;
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-stretch">
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.65 }}
+            className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/30 backdrop-blur md:p-8"
+          >
+            <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-pink-500 via-violet-500 to-cyan-400" />
 
-            return (
-              <div
-                key={stat.value}
-                className="rounded-3xl border border-slate-200 bg-white p-5 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/10"
-              >
-                <div
-                  className={`mx-auto grid h-14 w-14 place-items-center rounded-full ${stat.bg}`}
-                >
-                  <Icon className={`h-8 w-8 ${stat.colour}`} />
-                </div>
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-cyan-300">
+              Growing Convergence
+            </p>
 
-                <p className="mt-4 text-3xl font-black text-slate-950">
-                  {stat.value}
-                </p>
+            <h2 className="mt-3 max-w-xl text-3xl font-black leading-tight md:text-4xl">
+              Sustainability, security and compliance are converging.
+            </h2>
 
-                <p className="mt-2 text-xs leading-5 text-slate-600">
-                  {stat.label}
-                </p>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-white/68 md:text-base">
+              What were once separate workstreams are now colliding across the
+              built environment.
+            </p>
 
-                <p className="mt-3 text-[11px] text-slate-400">
-                  Source: {stat.source}
-                </p>
+            <div className="mt-7 space-y-3">
+              {impactStats.map((stat, index) => {
+                const Icon = stat.icon;
+                const style = convergenceStyles[index % convergenceStyles.length];
+
+                return (
+                  <div
+                    key={stat.value}
+                    className={`rounded-2xl border ${style.border} ${style.bg} p-4 shadow-lg shadow-black/10`}
+                  >
+                    <div className="grid gap-4 sm:grid-cols-[46px_115px_1fr_auto] sm:items-center">
+                      <div
+                        className={`grid h-11 w-11 place-items-center rounded-xl ${style.iconBg} ${style.text}`}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+
+                      <p className={`text-4xl font-black ${style.text}`}>
+                        {stat.value}
+                      </p>
+
+                      <p className="text-sm leading-5 text-white/74">
+                        {stat.label}
+                      </p>
+
+                      <p className="w-fit rounded-full border border-white/10 bg-black/15 px-3 py-1 text-[11px] font-bold text-white/60">
+                        {stat.source}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.65, delay: 0.08 }}
+            className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/30 backdrop-blur md:p-8"
+          >
+            <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-pink-500 via-violet-500 to-cyan-400" />
+
+            <div className="absolute right-[-8rem] top-[-8rem] h-72 w-72 rounded-full bg-pink-500/12 blur-3xl" />
+            <div className="absolute bottom-[-8rem] left-[-8rem] h-72 w-72 rounded-full bg-cyan-400/12 blur-3xl" />
+
+            <div className="relative z-10">
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-pink-300">
+                Customer Outcomes
+              </p>
+
+              <h2 className="mt-3 max-w-xl text-3xl font-black leading-tight md:text-4xl">
+                Benefits customers can feel in cost, time and risk.
+              </h2>
+
+              <p className="mt-4 max-w-xl text-sm leading-6 text-white/68 md:text-base">
+                The value is not more dashboards. It is less waste, faster
+                action, lower exposure and clearer proof.
+              </p>
+
+              <div className="mt-8 grid gap-4">
+                {customerBenefits.map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <div
+                      key={item.title}
+                      className={`group relative overflow-hidden rounded-2xl border ${item.border} ${item.bg} p-5 shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20`}
+                    >
+                      <div
+                        className={`absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b ${item.accent}`}
+                      />
+
+                      <div className="flex items-start gap-4">
+                        <div
+                          className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${item.accent} text-white shadow-lg`}
+                        >
+                          <Icon className="h-7 w-7" />
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                            <p
+                              className={`text-3xl font-black leading-none ${item.text}`}
+                            >
+                              {item.value}
+                            </p>
+
+                            <h3 className="text-lg font-black leading-tight text-white">
+                              {item.title}
+                            </h3>
+                          </div>
+
+                          <p className="mt-2 text-sm leading-5 text-white/72">
+                            {item.label}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -896,7 +1228,7 @@ function ImpactSection() {
 
 function CTASection({ openEnquiryForm }) {
   return (
-    <section id="contact" className="mx-auto max-w-7xl px-5 pb-14 lg:px-8">
+    <section id="contact" className="mx-auto max-w-7xl px-5 pb-14 pt-12 lg:px-8 lg:pt-16">
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#100044] via-violet-900 to-[#07124d] p-8 text-white shadow-2xl shadow-violet-950/20 md:p-12">
         <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_40%_50%,rgba(77,208,225,.28),transparent_35%),linear-gradient(90deg,transparent,rgba(255,255,255,.06))]" />
 
@@ -917,12 +1249,11 @@ function CTASection({ openEnquiryForm }) {
 
           <div>
             <h2 className="text-3xl font-black">
-              Ready to start your smart net zero journey?
+             Start with a SMARTER baseline.
             </h2>
 
             <p className="mt-3 max-w-2xl text-white/75">
-              Talk to our experts to build a secure, compliant and sustainable
-              future for your organisation.
+              See how we can get you better clarity, reduce risks and deliver outcomes that last.
             </p>
           </div>
 
@@ -931,7 +1262,7 @@ function CTASection({ openEnquiryForm }) {
             onClick={openEnquiryForm}
             className="inline-flex cursor-pointer items-center justify-center rounded-2xl bg-gradient-to-r from-pink-600 to-violet-700 px-8 py-4 font-black shadow-xl transition hover:scale-[1.02]"
           >
-            Talk to Experts <ArrowRight className="ml-2 h-5 w-5" />
+            Book a Discovery Call <ArrowRight className="ml-2 h-5 w-5" />
           </button>
         </div>
       </div>
@@ -962,6 +1293,8 @@ export default function Homepage({
         <WhatWeDoSection />
 
         <TransformingTypicalSection />
+
+        <IntelligenceLayerSection goToPage={goToPage} />
 
         <ServicesSection goToPage={goToPage} />
 

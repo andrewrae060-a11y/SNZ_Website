@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import FAQSection from "../components/FAQSection";
+import { getPageFaqs } from "../data/pageFaqs.js";
 import {
   ArrowRight,
   Building2,
@@ -793,8 +795,9 @@ function CTASection({ openEnquiryForm }) {
 }
 
 export default function SmartRegulations({ goToPage, openEnquiryForm }) {
+  const smartRegulationsFaqContent = getPageFaqs("SmartRegulations");
 
-    useEffect(() => {
+  useEffect(() => {
     document.title = "Smart Regulations & Compliance | Smart Net Zero";
   }, []);
 
@@ -812,6 +815,13 @@ export default function SmartRegulations({ goToPage, openEnquiryForm }) {
         <RegulationsSection />
         <AdvisoryServicesSection />
         <ApproachSection />
+
+        {smartRegulationsFaqContent && (
+          <FAQSection
+            {...smartRegulationsFaqContent}
+          />
+        )}
+
         <CTASection openEnquiryForm={openEnquiryForm} />
       </main>
 

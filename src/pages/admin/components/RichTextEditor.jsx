@@ -19,6 +19,8 @@ export default function RichTextEditor({
   helpText,
 }) {
   const editorRef = useRef(null);
+  const savedSelectionRef = useRef(null);
+
   const [linkUrl, setLinkUrl] = useState("");
 
   useEffect(() => {
@@ -34,15 +36,61 @@ export default function RichTextEditor({
     onChange?.(editorRef.current?.innerHTML || "");
   };
 
+  const editorContainsSelection = () => {
+    const selection = window.getSelection();
+
+    if (!selection || selection.rangeCount === 0) {
+      return false;
+    }
+
+    const range = selection.getRangeAt(0);
+
+    return editorRef.current?.contains(range.commonAncestorContainer);
+  };
+
+  const saveSelection = () => {
+    const selection = window.getSelection();
+
+    if (
+      selection &&
+      selection.rangeCount > 0 &&
+      editorContainsSelection()
+    ) {
+      savedSelectionRef.current = selection.getRangeAt(0).cloneRange();
+    }
+  };
+
+  const restoreSelection = () => {
+    const selection = window.getSelection();
+    const savedSelection = savedSelectionRef.current;
+
+    if (!selection || !savedSelection) {
+      return false;
+    }
+
+    selection.removeAllRanges();
+    selection.addRange(savedSelection);
+
+    return true;
+  };
+
   const runCommand = (command, commandValue = null) => {
     editorRef.current?.focus();
+    restoreSelection();
+
     document.execCommand(command, false, commandValue);
+
+    saveSelection();
     emitChange();
   };
 
   const applyBlock = (tagName) => {
     editorRef.current?.focus();
+    restoreSelection();
+
     document.execCommand("formatBlock", false, tagName);
+
+    saveSelection();
     emitChange();
   };
 
@@ -52,8 +100,11 @@ export default function RichTextEditor({
 
   const applyFontSize = (size) => {
     editorRef.current?.focus();
+    restoreSelection();
 
     document.execCommand("fontSize", false, size);
+
+    saveSelection();
     emitChange();
   };
 
@@ -65,18 +116,42 @@ export default function RichTextEditor({
     const normalisedUrl =
       url.startsWith("http://") ||
       url.startsWith("https://") ||
-      url.startsWith("mailto:")
+      url.startsWith("mailto:") ||
+      url.startsWith("tel:")
         ? url
         : `https://${url}`;
 
-    runCommand("createLink", normalisedUrl);
+    editorRef.current?.focus();
+
+    const restored = restoreSelection();
+    const selection = window.getSelection();
+
+    const hasSelectedText =
+      restored &&
+      selection &&
+      selection.rangeCount > 0 &&
+      !selection.isCollapsed;
+
+    if (hasSelectedText) {
+      document.execCommand("createLink", false, normalisedUrl);
+    } else {
+      const linkHtml = `<a href="${normalisedUrl}" target="_blank" rel="noreferrer">${normalisedUrl}</a>`;
+      document.execCommand("insertHTML", false, linkHtml);
+    }
+
     setLinkUrl("");
+    saveSelection();
+    emitChange();
   };
 
   const clearFormatting = () => {
     editorRef.current?.focus();
+    restoreSelection();
+
     document.execCommand("removeFormat", false, null);
     document.execCommand("formatBlock", false, "p");
+
+    saveSelection();
     emitChange();
   };
 
@@ -196,13 +271,19 @@ export default function RichTextEditor({
           <input
             type="url"
             value={linkUrl}
+            onFocus={saveSelection}
+            onMouseDown={saveSelection}
             onChange={(event) => setLinkUrl(event.target.value)}
-            placeholder="Paste link URL"
+            placeholder="Select text, then paste link URL"
             className="min-w-[220px] flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-teal-500"
           />
 
           <button
             type="button"
+            onMouseDown={(event) => {
+              event.preventDefault();
+              saveSelection();
+            }}
             onClick={addLink}
             className="inline-flex items-center rounded-xl bg-slate-950 px-3 py-2 text-sm font-bold text-white"
           >
@@ -215,8 +296,13 @@ export default function RichTextEditor({
           ref={editorRef}
           contentEditable
           suppressContentEditableWarning
-          onInput={emitChange}
-          onBlur={emitChange}
+          onInput={() => {
+            saveSelection();
+            emitChange();
+          }}
+          onKeyUp={saveSelection}
+          onMouseUp={saveSelection}
+          onBlur={saveSelection}
           className="rich-text-editor min-h-[240px] max-w-none overflow-y-auto p-5 text-base leading-7 text-slate-700 outline-none"
         />
       </div>
