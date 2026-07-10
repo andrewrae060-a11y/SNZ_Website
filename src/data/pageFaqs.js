@@ -1,37 +1,43 @@
 export const pageFaqs = {
   SustainabilityNetZero: {
-    eyebrow: "Frequently asked questions",
-    title: "Common guidance before starting a net zero journey",
-    text:
-      "Questions organisations often ask when moving from sustainability ambition to practical action, investment planning and measurable delivery.",
-    faqs: [
-      {
-        question: "Where should we start with sustainability and net zero?",
-        answer:
-          "Most organisations should start by understanding their current emissions, energy use, asset performance, operational priorities and reporting obligations. This creates a clear baseline before moving into roadmaps, investment planning or delivery programmes.",
-      },
-      {
-        question: "How do we know which carbon reduction actions to prioritise?",
-        answer:
-          "The best priorities are usually based on a combination of carbon impact, cost, feasibility, asset condition, operational disruption, compliance requirements and available funding. This helps avoid fragmented activity and focuses investment on the actions that can deliver the strongest overall value.",
-      },
-      {
-        question: "Can Smart Net Zero help with ESG, board and stakeholder reporting?",
-        answer:
-          "Yes. Smart Net Zero can help improve the quality of carbon, energy, ESG and sustainability reporting by strengthening the underlying evidence, data quality, KPI structure, governance and assurance readiness. This gives leadership teams and stakeholders more confidence in the information being reported.",
-      },
-      {
-        question: "Is this only relevant for large estates and building portfolios?",
-        answer:
-          "No. The approach can support single organisations, multi-site estates, public-sector bodies, developers, investors, asset owners and operational businesses. The scope can be scaled from an initial baseline review through to a full net zero roadmap, delivery plan or ongoing monitoring model.",
-      },
-      {
-        question: "How does sustainability connect with smart infrastructure?",
-        answer:
-          "Sustainability outcomes increasingly depend on better energy data, connected assets, building systems, automation, monitoring and resilient infrastructure. Smart Net Zero connects sustainability, energy, smart building performance and infrastructure intelligence so organisations can reduce emissions while improving operational control.",
-      },
-    ],
-  },
+  eyebrow: "Frequently asked questions",
+  title: "Sustainability & Net Zero FAQs",
+  text:
+    "Answers to common questions about developing a net zero strategy, prioritising carbon reduction investment and measuring progress.",
+
+  faqs: [
+    {
+      question:
+        "Where should an organisation start its journey to net zero?",
+      answer:
+        "The first step is to understand your current position. This means establishing a clear baseline for energy use and carbon emissions, identifying the areas with the greatest impact and setting realistic goals. From there, organisations can build a practical net zero roadmap that prioritises actions based on carbon reduction potential, cost, risk and deliverability.",
+    },
+    {
+      question:
+        "What data do you need to develop a net zero strategy?",
+      answer:
+        "A strong net zero strategy starts with reliable data. This may include energy consumption, greenhouse gas emissions, building and asset performance, transport and fleet data, operational activity and relevant supply chain information. The aim is not simply to collect more data, but to understand what is available, identify gaps and turn that information into clear priorities and informed decisions.",
+    },
+    {
+      question:
+        "What is the difference between a net zero target and a net zero strategy?",
+      answer:
+        "A net zero target defines the outcome an organisation wants to achieve and the timeframe for reaching it. A net zero strategy sets out how that target will be delivered. It should establish the current baseline, identify the actions required, prioritise investment, assign responsibilities and set out how progress will be measured over time.",
+    },
+    {
+      question:
+        "How do you prioritise which carbon reduction projects to invest in first?",
+      answer:
+        "Carbon reduction projects should be assessed against a combination of environmental, financial and operational factors. This can include carbon impact, energy and cost savings, capital requirements, payback periods, implementation timescales, operational risk and dependencies between projects. A structured approach helps organisations focus investment on the actions that deliver the greatest overall value.",
+    },
+    {
+      question:
+        "How can an organisation measure progress towards net zero?",
+      answer:
+        "Progress should be measured against a clear baseline using consistent and reliable data. This can include tracking carbon emissions, energy consumption, operational performance, project delivery and cost savings. Regular monitoring allows organisations to understand what is working, identify where progress is falling behind and adjust the strategy as conditions, technology and priorities change.",
+    },
+  ],
+},
 
   OTSecurityResilience: {
     eyebrow: "Frequently asked questions",
@@ -127,6 +133,201 @@ export const pageFaqs = {
         question: "How can organisations make compliance more proactive and less reactive?",
         answer:
           "Proactive compliance means building regulatory requirements into normal business processes rather than responding only when deadlines approach. This can include considering compliance during procurement, project planning, asset management, data collection and risk reviews. A structured approach helps organisations identify gaps earlier, maintain better evidence and respond more effectively as requirements change.",
+      },
+    ],
+  },
+
+  BuiltEnvironment: {
+    eyebrow: "Frequently asked questions",
+    title: "Built Environment FAQs",
+    text:
+      "Answers to common questions about building energy performance, retrofit investment, smart buildings and estate resilience.",
+    faqs: [
+      {
+        question:
+          "How can building owners and operators reduce energy costs across their estate?",
+        answer:
+          "Reducing energy costs starts with understanding how buildings and systems are actually performing. By monitoring consumption, identifying out-of-hours use, reviewing heating and cooling schedules, optimising controls and comparing performance across sites, organisations can target waste and improve efficiency. This helps reduce costs while ensuring investment is focused where it will have the greatest impact.",
+      },
+      {
+        question:
+          "How can you identify which buildings and systems are underperforming?",
+        answer:
+          "The key is to compare performance across buildings, assets and systems using reliable energy and operational data. This can help identify unusual consumption patterns, excessive baseloads, inefficient equipment, poor scheduling and differences between similar sites. Better visibility makes it easier to focus attention on the buildings and systems that are creating the greatest cost or performance issues.",
+      },
+      {
+        question:
+          "Do buildings need major retrofit projects to improve energy performance?",
+        answer:
+          "Not always. Significant improvements can often be achieved by optimising existing systems, improving controls, adjusting operating schedules, resolving faults and using data to identify inefficiencies. Where major retrofit is required, understanding current performance first helps ensure projects are targeted effectively and supported by a clear operational and financial case.",
+      },
+      {
+        question:
+          "How should organisations prioritise energy efficiency and retrofit investment across multiple buildings?",
+        answer:
+          "Investment should be prioritised using a combination of energy and carbon impact, cost savings, capital requirements, payback, operational importance, asset condition and delivery complexity. A structured, data-led approach helps organisations compare opportunities across the estate and focus available budgets on the projects that offer the greatest overall value.",
+      },
+      {
+        question:
+          "How can smart buildings be made more secure and resilient?",
+        answer:
+          "Smart buildings rely on connected systems such as Building Management Systems, HVAC controls, sensors, access control, lighting and EV charging infrastructure. Improving security and resilience starts with understanding what is connected, how systems communicate, who has remote access and where critical dependencies exist. This allows organisations to reduce risk while maintaining the operational and efficiency benefits of connected infrastructure.",
+      },
+    ],
+  },
+
+  DataCentres: {
+    eyebrow: "Frequently asked questions",
+    title: "Data Centre FAQs",
+    text:
+      "Answers to common questions about data centre capacity, efficiency, cooling, resilience and infrastructure investment.",
+    faqs: [
+      {
+        question:
+          "How can data centre operators improve capacity and performance without immediately expanding infrastructure?",
+        answer:
+          "Improving capacity starts with understanding how existing power, cooling and infrastructure are actually being used. By identifying underused assets, stranded capacity, inefficient load distribution and cooling constraints, operators can often improve performance and release additional capacity before committing to major expansion.",
+      },
+      {
+        question:
+          "How can data centres reduce energy and cooling costs while maintaining performance?",
+        answer:
+          "Reducing energy and cooling costs requires a clear understanding of how facility systems respond to IT load and operating conditions. This can include improving airflow management, addressing overcooling, optimising control settings, monitoring equipment performance and comparing actual consumption against expected demand. The aim is to reduce waste without compromising availability or performance.",
+      },
+      {
+        question:
+          "How can data centre operators identify resilience risks before they cause downtime?",
+        answer:
+          "Resilience risks can be identified by reviewing critical assets, system dependencies, single points of failure, backup arrangements and the condition of power, cooling and control systems. Better monitoring and visibility across infrastructure help operators detect emerging issues earlier, strengthen contingency planning and prioritise improvements before failures affect availability.",
+      },
+      {
+        question:
+          "Which metrics should data centres use to measure sustainability and efficiency?",
+        answer:
+          "Data centres should use a combination of metrics rather than relying on one measure alone. This can include Power Usage Effectiveness (PUE), Water Usage Effectiveness (WUE), Carbon Usage Effectiveness (CUE), total energy consumption, renewable energy use and infrastructure utilisation. Tracking these alongside operational performance helps ensure sustainability improvements do not come at the expense of resilience or capacity.",
+      },
+      {
+        question:
+          "How should data centre operators prioritise infrastructure upgrades and investment?",
+        answer:
+          "Investment should be prioritised using factors such as operational criticality, capacity constraints, asset condition, likelihood and impact of failure, energy savings, resilience improvement, future demand and delivery complexity. A structured, evidence-led approach helps operators focus capital on the upgrades that will deliver the greatest overall improvement in performance, resilience and long-term value.",
+      },
+    ],
+  },
+
+  EnergyUtilitiesCriticalInfrastructure: {
+    eyebrow: "Frequently asked questions",
+    title: "Energy, Utilities & Critical Infrastructure FAQs",
+    text:
+      "Answers to common questions about OT visibility, cyber security, resilience, net zero delivery and infrastructure investment.",
+    faqs: [
+      {
+        question:
+          "Why is OT asset visibility important for energy, utilities and critical infrastructure operators?",
+        answer:
+          "OT asset visibility helps organisations understand what systems and devices are connected, how they communicate and which assets are critical to service delivery. This can reveal undocumented equipment, remote connections, third-party access and dependencies between systems. A clear view of the OT environment makes it easier to manage cyber risk, improve resilience and prioritise investment.",
+      },
+      {
+        question:
+          "How can critical infrastructure operators improve OT cyber security without compromising availability?",
+        answer:
+          "OT cyber security should be improved through a risk-based approach that reflects the operational importance, availability requirements and safety considerations of critical systems. This can include better asset visibility, network segmentation, secure remote access, improved monitoring and stronger incident planning. Changes should be carefully prioritised and implemented around operational constraints.",
+      },
+      {
+        question:
+          "How can energy and utility organisations deliver and measure progress towards net zero?",
+        answer:
+          "Progress starts with establishing clear energy and emissions baselines, identifying realistic improvement opportunities and prioritising actions based on carbon impact, cost, operational risk and deliverability. Organisations should then track clear KPIs and compare actual results against expected outcomes, allowing strategies and investment plans to be adjusted as performance data improves.",
+      },
+      {
+        question:
+          "How can energy and utility operators improve resilience and maintain essential services during disruption?",
+        answer:
+          "Improving resilience starts with identifying essential functions, critical assets, key dependencies and potential single points of failure. Organisations can then strengthen monitoring, incident response, recovery planning and alternative operating arrangements. Understanding how systems depend on each other helps operators prepare for disruption while maintaining continuity of essential services.",
+      },
+      {
+        question:
+          "How should critical infrastructure operators prioritise investment across ageing and high-risk assets?",
+        answer:
+          "Investment should be prioritised using a combination of asset condition, service criticality, cyber exposure, likelihood and consequence of failure, regulatory requirements and delivery complexity. A structured, evidence-led approach helps organisations compare competing priorities and direct capital towards the assets and projects that deliver the greatest improvement in resilience, performance and long-term value.",
+      },
+    ],
+  },
+
+  ManufacturersConnectedProducts: {
+    eyebrow: "Frequently asked questions",
+    title: "Manufacturers & Connected Products FAQs",
+    text:
+      "Answers to common questions about connected-product regulation, cyber security compliance, testing and product lifecycle requirements.",
+    faqs: [
+      {
+        question:
+          "How do manufacturers know whether a connected product is subject to cyber security regulation?",
+        answer:
+          "Whether a product is in scope depends on factors such as how it connects, whether it uses radio technology, whether it includes software, which markets it will be sold into and the organisation’s role in the supply chain. An early scope assessment helps manufacturers understand which requirements apply before testing, certification or market-entry decisions are made.",
+      },
+      {
+        question:
+          "Which cyber security regulations apply to connected products in the UK and EU?",
+        answer:
+          "The requirements will depend on the product and the markets in which it is supplied. Relevant regulations may include the UK Product Security and Telecommunications Infrastructure (PSTI) regime, RED Article 3(3) cyber security requirements for certain radio equipment, and the EU Cyber Resilience Act for products with digital elements. Some products may need to consider more than one regulatory framework.",
+      },
+      {
+        question:
+          "Does a connected product need independent cyber security compliance testing?",
+        answer:
+          "Not every connected product follows the same compliance route. Whether independent testing or third-party assessment is required depends on the product, its classification, the applicable regulation, the standards being used and the chosen conformity-assessment route. Assessing these requirements early can help avoid unnecessary testing and identify compliance gaps before market launch.",
+      },
+      {
+        question:
+          "What evidence is needed to demonstrate product security compliance?",
+        answer:
+          "The exact evidence required will vary, but it can include scope and risk assessments, security requirements, test results, technical documentation, vulnerability management processes, software update information and formal declarations or statements of compliance. Strong evidence helps manufacturers demonstrate that security requirements have been properly assessed, implemented and maintained.",
+      },
+      {
+        question:
+          "How can manufacturers build cyber security compliance into product development from the start?",
+        answer:
+          "Cyber security and compliance should be considered throughout the product lifecycle, rather than treated as a final pre-launch check. This can include assessing regulatory scope early, defining security requirements, carrying out risk assessments, testing during development, managing software dependencies and establishing clear processes for vulnerabilities, updates and ongoing support.",
+      },
+    ],
+  },
+
+  PublicSectorLocalAuthorities: {
+    eyebrow: "Frequently asked questions",
+    title: "Public Sector & Local Authority FAQs",
+    text:
+      "Answers to common questions about public-estate energy costs, investment prioritisation, resilience, funding and project performance.",
+    faqs: [
+      {
+        question:
+          "How can local authorities reduce energy costs across public buildings?",
+        answer:
+          "Reducing energy costs starts with understanding how different buildings and systems are performing. By comparing sites, identifying out-of-hours consumption, improving heating and control schedules, resolving faults and targeting inefficient assets, local authorities can reduce waste and focus available budgets on the areas where savings will have the greatest impact.",
+      },
+      {
+        question:
+          "How should local authorities prioritise investment when budgets are limited?",
+        answer:
+          "Investment should be prioritised using a combination of service criticality, asset condition, operational risk, energy and carbon savings, capital requirements, payback and delivery readiness. A structured, evidence-led approach helps local authorities compare competing projects and direct limited budgets towards the interventions that deliver the greatest overall value.",
+      },
+      {
+        question:
+          "How can better estate data help public sector organisations secure funding and build stronger business cases?",
+        answer:
+          "Better estate data provides the evidence needed to establish baselines, quantify expected savings, compare buildings and demonstrate where investment is needed most. This helps public sector organisations build clearer business cases, develop stronger project pipelines and respond more effectively when funding opportunities become available.",
+      },
+      {
+        question:
+          "How can local authorities improve the resilience of critical public buildings and infrastructure?",
+        answer:
+          "Improving resilience starts with understanding which buildings, assets and systems are critical to service delivery and where key dependencies or single points of failure exist. By improving visibility of energy, building systems and connected infrastructure, local authorities can identify risks earlier, strengthen continuity planning and prioritise improvements without compromising essential services.",
+      },
+      {
+        question:
+          "How can public sector organisations measure whether energy and decarbonisation projects are delivering value?",
+        answer:
+          "Projects should be measured against clear baselines and expected outcomes. This can include tracking energy reduction, cost savings, carbon reduction, operational performance, asset reliability and actual results against forecasts. Ongoing monitoring helps organisations demonstrate value for money, identify underperformance and improve future investment decisions.",
       },
     ],
   },

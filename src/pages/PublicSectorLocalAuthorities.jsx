@@ -1,6 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import FAQSection from "../components/FAQSection";
+import { getPageFaqs } from "../data/pageFaqs.js";
 import {
   ArrowRight,
   BadgeCheck,
@@ -644,6 +646,9 @@ export default function PublicSectorLocalAuthorities({
   goToPage,
   openEnquiryForm,
 }) {
+const faqContent = getPageFaqs(
+  "PublicSectorLocalAuthorities"
+);
 
   useEffect(() => {
     document.title = "Public Sector & Local Authorities | Smart Net Zero";
@@ -978,6 +983,13 @@ export default function PublicSectorLocalAuthorities({
             </div>
           </div>
         </section>
+
+          {faqContent && (
+                <FAQSection
+                  {...faqContent}
+                  openEnquiryForm={openEnquiryForm}
+                />
+          )}
 
         <section className="bg-white px-5 pb-16 pt-4 lg:px-8">
           <div

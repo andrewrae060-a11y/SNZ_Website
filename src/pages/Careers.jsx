@@ -58,12 +58,7 @@ const benefits = [
     text: "Access training, certifications and career development support.",
     icon: GraduationCap,
   },
-  {
-    title: "Private Healthcare & Wellbeing",
-    text: "Support for your health, wellbeing and work-life balance.",
-    icon: Heart,
-  },
-  {
+   {
     title: "Pension Contribution",
     text: "We contribute towards your future financial security.",
     icon: Wallet,
@@ -106,6 +101,22 @@ const cultureCards = [
     text: "Clear development, mentoring and opportunities to expand your expertise.",
     icon: ArrowGrowthIcon,
   },
+];
+
+const rightFitPoints = [
+  "Enjoy making a difference and creating a positive impact.",
+  "Like working as part of a team where everyone pitches in.",
+  "Want to help shape the future of a growing organisation.",
+  "Take ownership, use your initiative and look for solutions rather than problems.",
+  "Are open to learning, trying new ideas and embracing change.",
+];
+
+const notRightFitPoints = [
+  "Prefer to work entirely on your own with little collaboration.",
+  "Prefer well-established processes and procedures with little need for change or innovation.",
+  "Like every day to be the same and find change frustrating.",
+  "Are not comfortable taking ownership or making decisions.",
+  'See this as "just a job" rather than an opportunity to contribute to something meaningful.',
 ];
 
 function TargetIcon({ className }) {
@@ -170,6 +181,147 @@ function ArrowGrowthIcon({ className }) {
         strokeLinecap="round"
       />
     </svg>
+  );
+}
+
+function RightFitSection({ jobsAvailable }) {
+  return (
+    <section className="bg-slate-50 px-5 py-14 lg:px-8 lg:py-18">
+      <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-black text-cyan-800">
+            <Sparkles className="h-4 w-4" />
+            Life at Smart Net Zero
+          </div>
+
+          <h2 className="mt-5 text-4xl font-black tracking-tight text-[#07133c] md:text-5xl">
+            Is SNZ the Right Fit for You?
+          </h2>
+
+          <p className="mx-auto mt-5 max-w-3xl text-lg font-semibold leading-8 text-slate-600">
+            Finding the right role is not just about your skills. It is also
+            about finding an organisation where you will enjoy coming to work,
+            feel supported and have the opportunity to thrive.
+          </p>
+
+          <p className="mx-auto mt-4 max-w-3xl text-base font-semibold leading-7 text-slate-600">
+            At Smart Net Zero, we are looking for people who share our values,
+            enjoy working as part of an innovative team and genuinely want to
+            make a difference.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-2">
+          <article className="relative overflow-hidden rounded-[2rem] border border-emerald-200 bg-white p-7 shadow-xl shadow-emerald-900/5 md:p-9">
+            <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-emerald-100/70 blur-3xl" />
+
+            <div className="relative">
+              <div className="flex items-start gap-4">
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
+                  <CheckCircle2 className="h-8 w-8" />
+                </div>
+
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">
+                    You will probably thrive here
+                  </p>
+
+                  <h3 className="mt-2 text-2xl font-black text-[#07133c]">
+                    You will probably love working at SNZ if you...
+                  </h3>
+                </div>
+              </div>
+
+              <div className="mt-7 space-y-4">
+                {rightFitPoints.map((point) => (
+                  <div
+                    key={point}
+                    className="flex gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4"
+                  >
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+
+                    <p className="text-sm font-semibold leading-6 text-slate-700">
+                      {point}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </article>
+
+          <article className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-7 shadow-xl shadow-slate-900/5 md:p-9">
+            <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-violet-100/80 blur-3xl" />
+
+            <div className="relative">
+              <div className="flex items-start gap-4">
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-700">
+                  <X className="h-8 w-8" />
+                </div>
+
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-violet-700">
+                    It may not be the right environment
+                  </p>
+
+                  <h3 className="mt-2 text-2xl font-black text-[#07133c]">
+                    This might not be the right fit if you...
+                  </h3>
+                </div>
+              </div>
+
+              <div className="mt-7 space-y-4">
+                {notRightFitPoints.map((point) => (
+                  <div
+                    key={point}
+                    className="flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                  >
+                    <X className="mt-0.5 h-5 w-5 shrink-0 text-violet-600" />
+
+                    <p className="text-sm font-semibold leading-6 text-slate-700">
+                      {point}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div className="mt-8 overflow-hidden rounded-[2rem] bg-[#06112e] p-7 text-white shadow-xl md:p-9">
+          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+            <div className="max-w-4xl">
+              <p className="text-base font-semibold leading-7 text-white/72">
+                There is nothing wrong with any of the above. We simply want to
+                help you decide whether Smart Net Zero is the right place for
+                you before you apply.
+              </p>
+
+              <h3 className="mt-4 text-2xl font-black md:text-3xl">
+                Did you read this and think, “That sounds like me”?
+              </h3>
+
+              <p className="mt-3 text-base font-semibold text-white/72">
+                We would love to hear from you.
+              </p>
+            </div>
+
+            {jobsAvailable ? (
+              <a
+                href="#apply-now"
+                className="inline-flex items-center justify-center rounded-2xl bg-white px-7 py-4 text-sm font-black text-[#07133c] transition hover:scale-[1.02]"
+              >
+                Apply to join SNZ
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </a>
+            ) : (
+              <span className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-7 py-4 text-center text-sm font-black text-white">
+                Check back for future roles
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -1240,6 +1392,8 @@ export default function Careers({
               )}
           </div>
         </section>
+
+        <RightFitSection jobsAvailable={jobs.length > 0} />
 
         <section className="bg-white px-5 py-8 lg:px-8">
           <div className="mx-auto max-w-7xl">

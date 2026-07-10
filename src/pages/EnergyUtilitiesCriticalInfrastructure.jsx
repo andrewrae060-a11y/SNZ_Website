@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import FAQSection from "../components/FAQSection";
+import { getPageFaqs } from "../data/pageFaqs.js";
 import {
   ArrowRight,
   BarChart3,
@@ -643,6 +645,9 @@ function safeGo(goToPage, page) {
 
 export default function EnergyUtilitiesCriticalInfrastructure({ goToPage, openEnquiryForm }) {
 
+  const faqContent = getPageFaqs(
+  "EnergyUtilitiesCriticalInfrastructure"
+);
   useEffect(() => {
     document.title = "Energy, Utilities & Critical Infrastructure | Smart Net Zero";
   }, []);
@@ -1069,6 +1074,13 @@ export default function EnergyUtilitiesCriticalInfrastructure({ goToPage, openEn
             </div>
           </div>
         </section>
+        
+        {faqContent && (
+        <FAQSection
+          {...faqContent}
+          openEnquiryForm={openEnquiryForm}
+        />
+        )}
 
         <section className="border-t border-slate-100 bg-white px-5 py-9 lg:px-8">
           <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.55fr_2.45fr]">

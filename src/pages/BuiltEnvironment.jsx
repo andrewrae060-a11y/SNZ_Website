@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import FAQSection from "../components/FAQSection";
+import { getPageFaqs } from "../data/pageFaqs.js";
 import {
   ArrowRight,
   BarChart3,
@@ -602,7 +604,7 @@ function UseCaseModal({ useCase, onClose }) {
 function safeGo(goToPage, page) {
   if (goToPage && page) goToPage(page);
 }
-
+const faqContent = getPageFaqs("BuiltEnvironment");
 export default function BuiltEnvironment({ goToPage, openEnquiryForm }) {
   useEffect(() => {
     document.title = "Built Environment | Smart Net Zero";
@@ -1105,6 +1107,13 @@ export default function BuiltEnvironment({ goToPage, openEnquiryForm }) {
             </div>
           </div>
         </section>        
+        
+        {faqContent && (
+          <FAQSection
+            {...faqContent}
+            openEnquiryForm={openEnquiryForm}
+          />
+        )}
 
         <section className="bg-white px-5 pb-16 pt-6 lg:px-8">
           <div
