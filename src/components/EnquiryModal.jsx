@@ -102,18 +102,20 @@ export default function EnquiryModal({ open, onClose }) {
         result = {
           message:
             responseText ||
-            "Your enquiry could not be sent.",
+            `Your enquiry could not be sent. Server returned ${response.status}.`,
         };
       }
 
       if (!response.ok) {
         throw new Error(
           result.message ||
-            "Your enquiry could not be sent."
+            result.error ||
+            result.details ||
+            `Your enquiry could not be sent. Server returned ${response.status}.`
         );
       }
 
-      setSubmitState({
+     setSubmitState({
         loading: false,
         success:
           result.message ||

@@ -26,12 +26,18 @@ export async function createCareersApplication({
   phone,
   linkedin,
   message,
+  screeningResponses,
   cvBucket,
   cvPath,
   cvOriginalName,
   cvMimeType,
   cvSizeBytes,
 }) {
+  const safeScreeningResponses =
+    Array.isArray(screeningResponses)
+      ? screeningResponses
+      : [];
+
   const rows = await sql`
     insert into
       public.careers_applications (
@@ -42,6 +48,7 @@ export async function createCareersApplication({
         phone,
         linkedin_url,
         message,
+        screening_responses,
         cv_bucket,
         cv_path,
         cv_original_name,
@@ -56,6 +63,7 @@ export async function createCareersApplication({
       ${phone},
       ${linkedin},
       ${message},
+      ${safeScreeningResponses},
       ${cvBucket},
       ${cvPath},
       ${cvOriginalName},
@@ -71,6 +79,7 @@ export async function createCareersApplication({
       phone,
       linkedin_url,
       message,
+      screening_responses,
       cv_original_name,
       status,
       submitted_at

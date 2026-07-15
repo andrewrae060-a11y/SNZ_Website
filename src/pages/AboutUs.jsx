@@ -187,7 +187,7 @@ const loweConexPartnerDetails = {
 const kmcConsultingPartnerDetails = {
   website: "https://www.kmccontrols.com/consulting/",
   background: [
-    "KMC Consulting brings together 40+ experienced specialists across strategy, operations, technology and cybersecurity.",
+    "KMC Consulting brings together a global team of experienced specialists across strategy, operations, technology and cybersecurity.",
     "700+ years of combined subject matter expertise across the consulting team.",
     "22 graduate degrees and 30+ specialty areas supporting complex transformation challenges.",
     "Focused expertise across business process, strategic alignment and cybersecurity.",

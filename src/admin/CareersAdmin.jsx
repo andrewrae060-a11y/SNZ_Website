@@ -78,11 +78,43 @@ function normaliseScreeningQuestions(value) {
   }
 
   return value
-    .map((question) =>
-      String(question || "")
+    .map((item) => {
+      /*
+       * Backward compatibility:
+       * existing questions stored as strings remain Yes/No.
+       */
+      if (typeof item === "string") {
+        const question = item
+          .trim()
+          .slice(0, 300);
+
+        return question
+          ? {
+              question,
+              answerType: "yes_no",
+            }
+          : null;
+      }
+
+      const question = String(
+        item?.question || ""
+      )
         .trim()
-        .slice(0, 300)
-    )
+        .slice(0, 300);
+
+      if (!question) {
+        return null;
+      }
+
+      return {
+        question,
+
+        answerType:
+          item?.answerType === "text"
+            ? "text"
+            : "yes_no",
+      };
+    })
     .filter(Boolean)
     .slice(0, 3);
 }
@@ -287,43 +319,57 @@ function JobEditor({
     }));
   }
 
-  function updateScreeningQuestion(
-    index,
-    value
-  ) {
-    setForm((current) => {
-      const questions = [
-        ...(current.screeningQuestions || []),
-      ];
+ function updateScreeningQuestion(
+  index,
+  field,
+  value
+) {
+  setForm((current) => {
+    const questions = [
+      ...(current.screeningQuestions || []),
+    ];
 
-      questions[index] = value;
-
-      return {
-        ...current,
-        screeningQuestions:
-          questions.slice(0, 3),
+    const existingQuestion =
+      questions[index] || {
+        question: "",
+        answerType: "yes_no",
       };
-    });
-  }
 
-  function addScreeningQuestion() {
-    setForm((current) => {
-      const questions =
-        current.screeningQuestions || [];
+    questions[index] = {
+      ...existingQuestion,
+      [field]: value,
+    };
 
-      if (questions.length >= 3) {
-        return current;
-      }
+    return {
+      ...current,
+      screeningQuestions:
+        questions.slice(0, 3),
+    };
+  });
+}
 
-      return {
-        ...current,
-        screeningQuestions: [
-          ...questions,
-          "",
-        ],
-      };
-    });
-  }
+function addScreeningQuestion() {
+  setForm((current) => {
+    const questions =
+      current.screeningQuestions || [];
+
+    if (questions.length >= 3) {
+      return current;
+    }
+
+    return {
+      ...current,
+
+      screeningQuestions: [
+        ...questions,
+        {
+          question: "",
+          answerType: "yes_no",
+        },
+      ],
+    };
+  });
+}
 
   function removeScreeningQuestion(index) {
     setForm((current) => ({
@@ -792,7 +838,7 @@ function JobEditor({
               </h3>
 
               <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-slate-600">
-                Add up to three optional Yes or No questions. Applicants must answer every question added to the role before submitting their application.
+                 Add up to three optional screening questions. Choose whether each question requires a Yes or No answer or an open-text response.
               </p>
             </div>
 
@@ -818,7 +864,7 @@ function JobEditor({
           ) : (
             <div className="mt-5 space-y-4">
               {form.screeningQuestions.map(
-                (question, index) => (
+                (screeningQuestion, index) => (
                   <div
                     key={`screening-question-${index}`}
                     className="rounded-2xl border border-violet-200 bg-white p-4"
@@ -834,9 +880,7 @@ function JobEditor({
                       <button
                         type="button"
                         onClick={() =>
-                          removeScreeningQuestion(
-                            index
-                          )
+                          removeScreeningQuestion(index)
                         }
                         className="inline-flex items-center rounded-xl px-3 py-2 text-xs font-black text-rose-700 transition hover:bg-rose-50"
                       >
@@ -848,21 +892,49 @@ function JobEditor({
                     <input
                       id={`screening-question-${index}`}
                       type="text"
-                      value={question}
+                      value={
+                        screeningQuestion.question || ""
+                      }
                       onChange={(event) =>
                         updateScreeningQuestion(
                           index,
+                          "question",
                           event.target.value
                         )
                       }
                       maxLength={300}
-                      placeholder="For example: Are you eligible to work in the UK?"
+                      placeholder="Enter the screening question"
                       className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
                     />
 
-                    <p className="mt-2 text-xs font-semibold text-slate-500">
-                      Applicants will select Yes or No.
-                    </p>
+                    <label className="mt-4 block">
+                      <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+                        Answer type
+                      </span>
+
+                      <select
+                        value={
+                          screeningQuestion.answerType ||
+                          "yes_no"
+                        }
+                        onChange={(event) =>
+                          updateScreeningQuestion(
+                            index,
+                            "answerType",
+                            event.target.value
+                          )
+                        }
+                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                      >
+                        <option value="yes_no">
+                          Yes / No
+                        </option>
+
+                        <option value="text">
+                          Open text
+                        </option>
+                      </select>
+                    </label>
                   </div>
                 )
               )}

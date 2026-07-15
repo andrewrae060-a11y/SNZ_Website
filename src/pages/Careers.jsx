@@ -301,16 +301,49 @@ function ApplyForm({
     selectedRole?.title || "";
 
   const screeningQuestions =
-    Array.isArray(
-      selectedRole?.screeningQuestions
-    )
-      ? selectedRole.screeningQuestions
-          .map((question) =>
-            String(question || "").trim()
-          )
-          .filter(Boolean)
-          .slice(0, 3)
-      : [];
+  Array.isArray(
+    selectedRole?.screeningQuestions
+  )
+    ? selectedRole.screeningQuestions
+        .map((item) => {
+          /*
+           * Backward compatibility for roles
+           * that still contain plain strings.
+           */
+          if (typeof item === "string") {
+            const question =
+              item.trim();
+
+            return question
+              ? {
+                  question,
+                  answerType:
+                    "yes_no",
+                }
+              : null;
+          }
+
+          const question = String(
+            item?.question || ""
+          ).trim();
+
+          if (!question) {
+            return null;
+          }
+
+          return {
+            question,
+
+            answerType:
+              item?.answerType ===
+              "text"
+                ? "text"
+                : "yes_no",
+          };
+        })
+        .filter(Boolean)
+        .slice(0, 3)
+    : [];
 
   const validateFile = (file) => {
     if (!file) {
@@ -451,11 +484,19 @@ function ApplyForm({
 
     const unansweredQuestionIndex =
       screeningQuestions.findIndex(
-        (_question, index) => {
-          const answer =
+        (screeningQuestion, index) => {
+          const answer = String(
             form.screeningAnswers?.[
               index
-            ];
+            ] || ""
+          ).trim();
+
+          if (
+            screeningQuestion.answerType ===
+            "text"
+          ) {
+            return !answer;
+          }
 
           return (
             answer !== "Yes" &&
@@ -481,12 +522,18 @@ function ApplyForm({
 
     const screeningResponses =
       screeningQuestions.map(
-        (question, index) => ({
-          question,
-          answer:
+        (screeningQuestion, index) => ({
+          question:
+            screeningQuestion.question,
+
+          answerType:
+            screeningQuestion.answerType,
+
+          answer: String(
             form.screeningAnswers?.[
               index
-            ] || "",
+            ] || ""
+          ).trim(),
         })
       );
 
@@ -834,28 +881,51 @@ function ApplyForm({
             </p>
 
             <div className="mt-5 space-y-5">
-              {screeningQuestions.map(
-                (question, index) => {
-                  const fieldName =
-                   `screening-question-${selectedRole?.id || "role"}-${index}`;
+            {screeningQuestions.map(
+              (screeningQuestion, index) => {
+                const fieldName =
+                  `screening-question-${index}`;
 
-                  const selectedAnswer =
-                    form.screeningAnswers?.[
-                      index
-                    ] || "";
+                const selectedAnswer =
+                  form.screeningAnswers?.[
+                    index
+                  ] || "";
 
-                  return (
-                    <fieldset
-                      key={`${question}-${index}`}
-                      className="rounded-2xl border border-violet-200 bg-white p-4"
-                    >
-                      <legend className="px-1 text-sm font-black leading-6 text-slate-800">
-                        {index + 1}. {question}
-                        <span className="ml-1 text-rose-600">
-                          *
-                        </span>
-                      </legend>
+                const isOpenText =
+                  screeningQuestion.answerType ===
+                  "text";
 
+                return (
+                  <fieldset
+                    key={`${screeningQuestion.question}-${index}`}
+                    className="rounded-2xl border border-violet-200 bg-white p-4"
+                  >
+                    <legend className="px-1 text-sm font-black leading-6 text-slate-800">
+                      {index + 1}.{" "}
+                      {screeningQuestion.question}
+
+                      <span className="ml-1 text-rose-600">
+                        *
+                      </span>
+                    </legend>
+
+                    {isOpenText ? (
+                      <textarea
+                        name={fieldName}
+                        rows={4}
+                        value={selectedAnswer}
+                        onChange={(event) =>
+                          handleScreeningAnswer(
+                            index,
+                            event.target.value
+                          )
+                        }
+                        maxLength={1500}
+                        required
+                        placeholder="Enter your answer..."
+                        className="mt-3 w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                      />
+                    ) : (
                       <div className="mt-3 grid grid-cols-2 gap-3">
                         {["Yes", "No"].map(
                           (answer) => (
@@ -872,7 +942,8 @@ function ApplyForm({
                                 name={fieldName}
                                 value={answer}
                                 checked={
-                                  selectedAnswer === answer
+                                  selectedAnswer ===
+                                  answer
                                 }
                                 onChange={() =>
                                   handleScreeningAnswer(
@@ -889,10 +960,11 @@ function ApplyForm({
                           )
                         )}
                       </div>
-                    </fieldset>
-                  );
-                }
-              )}
+                    )}
+                  </fieldset>
+                );
+              }
+            )}  
             </div>
           </section>
         )}

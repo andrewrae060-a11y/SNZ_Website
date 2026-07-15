@@ -83,89 +83,181 @@ function isValidEmail(value) {
  * Receives the applicant details and CV, then sends them through
  * the careers@smartnetzero.co.uk mailbox.
  */
-app.post("/api/careers/apply", upload.single("cv"), async (req, res) => {
-  try {
-    const {
-      fullName,
-      email,
-      phone,
-      roleId,
-      roleTitle,
-      linkedin,
-      message,
-    } = req.body;
+app.post(
+  "/api/careers/apply",
+  upload.single("cv"),
+  async (req, res) => {
+    try {
+      const {
+        fullName,
+        email,
+        phone,
+        roleId,
+        roleTitle,
+        linkedin,
+        message,
+        screeningResponses,
+      } = req.body;
 
-    if (!fullName || !email || !roleId || !roleTitle) {
-      return res.status(400).json({
-        message: "Name, email and role are required.",
+      if (
+        !fullName ||
+        !email ||
+        !roleId ||
+        !roleTitle
+      ) {
+        return res.status(400).json({
+          message:
+            "Name, email and role are required.",
+        });
+      }
+
+      if (!isValidEmail(email)) {
+        return res.status(400).json({
+          message:
+            "Please enter a valid email address.",
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          message:
+            "CV is required and must be PDF or DOCX.",
+        });
+      }
+
+      let parsedScreeningResponses = [];
+
+      try {
+        const parsed = JSON.parse(
+          String(
+            screeningResponses || "[]"
+          )
+        );
+
+        if (Array.isArray(parsed)) {
+          parsedScreeningResponses =
+            parsed
+              .map((item) => ({
+                question: String(
+                  item?.question || ""
+                )
+                  .trim()
+                  .slice(0, 300),
+
+                answer: String(
+                  item?.answer || ""
+                )
+                  .trim()
+                  .slice(0, 1500),
+
+                answerType:
+                  item?.answerType ===
+                  "text"
+                    ? "text"
+                    : "yes_no",
+              }))
+              .filter(
+                (item) =>
+                  item.question &&
+                  item.answer
+              )
+              .slice(0, 3);
+        }
+      } catch {
+        parsedScreeningResponses = [];
+      }
+
+      const screeningSection =
+        parsedScreeningResponses.length > 0
+          ? parsedScreeningResponses
+              .map(
+                (item, index) =>
+                  [
+                    `${index + 1}. ${item.question}`,
+                    `Answer: ${item.answer}`,
+                  ].join("\n")
+              )
+              .join("\n\n")
+          : "No screening questions were provided.";
+
+      const transporter =
+        createCareersTransporter();
+
+      const emailBody = [
+        "New careers application received.",
+        "",
+        "Role:",
+        roleTitle,
+        roleId,
+        "",
+        "Applicant:",
+        fullName,
+        "",
+        "Email:",
+        email,
+        "",
+        "Phone:",
+        phone || "Not provided",
+        "",
+        "LinkedIn:",
+        linkedin || "Not provided",
+        "",
+        "Screening responses:",
+        screeningSection,
+        "",
+        "Message:",
+        message ||
+          "No message provided",
+      ].join("\n");
+
+      await transporter.sendMail({
+        from:
+          process.env.MAIL_FROM ||
+          process.env.SMTP_USER,
+
+        to:
+          process.env.CAREERS_MAIL_TO ||
+          "careers@smartnetzero.co.uk",
+
+        replyTo: email,
+
+        subject:
+          `Careers Application: ${roleTitle} - ${fullName}`,
+
+        text: emailBody,
+
+        attachments: [
+          {
+            filename:
+              req.file.originalname,
+
+            content:
+              req.file.buffer,
+
+            contentType:
+              req.file.mimetype,
+          },
+        ],
+      });
+
+      return res.status(200).json({
+        message:
+          "Application sent successfully.",
+      });
+    } catch (error) {
+      console.error(
+        "Careers application error:",
+        error
+      );
+
+      return res.status(500).json({
+        message:
+          error?.message ||
+          "Application could not be sent. Please try again later.",
       });
     }
-
-    if (!isValidEmail(email)) {
-      return res.status(400).json({
-        message: "Please enter a valid email address.",
-      });
-    }
-
-    if (!req.file) {
-      return res.status(400).json({
-        message: "CV is required and must be PDF or DOCX.",
-      });
-    }
-
-    const transporter = createCareersTransporter();
-
-    const emailBody = [
-      "New careers application received.",
-      "",
-      "Role:",
-      roleTitle,
-      roleId,
-      "",
-      "Applicant:",
-      fullName,
-      "",
-      "Email:",
-      email,
-      "",
-      "Phone:",
-      phone || "Not provided",
-      "",
-      "LinkedIn:",
-      linkedin || "Not provided",
-      "",
-      "Message:",
-      message || "No message provided",
-    ].join("\n");
-
-    await transporter.sendMail({
-      from: process.env.MAIL_FROM || process.env.SMTP_USER,
-      to: "careers@smartnetzero.co.uk",
-      replyTo: email,
-      subject: `Careers Application: ${roleTitle} - ${fullName}`,
-      text: emailBody,
-      attachments: [
-        {
-          filename: req.file.originalname,
-          content: req.file.buffer,
-          contentType: req.file.mimetype,
-        },
-      ],
-    });
-
-    return res.status(200).json({
-      message: "Application sent successfully.",
-    });
-  } catch (error) {
-    console.error("Careers application error:", error);
-
-    return res.status(500).json({
-      message:
-        error?.message ||
-        "Application could not be sent. Please try again later.",
-    });
   }
-});
+);
 
 /*
  * Website enquiry endpoint.

@@ -10,9 +10,25 @@ const textListSchema = z
   )
   .default([]);
 
-const screeningQuestionsSchema = z
-  .array(
-    z
+const screeningQuestionSchema = z.union([
+  z
+    .string()
+    .trim()
+    .min(
+      1,
+      "Screening questions cannot be blank."
+    )
+    .max(
+      300,
+      "Screening questions must be 300 characters or fewer."
+    )
+    .transform((question) => ({
+      question,
+      answerType: "yes_no",
+    })),
+
+  z.object({
+    question: z
       .string()
       .trim()
       .min(
@@ -22,8 +38,19 @@ const screeningQuestionsSchema = z
       .max(
         300,
         "Screening questions must be 300 characters or fewer."
-      )
-  )
+      ),
+
+    answerType: z
+      .enum([
+        "yes_no",
+        "text",
+      ])
+      .default("yes_no"),
+  }),
+]);
+
+const screeningQuestionsSchema = z
+  .array(screeningQuestionSchema)
   .max(
     3,
     "A role can have no more than three screening questions."

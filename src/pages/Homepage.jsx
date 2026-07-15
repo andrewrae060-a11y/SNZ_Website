@@ -604,7 +604,7 @@ function HeroInfrastructureScreen() {
           <video
             ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover"
-            src="/MA_Waves_SoDoI_2_3.mp4"
+            src="/MA_Waves_SoDoI.mp4"
             playsInline
             preload="metadata"
             controls={isPlaying && !hasEnded}
@@ -625,7 +625,6 @@ function HeroInfrastructureScreen() {
               />
 
               <div className="absolute inset-0 bg-black/20" />
-              {/*
               <button
                 type="button"
                 onClick={playVideo}
@@ -634,7 +633,6 @@ function HeroInfrastructureScreen() {
               >
                 <Play className="ml-0.5 h-7 w-7 fill-white" />
               </button>
-              */}
             </div>
           )}
 

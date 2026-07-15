@@ -63,11 +63,43 @@ function cleanScreeningQuestions(value) {
   }
 
   return value
-    .map((question) =>
-      String(question || "")
+    .map((item) => {
+      /*
+       * Backward compatibility for any older
+       * string-based screening questions.
+       */
+      if (typeof item === "string") {
+        const question = item
+          .trim()
+          .slice(0, 300);
+
+        return question
+          ? {
+              question,
+              answerType: "yes_no",
+            }
+          : null;
+      }
+
+      const question = String(
+        item?.question || ""
+      )
         .trim()
-        .slice(0, 300)
-    )
+        .slice(0, 300);
+
+      if (!question) {
+        return null;
+      }
+
+      return {
+        question,
+
+        answerType:
+          item?.answerType === "text"
+            ? "text"
+            : "yes_no",
+      };
+    })
     .filter(Boolean)
     .slice(0, 3);
 }

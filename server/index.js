@@ -14,6 +14,7 @@ import jobsRouter from "./routes/jobs.js";
 import cmsRouter from "./routes/cmsRoutes.js";
 import socialRouter from "./routes/socialRoutes.js";
 import mediaRouter from "./routes/mediaRoutes.js";
+import enquiriesRouter from "./routes/enquiries.js";
 
 /*
  * Create the Express application before calling app.use(),
@@ -34,10 +35,6 @@ const uploadDirectory =
 
 /*
  * Security headers.
- *
- * Cross-origin-resource-policy is disabled temporarily so that
- * the Vite frontend on port 5173 can display locally hosted
- * media from the API on port 5000.
  */
 app.use(
   helmet({
@@ -46,7 +43,7 @@ app.use(
 );
 
 /*
- * Allow the local frontend to call the API.
+ * Allow the frontend to call the API.
  */
 app.use(
   cors({
@@ -66,9 +63,6 @@ app.use(
 
 /*
  * Serve locally uploaded development files.
- *
- * Example:
- * http://localhost:5000/uploads/example.jpg
  */
 app.use(
   "/uploads",
@@ -116,6 +110,11 @@ app.post(
 app.use(
   "/api/jobs",
   jobsRouter
+);
+
+app.use(
+  "/api/enquiries",
+  enquiriesRouter
 );
 
 app.use(
