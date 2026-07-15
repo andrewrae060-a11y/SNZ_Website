@@ -1,129 +1,157 @@
 import { Router } from "express";
-import { requireAdministrator } from "../auth.js";
-import { jobSchema } from "../jobSchema.js";
+
+import requireCareersAdmin from
+  "../../backend/src/middleware/requireCareersAdmin.js";
+
+import { jobSchema } from
+  "../jobSchema.js";
+
 import {
   createJob,
   deleteJob,
-  readJobs,
+  readAllJobs,
+  readPublishedJobs,
   updateJob,
-} from "../jobsStore.js";
+} from "../../backend/src/jobsRepository.js";
 
 const router = Router();
 
-/*
- * Public endpoint.
- * Only published jobs are returned.
- */
-router.get("/", async (_req, res, next) => {
-  try {
-    const jobs = await readJobs();
+function validateJob(req, res, next) {
+  const validation =
+    jobSchema.safeParse(req.body);
 
-    res.json(jobs);
-  } catch (error) {
-    next(error);
+  if (!validation.success) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Please check the role details.",
+      issues:
+        validation.error.flatten(),
+    });
   }
-});
 
-/*
- * Administrator endpoint.
- * Includes both published roles and drafts.
- */
+  req.validatedJob =
+    validation.data;
+
+  return next();
+}
+
+// Public: published jobs only.
 router.get(
-  "/admin",
-  requireAdministrator,
+  "/",
   async (_req, res, next) => {
     try {
-      const jobs = await readJobs({
-        includeDrafts: true,
-      });
+      const jobs =
+        await readPublishedJobs();
 
-      res.json(jobs);
+      return res
+        .status(200)
+        .json(jobs);
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 );
 
-/*
- * Create a role.
- */
+// Admin: drafts and published jobs.
+router.get(
+  "/admin",
+  requireCareersAdmin,
+  async (_req, res, next) => {
+    try {
+      const jobs =
+        await readAllJobs();
+
+      return res
+        .status(200)
+        .json(jobs);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+// Create role.
 router.post(
   "/",
-  requireAdministrator,
+  requireCareersAdmin,
+  validateJob,
   async (req, res, next) => {
     try {
-      const validation = jobSchema.safeParse(req.body);
+      const job =
+        await createJob(
+          req.validatedJob,
+          req.admin.id
+        );
 
-      if (!validation.success) {
-        return res.status(400).json({
-          message: "Please check the role details.",
-          issues: validation.error.flatten(),
-        });
-      }
-
-      const job = await createJob(validation.data);
-
-      res.status(201).json(job);
+      return res
+        .status(201)
+        .json(job);
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 );
 
-/*
- * Update a role.
- */
+// Update role.
 router.put(
   "/:id",
-  requireAdministrator,
+  requireCareersAdmin,
+  validateJob,
   async (req, res, next) => {
     try {
-      const validation = jobSchema.safeParse(req.body);
-
-      if (!validation.success) {
-        return res.status(400).json({
-          message: "Please check the role details.",
-          issues: validation.error.flatten(),
-        });
-      }
-
-      const job = await updateJob(
-        req.params.id,
-        validation.data
-      );
+      const job =
+        await updateJob(
+          req.params.id,
+          req.validatedJob,
+          req.admin.id
+        );
 
       if (!job) {
-        return res.status(404).json({
-          message: "The role could not be found.",
-        });
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message:
+              "The role could not be found.",
+          });
       }
 
-      res.json(job);
+      return res
+        .status(200)
+        .json(job);
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 );
 
-/*
- * Delete a role.
- */
+// Delete role.
 router.delete(
   "/:id",
-  requireAdministrator,
+  requireCareersAdmin,
   async (req, res, next) => {
     try {
-      const removed = await deleteJob(req.params.id);
+      const deleted =
+        await deleteJob(
+          req.params.id
+        );
 
-      if (!removed) {
-        return res.status(404).json({
-          message: "The role could not be found.",
-        });
+      if (!deleted) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message:
+              "The role could not be found.",
+          });
       }
 
-      res.status(204).end();
+      return res
+        .status(204)
+        .end();
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 );

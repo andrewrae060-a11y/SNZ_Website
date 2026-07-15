@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
@@ -15,6 +15,7 @@ import {
   Leaf,
   MessageCircle,
   Network,
+  Play,
   Scale,
   ShieldCheck,
   Users,
@@ -552,6 +553,99 @@ function HeroLighting() {
   );
 }
 
+function HeroInfrastructureScreen() {
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasEnded, setHasEnded] = useState(false);
+
+  const playVideo = async () => {
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    video.muted = false;
+    video.volume = 1;
+
+    if (hasEnded) {
+      video.currentTime = 0;
+    }
+
+    setIsPlaying(true);
+    setHasEnded(false);
+
+    try {
+      await video.play();
+    } catch (error) {
+      console.error("Video playback failed:", error);
+      setIsPlaying(false);
+    }
+  };
+
+  return (
+    <div className="relative mx-auto w-full max-w-[560px]">
+      <div className="absolute -inset-6 rounded-[2.5rem] bg-cyan-400/20 blur-3xl" />
+      <div className="absolute -inset-3 rounded-[2.25rem] bg-violet-500/15 blur-2xl" />
+
+      <div className="relative overflow-hidden rounded-[2rem] border border-cyan-300/25 bg-[#020817] p-3 shadow-2xl shadow-cyan-950/40">
+        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="h-3 w-3 rounded-full bg-red-400" />
+            <span className="h-3 w-3 rounded-full bg-amber-400" />
+            <span className="h-3 w-3 rounded-full bg-emerald-400" />
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">
+            <span className="h-2 w-2 rounded-full bg-cyan-300" />
+            SNZ InfraVision
+          </div>
+        </div>
+
+        <div className="relative aspect-[4/3] overflow-hidden rounded-[1.35rem] border border-white/10 bg-black">
+          <video
+            ref={videoRef}
+            className="absolute inset-0 h-full w-full object-cover"
+            src="/MA_Waves_SoDoI_2_3.mp4"
+            playsInline
+            preload="metadata"
+            controls={isPlaying && !hasEnded}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => {
+              setIsPlaying(false);
+              setHasEnded(true);
+            }}
+          />
+
+          {!isPlaying && (
+            <div className="absolute inset-0">
+              <img
+                src="/infrastructure-video-poster.png"
+                alt="Infrastructure intelligence display preview"
+                className="h-full w-full object-cover"
+              />
+
+              <div className="absolute inset-0 bg-black/20" />
+              {/*
+              <button
+                type="button"
+                onClick={playVideo}
+                aria-label={hasEnded ? "Watch again" : "Play video"}
+                className="absolute bottom-5 left-5 grid h-14 w-14 place-items-center rounded-full border border-cyan-300/45 bg-[#06112e]/90 text-white shadow-xl shadow-cyan-950/40 backdrop-blur transition hover:scale-[1.06] hover:bg-[#071a42]"
+              >
+                <Play className="ml-0.5 h-7 w-7 fill-white" />
+              </button>
+              */}
+            </div>
+          )}
+
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.02)_0%,rgba(2,6,23,0.12)_100%)]" />
+          <div className="pointer-events-none absolute inset-0 rounded-[1.35rem] ring-1 ring-inset ring-white/10" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Hero({ openEnquiryForm }) {
   return (
     <section className="relative isolate overflow-hidden bg-[#05072a] text-white">
@@ -573,7 +667,7 @@ function Hero({ openEnquiryForm }) {
 
       <div className="absolute bottom-0 left-0 right-0 z-10 h-20 bg-gradient-to-t from-white to-transparent" />
 
-      <div className="relative z-20 mx-auto grid max-w-[1500px] items-center gap-8 px-5 pb-32 pt-36 lg:grid-cols-[1.25fr_0.75fr] lg:px-8 lg:pb-36 lg:pt-40">
+      <div className="relative z-20 mx-auto grid max-w-[1500px] items-center gap-8 px-5 pb-32 pt-36 lg:grid-cols-[1.25fr_0.75fr] lg:px-8 lg:pb-36 lg:pt-20">
         <motion.div
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
@@ -618,22 +712,16 @@ function Hero({ openEnquiryForm }) {
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>
           </div>
-
-          <div className="mt-8 max-w-5xl">
-            <img
-              src="/homepage-hero-four-point-banner.png"
-              alt="Sustainable by Design, Secure by Default, Smarter by Data, Compliant by Choice"
-              className="w-full rounded-2xl object-contain shadow-2xl shadow-cyan-950/30"
-            />
-          </div>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, scale: 0.96, x: 24 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="relative hidden min-h-[560px] lg:block"
-        />
+          className="relative z-20 hidden min-h-[560px] items-start justify-center pt-2 lg:flex"
+        >
+          <HeroInfrastructureScreen />
+        </motion.div>
       </div>
     </section>
   );
@@ -845,9 +933,9 @@ function TransformingTypicalSection() {
           </p>
 
           <h2 className="mx-auto mt-4 max-w-4xl text-4xl font-black leading-tight text-slate-950 md:text-5xl">
-            Most organisations see parts. 
-             <br />
-             We see the whole.
+            Most organisations see parts.
+            <br />
+            We see the whole.
           </h2>
         </motion.div>
 
@@ -856,13 +944,27 @@ function TransformingTypicalSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.15 }}
           transition={{ duration: 0.75, delay: 0.1 }}
-          className="mt-12"
+          className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-4"
         >
-          <img
-            src="/transforming-the-typical.png"
-            alt="Comparison between siloed infrastructure data and a connected 360 degree intelligent infrastructure view"
-            className="mx-auto h-auto w-full rounded-[2rem] object-contain shadow-xl shadow-violet-950/10"
-          />
+          {/* Left-hand image */}
+          <div className="overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-violet-950/10">
+            <img
+              src="/transforming-the-typical-left.png"
+              alt="Typical fragmented infrastructure with disconnected systems, data and organisational silos"
+              className="h-auto w-full object-contain"
+              loading="lazy"
+            />
+          </div>
+
+          {/* Right-hand image */}
+          <div className="overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-violet-950/10">
+            <img
+              src="/transforming-the-typical-right.png"
+              alt="Smart Net Zero connected infrastructure approach providing a complete intelligent view"
+              className="h-auto w-full object-contain"
+              loading="lazy"
+            />
+          </div>
         </motion.div>
       </div>
     </section>

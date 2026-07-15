@@ -24,7 +24,7 @@ const researchItems = [
     documentId: "building-decarbonisation-optimised-retrofitting-model",
     title: "Building Decarbonisation Optimised Retrofitting Model",
     description:
-      "A data-driven model to optimise retrofit strategies and deliver measurable carbon reductions across the building stock.",
+      "Building decarbonisation programmes often struggle with fragmented data, competing priorities and poorly sequenced investment. BDORM provides an evidence-led framework to prioritise retrofit actions by balancing carbon, cost, risk and deliverability.",
     image:
       "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
     icon: Building2,
@@ -83,7 +83,7 @@ const researchItems = [
     documentId: "cyber-physical-resilience-critical-infrastructure",
     title: "Cyber-Physical Resilience for Critical Infrastructure",
     description:
-      "Research into integrated cyber, operational and physical resilience models for smart infrastructure and essential services.",
+      "Connected infrastructure creates new cyber risks that can disrupt operations, accelerate asset degradation and shorten useful life. CPILM provides a framework for linking cyber exposure, operational performance and resilience decisions to maintenance, investment and infrastructure longevity.",
     image:
       "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
     icon: Lock,

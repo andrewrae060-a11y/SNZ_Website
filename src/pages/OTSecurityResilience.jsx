@@ -1498,7 +1498,7 @@ export default function OTSecurityResilience({ goToPage, openEnquiryForm }) {
                   href="/Smart_Net_Zero_OTSecurity_Brochure_2026.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center rounded-2xl border border-cyan-300/40 bg-white/5 px-7 py-4 text-sm font-black text-white backdrop-blur transition hover:bg-white/10"
+                  className="hidden items-center rounded-2xl border border-cyan-300/40 bg-white/5 px-7 py-4 text-sm font-black text-white backdrop-blur transition hover:bg-white/10"
                 >
                   Download Brochure <Download className="ml-2 h-5 w-5" />
                 </a>

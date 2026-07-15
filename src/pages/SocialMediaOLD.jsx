@@ -622,13 +622,7 @@ function Hero({ onOpenContent, pageSettings, heroCards }) {
   );
 }
 
-function LatestChannels({
-  onOpenContent,
-  onViewAllContent,
-  onViewAllChannels,
-  channelPosts,
-  channels,
-}) {
+function LatestChannels({ onOpenContent, channelPosts, channels }) {
   const [filter, setFilter] = useState("All");
   const filtered = useMemo(
     () =>
@@ -666,11 +660,7 @@ function LatestChannels({
               ))}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onViewAllContent}
-            className="inline-flex items-center self-start text-sm font-black text-teal-700 md:self-auto"
-          >
+          <button onClick={() => onOpenContent({ title: "All content" })} className="inline-flex items-center self-start text-sm font-black text-teal-700 md:self-auto">
             View all content <ArrowRight className="ml-2 h-4 w-4" />
           </button>
         </div>
@@ -788,11 +778,7 @@ function LatestChannels({
                 );
               })}
             </div>
-            <button
-              type="button"
-              onClick={onViewAllChannels}
-              className="mt-5 inline-flex items-center text-sm font-black text-teal-700"
-            >
+            <button onClick={() => onOpenContent({ title: "All channels" })} className="mt-5 inline-flex items-center text-sm font-black text-teal-700">
               View all channels <ArrowRight className="ml-2 h-4 w-4" />
             </button>
           </aside>
@@ -854,34 +840,75 @@ function EditorPicks({ onOpenContent, editorPicks }) {
   );
 }
 
-function PartnerContent() {
+function PartnerContent({ onOpenContent, partnerContent }) {
   return (
     <section className="bg-white px-5 py-8 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="relative overflow-hidden rounded-[2rem] border border-violet-200 bg-gradient-to-br from-[#06112e] via-[#0b1d45] to-violet-950 px-6 py-10 text-white shadow-xl md:px-10 md:py-12">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_25%,rgba(34,211,238,.20),transparent_28%),radial-gradient(circle_at_82%_70%,rgba(168,85,247,.26),transparent_32%)]" />
-          <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(90deg,rgba(255,255,255,.06)_1px,transparent_1px),linear-gradient(rgba(255,255,255,.05)_1px,transparent_1px)] [background-size:42px_42px]" />
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-2xl font-black text-slate-950">
+            From our partners
+          </h2>
+          <button
+            type="button"
+            onClick={() => onOpenContent({ title: "Partner content" })}
+            className="inline-flex items-center text-sm font-black text-teal-700"
+          >
+            View all partner content
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </button>
+        </div>
 
-          <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div className="max-w-3xl">
-              <span className="inline-flex items-center rounded-full border border-cyan-300/25 bg-cyan-300/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-200">
-                <Sparkles className="mr-2 h-4 w-4" />
-                Coming Soon
-              </span>
+        <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {partnerContent.map((item) => (
+            <button
+              key={item.id || item.itemKey || item.title}
+              type="button"
+              onClick={() => openContent(item, onOpenContent)}
+              className="relative min-h-[150px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 p-5 text-left text-white shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
+            >
+              {item.mediaType === "video" && item.image ? (
+                <video
+                  src={item.image}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="absolute inset-0 h-full w-full object-cover"
+                >
+                  Your browser does not support embedded video.
+                </video>
+              ) : item.image ? (
+                <img
+                  src={item.image}
+                  alt={item.imageAlt || item.title || ""}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-950" />
+              )}
 
-              <h2 className="mt-5 text-3xl font-black leading-tight md:text-4xl">
-                Content delivered from across our global approved partner network
-              </h2>
+              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/5 to-slate-950/90" />
 
-              <p className="mt-4 max-w-2xl text-base font-semibold leading-7 text-white/70">
-                We are preparing a dedicated partner content stream featuring approved insight, innovation stories, case studies and events from organisations working across the Smart Net Zero ecosystem.
-              </p>
-            </div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="rounded bg-white/90 px-2 py-1 text-sm font-black text-slate-950">
+                    {item.partner}
+                  </span>
+                  <span className="rounded-full bg-teal-100 px-2 py-1 text-[10px] font-black text-teal-800">
+                    {item.type}
+                  </span>
+                </div>
 
-            <div className="grid h-24 w-24 shrink-0 place-items-center rounded-3xl border border-white/15 bg-white/10 text-cyan-200 shadow-2xl backdrop-blur">
-              <Globe2 className="h-12 w-12" />
-            </div>
-          </div>
+                <h3 className="mt-8 text-xl font-black leading-tight">
+                  {item.title}
+                </h3>
+
+                <p className="mt-3 inline-flex items-center text-sm font-bold text-emerald-300">
+                  {item.cta}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </p>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </section>
@@ -891,7 +918,6 @@ function PartnerContent() {
 function Events({
   onOpenContent,
   onRegisterEvent,
-  onViewAllEvents,
   events,
 }) {
   return (
@@ -903,7 +929,7 @@ function Events({
           </h2>
           <button
             type="button"
-            onClick={onViewAllEvents}
+            onClick={() => onOpenContent({ title: "Events and webinars" })}
             className="inline-flex items-center text-sm font-black text-teal-700"
           >
             View all events
@@ -1029,298 +1055,6 @@ function QuickActions({ onSubscribe, onOpenContent, quickActions }) {
         })}
       </div>
     </section>
-  );
-}
-
-function CollectionModal({
-  collection,
-  onClose,
-  onOpenContent,
-  onRegisterEvent,
-}) {
-  if (!collection) {
-    return null;
-  }
-
-  const items = Array.isArray(collection.items)
-    ? collection.items
-    : [];
-
-  const type = collection.type || "content";
-
-  const handleItemClick = (item) => {
-    if (type === "events") {
-      const externalUrl = String(item.url || "").trim();
-      const registrationMode =
-        item.registrationMode ||
-        (externalUrl ? "external" : "internal");
-
-      if (
-        externalUrl &&
-        registrationMode !== "internal"
-      ) {
-        onClose();
-        openContent(item, onOpenContent);
-        return;
-      }
-
-      onClose();
-      onRegisterEvent(item);
-      return;
-    }
-
-    onClose();
-    openContent(item, onOpenContent);
-  };
-
-  return (
-    <AnimatePresence>
-      {collection && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[1000] overflow-y-auto bg-slate-950/75 p-4 backdrop-blur-sm sm:p-6"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: 24,
-              scale: 0.97,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-            }}
-            exit={{
-              opacity: 0,
-              y: 18,
-              scale: 0.98,
-            }}
-            className="mx-auto my-6 max-w-6xl overflow-hidden rounded-[2rem] bg-white shadow-2xl"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-          >
-            <div className="relative overflow-hidden bg-[#06112e] px-6 py-7 text-white sm:px-8">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(34,211,238,.20),transparent_28%),radial-gradient(circle_at_85%_75%,rgba(168,85,247,.22),transparent_32%)]" />
-
-              <div className="relative z-10 flex items-start justify-between gap-6">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">
-                    Social Media & Content Hub
-                  </p>
-
-                  <h2 className="mt-2 text-3xl font-black sm:text-4xl">
-                    {collection.title}
-                  </h2>
-
-                  <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-white/70">
-                    {collection.description}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label={`Close ${collection.title}`}
-                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-5 sm:p-7">
-              {items.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-                  <Sparkles className="mx-auto h-10 w-10 text-violet-500" />
-                  <h3 className="mt-4 text-xl font-black text-slate-950">
-                    No content has been published yet
-                  </h3>
-                  <p className="mt-2 text-sm font-semibold text-slate-600">
-                    New content will appear here automatically when it is added through the CMS.
-                  </p>
-                </div>
-              ) : type === "channels" ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {items.map((item) => {
-                    const presentation =
-                      getChannelPresentation(
-                        item.name
-                      );
-                    const Icon =
-                      item.icon ||
-                      presentation.icon;
-
-                    return (
-                      <button
-                        key={
-                          item.id ||
-                          item.itemKey ||
-                          item.name
-                        }
-                        type="button"
-                        onClick={() =>
-                          handleItemClick(item)
-                        }
-                        className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-lg"
-                      >
-                        <span className="flex items-center gap-4">
-                          <span className="grid h-12 w-12 place-items-center rounded-full bg-slate-50">
-                            <Icon
-                              className={`h-6 w-6 ${
-                                item.color ||
-                                presentation.color
-                              }`}
-                            />
-                          </span>
-
-                          <span>
-                            <span className="block font-black text-slate-950">
-                              {item.name}
-                            </span>
-                            <span className="mt-1 block text-sm font-bold text-teal-700">
-                              {item.action ||
-                                "View channel"}
-                            </span>
-                          </span>
-                        </span>
-
-                        <ArrowRight className="h-5 w-5 text-slate-400" />
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {items.map((item) => {
-                    const isEvent =
-                      type === "events";
-                    const displayDate = isEvent
-                      ? getEventDisplayDate(item)
-                      : null;
-                    const presentation =
-                      getChannelPresentation(
-                        item.channel
-                      );
-                    const Icon =
-                      item.icon ||
-                      presentation.icon ||
-                      Sparkles;
-                    const mediaSource =
-                      item.image ||
-                      item.videoUrl ||
-                      "";
-
-                    return (
-                      <button
-                        key={
-                          item.id ||
-                          item.itemKey ||
-                          item.title
-                        }
-                        type="button"
-                        onClick={() =>
-                          handleItemClick(item)
-                        }
-                        className="group overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-                      >
-                        <div className="relative h-44 overflow-hidden bg-slate-900">
-                          {mediaSource ? (
-                            <img
-                              src={item.image || mediaSource}
-                              alt={
-                                item.imageAlt ||
-                                item.title ||
-                                ""
-                              }
-                              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="h-full w-full bg-gradient-to-br from-[#06112e] via-violet-950 to-slate-950" />
-                          )}
-
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/10 to-transparent" />
-
-                          {isEvent ? (
-                            <div className="absolute left-4 top-4 grid h-16 w-16 place-items-center rounded-2xl bg-white text-center text-violet-700 shadow-lg">
-                              <span>
-                                <span className="block text-xl font-black leading-none">
-                                  {displayDate.day}
-                                </span>
-                                <span className="mt-1 block text-[10px] font-black">
-                                  {displayDate.month}
-                                </span>
-                              </span>
-                            </div>
-                          ) : (
-                            <span
-                              className={`absolute left-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br ${
-                                item.accent ||
-                                presentation.accent ||
-                                "from-teal-500 to-violet-600"
-                              } text-white shadow-lg`}
-                            >
-                              <Icon className="h-5 w-5" />
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="p-5">
-                          <p className="text-xs font-black uppercase tracking-[0.12em] text-teal-700">
-                            {isEvent
-                              ? item.type ||
-                                "Event"
-                              : item.channel ||
-                                item.type ||
-                                "Content"}
-                          </p>
-
-                          <h3 className="mt-2 text-lg font-black leading-tight text-slate-950">
-                            {item.title}
-                          </h3>
-
-                          {(item.time ||
-                            item.publishedLabel) && (
-                            <p className="mt-2 text-xs font-semibold text-slate-500">
-                              {item.publishedLabel ||
-                                item.time}
-                            </p>
-                          )}
-
-                          <p className="mt-4 inline-flex items-center text-sm font-black text-teal-700">
-                            {isEvent
-                              ? item.action ||
-                                item.cta ||
-                                "View event"
-                              : item.cta ||
-                                "View content"}
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              <div className="mt-7 flex justify-end">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
   );
 }
 
@@ -1845,7 +1579,6 @@ function Toast({ message, onClose }) {
 export default function SocialMedia({ goToPage, openEnquiryForm }) {
   const { content: cmsContent, loading: cmsLoading, error: cmsError } = useSocialHubContent();
   const [content, setContent] = useState(null);
-  const [collection, setCollection] = useState(null);
   const [eventRegistration, setEventRegistration] =
     useState(null);
   const [subscribeOpen, setSubscribeOpen] = useState(false);
@@ -2026,57 +1759,21 @@ export default function SocialMedia({ goToPage, openEnquiryForm }) {
           pageSettings={pageSettings}
           heroCards={resolvedHeroCards}
         />
-        <LatestChannels
-          onOpenContent={setContent}
-          onViewAllContent={() =>
-            setCollection({
-              type: "content",
-              title: "All channel content",
-              description:
-                "Browse every social post and channel update currently published through the Smart Net Zero Content Hub.",
-              items: channelPosts,
-            })
-          }
-          onViewAllChannels={() =>
-            setCollection({
-              type: "channels",
-              title: "All social channels",
-              description:
-                "Connect with Smart Net Zero across every active social media channel.",
-              items: channels,
-            })
-          }
-          channelPosts={channelPosts}
-          channels={channels}
-        />
+        <LatestChannels onOpenContent={setContent} channelPosts={channelPosts} channels={channels} />
         <EditorPicks onOpenContent={setContent} editorPicks={editorPicks} />
-        <PartnerContent />
+        <PartnerContent onOpenContent={setContent} partnerContent={partnerContent} />
         <Events
           onOpenContent={setContent}
           onRegisterEvent={setEventRegistration}
-          onViewAllEvents={() =>
-            setCollection({
-              type: "events",
-              title: "All events and webinars",
-              description:
-                "Browse every event and webinar currently published through the Smart Net Zero Content Hub.",
-              items: events,
-            })
-          }
           events={events}
         />
-        {/*
-          Quick actions bottom bar temporarily hidden until
-          supporting content and destinations are ready.
-        */}
+        <QuickActions
+          onSubscribe={() => setSubscribeOpen(true)}
+          onOpenContent={setContent}
+          quickActions={quickActions}
+        />
       </main>
 
-      <CollectionModal
-        collection={collection}
-        onClose={() => setCollection(null)}
-        onOpenContent={setContent}
-        onRegisterEvent={setEventRegistration}
-      />
       <ContentModal item={content} onClose={() => setContent(null)} />
       <EventRegistrationModal
         event={eventRegistration}

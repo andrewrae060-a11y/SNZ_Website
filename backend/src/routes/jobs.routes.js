@@ -3,6 +3,9 @@ import { Router } from "express";
 import requireCareersAdmin from
   "../middleware/requireCareersAdmin.js";
 
+import { jobSchema } from
+  "../../../server/jobSchema.js";
+
 import {
   createJob,
   deleteJob,
@@ -14,30 +17,25 @@ import {
 const router = Router();
 
 function validateJob(req, res, next) {
-  const {
-    title,
-    department,
-    location,
-    summary,
-  } = req.body || {};
+  const validation =
+    jobSchema.safeParse(req.body);
 
-  if (
-    !String(title || "").trim() ||
-    !String(department || "").trim() ||
-    !String(location || "").trim() ||
-    !String(summary || "").trim()
-  ) {
+  if (!validation.success) {
     return res.status(400).json({
       success: false,
       message:
-        "Title, department, location and summary are required.",
+        "Please check the role details.",
+      issues:
+        validation.error.flatten(),
     });
   }
+
+  req.validatedJob =
+    validation.data;
 
   return next();
 }
 
-// Public: published jobs only.
 router.get(
   "/",
   async (_req, res, next) => {
@@ -45,14 +43,15 @@ router.get(
       const jobs =
         await readPublishedJobs();
 
-      return res.status(200).json(jobs);
+      return res
+        .status(200)
+        .json(jobs);
     } catch (error) {
       return next(error);
     }
   }
 );
 
-// Admin: drafts and published jobs.
 router.get(
   "/admin",
   requireCareersAdmin,
@@ -61,7 +60,9 @@ router.get(
       const jobs =
         await readAllJobs();
 
-      return res.status(200).json(jobs);
+      return res
+        .status(200)
+        .json(jobs);
     } catch (error) {
       return next(error);
     }
@@ -74,12 +75,15 @@ router.post(
   validateJob,
   async (req, res, next) => {
     try {
-      const job = await createJob(
-        req.body,
-        req.admin.id
-      );
+      const job =
+        await createJob(
+          req.validatedJob,
+          req.admin.id
+        );
 
-      return res.status(201).json(job);
+      return res
+        .status(201)
+        .json(job);
     } catch (error) {
       return next(error);
     }
@@ -92,21 +96,26 @@ router.put(
   validateJob,
   async (req, res, next) => {
     try {
-      const job = await updateJob(
-        req.params.id,
-        req.body,
-        req.admin.id
-      );
+      const job =
+        await updateJob(
+          req.params.id,
+          req.validatedJob,
+          req.admin.id
+        );
 
       if (!job) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "The role could not be found.",
-        });
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message:
+              "The role could not be found.",
+          });
       }
 
-      return res.status(200).json(job);
+      return res
+        .status(200)
+        .json(job);
     } catch (error) {
       return next(error);
     }
@@ -124,14 +133,18 @@ router.delete(
         );
 
       if (!deleted) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "The role could not be found.",
-        });
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message:
+              "The role could not be found.",
+          });
       }
 
-      return res.status(204).end();
+      return res
+        .status(204)
+        .end();
     } catch (error) {
       return next(error);
     }

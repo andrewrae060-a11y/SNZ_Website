@@ -350,12 +350,23 @@ function BDRRLearnMoreModal({ open, onClose }) {
       ? "Start with data, business case, supply chain and low-disruption preparation work."
       : "Requires foundational assessment before major smart or decarbonisation investment.";
 
+  const radarCentreX = 250;
+  const radarCentreY = 270;
+  const radarOuterRadius = 170;
+  const radarDataRadius = 166;
+
   const radarPoints = dimensions.map((dimension, index) => {
     const angle = -90 + index * (360 / dimensions.length);
     const score = adjustedScores[dimension.key];
-    const radius = (score / 5) * 195;
-    const x = 250 + radius * Math.cos((Math.PI / 180) * angle);
-    const y = 250 + radius * Math.sin((Math.PI / 180) * angle);
+    const radius = (score / 5) * radarDataRadius;
+
+    const x =
+      radarCentreX +
+      radius * Math.cos((Math.PI / 180) * angle);
+
+    const y =
+      radarCentreY +
+      radius * Math.sin((Math.PI / 180) * angle);
 
     return [x, y];
   });
@@ -524,18 +535,21 @@ function BDRRLearnMoreModal({ open, onClose }) {
                         </linearGradient>
                       </defs>
 
-                      {[65, 110, 155, 200].map((radius) => (
+                      {[55, 95, 135, 170].map((radius) => (
                         <polygon
                           key={radius}
                           points={Array.from({ length: 7 })
                             .map((_, index) => {
                               const angle = -90 + index * (360 / 7);
+
                               const x =
-                                250 +
+                                radarCentreX +
                                 radius * Math.cos((Math.PI / 180) * angle);
+
                               const y =
-                                250 +
+                                radarCentreY +
                                 radius * Math.sin((Math.PI / 180) * angle);
+
                               return `${x},${y}`;
                             })
                             .join(" ")}
@@ -547,16 +561,22 @@ function BDRRLearnMoreModal({ open, onClose }) {
 
                       {Array.from({ length: 7 }).map((_, index) => {
                         const angle = -90 + index * (360 / 7);
+
                         const x =
-                          250 + 200 * Math.cos((Math.PI / 180) * angle);
+                          radarCentreX +
+                          radarOuterRadius *
+                            Math.cos((Math.PI / 180) * angle);
+
                         const y =
-                          250 + 200 * Math.sin((Math.PI / 180) * angle);
+                          radarCentreY +
+                          radarOuterRadius *
+                            Math.sin((Math.PI / 180) * angle);
 
                         return (
                           <line
                             key={index}
-                            x1="250"
-                            y1="250"
+                            x1={radarCentreX}
+                            y1={radarCentreY}
                             x2={x}
                             y2={y}
                             stroke="#dbeafe"
@@ -590,8 +610,11 @@ function BDRRLearnMoreModal({ open, onClose }) {
                       {[1, 2, 3, 4, 5].map((value, index) => (
                         <text
                           key={value}
-                          x="258"
-                          y={250 - (index + 1) * 37}
+                          x={radarCentreX + 8}
+                          y={
+                            radarCentreY -
+                            ((index + 1) * radarDataRadius) / 5
+                          }
                           fontSize="13"
                           fontWeight="800"
                           fill="#581c87"
@@ -603,23 +626,32 @@ function BDRRLearnMoreModal({ open, onClose }) {
 
                     {dimensions.map((dimension, index) => {
                       const Icon = dimension.icon;
-                      const angle = -90 + index * (360 / dimensions.length);
+                      const angle =
+                        -90 + index * (360 / dimensions.length);
 
-                      const baseRadius = 232;
-
-                      const customRadiusByKey = {
-                        energy: 258,
-                        impact: 222,
-                        data: 222,
+                      /*
+                      * Labels use a slightly larger radius than the radar.
+                      * The Energy icon is kept closer to the graph so it
+                      * remains clear of the tile heading.
+                      */
+                      const labelRadiusByKey = {
+                        energy: 225,
+                        impact: 195,
+                        data: 195,
                       };
 
-                      const radius =
-                        customRadiusByKey[dimension.key] || baseRadius;
+                      const labelRadius =
+                        labelRadiusByKey[dimension.key] || 202;
 
                       const x =
-                        250 + radius * Math.cos((Math.PI / 180) * angle);
+                        radarCentreX +
+                        labelRadius *
+                          Math.cos((Math.PI / 180) * angle);
+
                       const y =
-                        250 + radius * Math.sin((Math.PI / 180) * angle);
+                        radarCentreY +
+                        labelRadius *
+                          Math.sin((Math.PI / 180) * angle);
 
                       return (
                         <div

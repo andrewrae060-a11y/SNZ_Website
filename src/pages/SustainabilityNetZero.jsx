@@ -397,21 +397,11 @@ const journeyStages = [
   {
     label: "Assess",
     title: "Assess",
-    text: "Understand your baseline, risks and opportunities across assets and operations.",
+    text: "Understand your baseline, data quality, risks and opportunities across assets and operations.",
     bullets: [
-      "Benchmark current performance",
-      "Identify material risks and hotspots",
-      "Prioritise high-impact opportunities",
-    ],
-  },
-  {
-    label: "Measure",
-    title: "Measure",
-    text: "Build reliable carbon, energy and operational data foundations.",
-    bullets: [
-      "Capture emissions and energy data",
-      "Improve data quality and traceability",
-      "Create reporting-ready evidence",
+      "Capture and benchmark emissions, energy and operational performance",
+      "Improve data quality, traceability and reporting evidence",
+      "Identify material risks, hotspots and high-impact opportunities",
     ],
   },
   {
@@ -448,20 +438,12 @@ const journeyStages = [
 
 const journeyStageInsights = {
   Assess: {
-    readiness: "45%",
-    confidence: "Early",
-    output: "Baseline view",
-    risk: "Unclear priorities",
-    data: "Asset and energy data",
-    action: "Identify hotspots",
-  },
-  Measure: {
-    readiness: "58%",
+    readiness: "52%",
     confidence: "Building",
-    output: "Reliable evidence",
-    risk: "Poor data quality",
-    data: "Meters and invoices",
-    action: "Validate emissions",
+    output: "Baseline and evidence view",
+    risk: "Unclear priorities and poor data quality",
+    data: "Assets, meters, invoices and emissions data",
+    action: "Validate data and identify hotspots",
   },
   Plan: {
     readiness: "67%",
@@ -832,7 +814,7 @@ function Hero() {
                 href="/Smart_Net_Zero_Sustainability_Brochure_2026.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex cursor-pointer items-center rounded-2xl border border-teal-300/40 bg-white/5 px-7 py-4 font-black text-white backdrop-blur transition hover:bg-white/10"
+                className="hidden cursor-pointer items-center rounded-2xl border border-teal-300/40 bg-white/5 px-7 py-4 font-black text-white backdrop-blur transition hover:bg-white/10"
                 >
                 Download Brochure <Download className="ml-2 h-5 w-5" />
             </a>
@@ -1265,7 +1247,7 @@ function ImpactStudio({ openEnquiryForm, goToPage }) {
                   <div className="absolute left-8 right-8 top-5 h-2 rounded-full bg-slate-100" />
                   <div className="absolute left-8 right-8 top-5 h-2 rounded-full bg-gradient-to-r from-green-500 via-teal-400 to-cyan-400 opacity-80" />
 
-                  <div className="relative grid grid-cols-5 gap-2">
+                  <div className="relative grid grid-cols-4 gap-2">
                     {journeyStages.map((stage, index) => (
                       <button
                         key={stage.label}
@@ -1991,42 +1973,6 @@ function AdvisoryServicesSection({ openEnquiryForm }) {
   );
 }
 
-function JourneySection() {
-  return (
-    <section className="bg-white px-5 py-8 lg:px-8">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-3xl bg-[#06112e] p-8 text-white shadow-xl">
-        <h2 className="text-center text-3xl font-black">
-          Our 4-Step Sustainability Journey
-        </h2>
-
-        <div className="mt-7 grid gap-5 lg:grid-cols-4">
-          {fourStepJourney.map((item) => {
-            const Icon = item.icon;
-
-            return (
-                <div key={item.title} className="relative flex items-center gap-4">
-                <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full border border-green-300/30 bg-green-400/10">
-                    <Icon className="h-10 w-10 text-green-300" />
-                </span>
-
-                <div>
-                    <h3 className="text-lg font-black">
-                    {item.number} {item.title}
-                    </h3>
-
-                    <p className="mt-2 text-sm leading-6 text-white/72">
-                    {item.text}
-                    </p>
-                </div>
-                </div>
-            );
-            })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function CTASection({ openEnquiryForm }) {
   return (
     <section className="bg-white px-5 pb-16 pt-6 lg:px-8">
@@ -2090,9 +2036,7 @@ export default function SustainabilityNetZero({ goToPage, openEnquiryForm }) {
         />
         <SolutionsSection openEnquiryForm={openEnquiryForm} />
        <AdvisoryServicesSection openEnquiryForm={openEnquiryForm} />
-        <JourneySection />
-
-        { sustainabilityFaqContent && (
+         { sustainabilityFaqContent && (
           <FAQSection
             {...sustainabilityFaqContent}
           />

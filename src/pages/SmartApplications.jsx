@@ -1721,34 +1721,59 @@ export default function SmartApplications({
     });
   };
 
-  const handleEarlyAccessSubmit = async (
-    formData
-  ) => {
-    const response = await fetch(
-      "/api/early-access",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-        body: JSON.stringify(formData),
-      }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result.message ||
-          "Unable to submit the early-access request."
-      );
-    }
-
-    onEarlyAccessSubmit?.(formData);
-
-    return result;
+ const handleEarlyAccessSubmit = async (formData) => {
+  const enquiryPayload = {
+    name: formData.name,
+    email: formData.email,
+    phone: "Not provided",
+    organisation: formData.organisation,
+    enquiryType: "SmartX360 Early Access",
+    message: [
+      `Early access interest: ${formData.interest}`,
+      `Role: ${formData.role || "Not provided"}`,
+      "",
+      "The user has requested early access, a demonstration, pilot opportunity or product development updates.",
+    ].join("\n"),
+    urgent: false,
   };
+
+  const response = await fetch("/api/enquiries", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(enquiryPayload),
+  });
+
+  const contentType =
+    response.headers.get("content-type") || "";
+
+  let result = {};
+
+  if (contentType.includes("application/json")) {
+    result = await response.json();
+  } else {
+    const responseText = await response.text();
+
+    result = {
+      message:
+        responseText ||
+        "The server returned an empty response.",
+    };
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      result.message ||
+        "Unable to submit the early-access request."
+    );
+  }
+
+  onEarlyAccessSubmit?.(formData);
+
+  return result;
+};
 
   return (
     <div className="min-h-screen bg-white text-slate-950 antialiased">

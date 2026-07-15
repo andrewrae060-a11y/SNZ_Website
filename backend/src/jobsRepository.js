@@ -11,12 +11,29 @@ function mapJob(row) {
     icon: row.icon,
     summary: row.summary,
     salary: row.salary,
+
     roleIncludes:
-      row.role_includes || [],
+      Array.isArray(row.role_includes)
+        ? row.role_includes
+        : [],
+
     skillsNeeded:
-      row.skills_needed || [],
+      Array.isArray(row.skills_needed)
+        ? row.skills_needed
+        : [],
+
     benefits:
-      row.benefits || [],
+      Array.isArray(row.benefits)
+        ? row.benefits
+        : [],
+
+    screeningQuestions:
+      Array.isArray(
+        row.screening_questions
+      )
+        ? row.screening_questions
+        : [],
+
     published: row.published,
     sortOrder: row.sort_order,
     createdAt: row.created_at,
@@ -35,9 +52,24 @@ function cleanList(value) {
 
   return value
     .map((item) =>
-      String(item).trim()
+      String(item || "").trim()
     )
     .filter(Boolean);
+}
+
+function cleanScreeningQuestions(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((question) =>
+      String(question || "")
+        .trim()
+        .slice(0, 300)
+    )
+    .filter(Boolean)
+    .slice(0, 3);
 }
 
 function normaliseJob(input) {
@@ -45,9 +77,12 @@ function normaliseJob(input) {
     Number(input.sortOrder);
 
   return {
-    title: cleanText(input.title),
+    title:
+      cleanText(input.title),
+
     department:
       cleanText(input.department),
+
     location:
       cleanText(input.location),
 
@@ -70,13 +105,24 @@ function normaliseJob(input) {
       cleanText(input.salary),
 
     roleIncludes:
-      cleanList(input.roleIncludes),
+      cleanList(
+        input.roleIncludes
+      ),
 
     skillsNeeded:
-      cleanList(input.skillsNeeded),
+      cleanList(
+        input.skillsNeeded
+      ),
 
     benefits:
-      cleanList(input.benefits),
+      cleanList(
+        input.benefits
+      ),
+
+    screeningQuestions:
+      cleanScreeningQuestions(
+        input.screeningQuestions
+      ),
 
     published:
       input.published === true,
@@ -117,7 +163,8 @@ export async function createJob(
   input,
   adminId
 ) {
-  const job = normaliseJob(input);
+  const job =
+    normaliseJob(input);
 
   const rows = await sql`
     insert into public.jobs (
@@ -132,6 +179,7 @@ export async function createJob(
       role_includes,
       skills_needed,
       benefits,
+      screening_questions,
       published,
       sort_order,
       created_by,
@@ -149,6 +197,7 @@ export async function createJob(
       ${job.roleIncludes},
       ${job.skillsNeeded},
       ${job.benefits},
+      ${job.screeningQuestions},
       ${job.published},
       ${job.sortOrder},
       ${adminId},
@@ -165,7 +214,8 @@ export async function updateJob(
   input,
   adminId
 ) {
-  const job = normaliseJob(input);
+  const job =
+    normaliseJob(input);
 
   const rows = await sql`
     update public.jobs
@@ -181,6 +231,7 @@ export async function updateJob(
       role_includes = ${job.roleIncludes},
       skills_needed = ${job.skillsNeeded},
       benefits = ${job.benefits},
+      screening_questions = ${job.screeningQuestions},
       published = ${job.published},
       sort_order = ${job.sortOrder},
       updated_by = ${adminId}

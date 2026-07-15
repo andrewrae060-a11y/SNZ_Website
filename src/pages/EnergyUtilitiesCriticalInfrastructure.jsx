@@ -552,9 +552,12 @@ function UseCaseModal({ useCase, onClose }) {
           type="button"
           onClick={onClose}
           aria-label="Close use case"
-          className="absolute right-5 top-5 z-20 grid h-11 w-11 place-items-center rounded-full bg-slate-950/10 text-slate-900 transition hover:bg-slate-950/20"
+          className="absolute right-5 top-5 z-30 grid h-11 w-11 place-items-center rounded-full border border-white/25 bg-white/10 text-white shadow-lg backdrop-blur-sm transition hover:bg-white/20"
         >
-          <X className="h-6 w-6" />
+          <X
+            className="h-6 w-6 text-white"
+            strokeWidth={2.5}
+          />
         </button>
 
         <div className="relative overflow-hidden rounded-t-[2rem] bg-[#06112e] p-8 text-white md:p-10">

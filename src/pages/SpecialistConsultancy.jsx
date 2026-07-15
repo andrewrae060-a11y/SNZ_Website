@@ -1064,29 +1064,25 @@ function CaseStudyModal({
 
           <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100">
             <div className="relative min-h-[360px]">
-              <img
-                src={study.projectImage}
-                alt="Project case study"
-                className="absolute inset-0 h-full w-full object-cover"
-                onError={(event) => {
-                  event.currentTarget.style.display = "none";
-                }}
-              />
-
-              <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-slate-100 to-slate-200 text-center">
+              {/* Fallback shown only if the image cannot load */}
+              <div className="absolute inset-0 z-0 grid place-items-center bg-gradient-to-br from-slate-100 to-slate-200 text-center">
                 <div className="max-w-md p-8">
                   <Building2 className="mx-auto h-14 w-14 text-slate-400" />
 
                   <p className="mt-4 text-sm font-black uppercase tracking-[0.15em] text-slate-500">
-                    Project image
-                  </p>
-
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Add an appropriate project or client-environment image as
-                    specialist-consultancy-project-image.png.
+                    Project image unavailable
                   </p>
                 </div>
               </div>
+
+              <img
+                src={study.projectImage}
+                alt="Customer environment featured in the operational resilience case study"
+                className="absolute inset-0 z-10 h-full w-full object-cover"
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                }}
+              />
             </div>
           </section>
 

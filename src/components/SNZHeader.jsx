@@ -80,24 +80,28 @@ export default function SNZHeader({
         text: "Decarbonisation strategy, ESG support, carbon reduction planning and net zero delivery.",
         page: "SustainabilityNetZero",
         icon: Leaf,
+        serviceKey: "sustainability",
       },
       {
         title: "Smart Energy Management",
         text: "Real-time energy insight, optimisation, automation and smarter operational performance.",
         page: "SmartEnergyManagement",
         icon: Zap,
+        serviceKey: "energy",
       },
       {
         title: "OT Security & Resilience",
         text: "Operational technology security, critical infrastructure resilience and risk management.",
         page: "OTSecurityResilience",
         icon: ShieldCheck,
+        serviceKey: "security",
       },
       {
         title: "Smart Regulations & Compliance",
         text: "Connected device compliance, product security and smart infrastructure regulation advisory.",
         page: "SmartRegulations",
         icon: Scale,
+        serviceKey: "compliance",
       },
     ],
 
@@ -837,7 +841,12 @@ export default function SNZHeader({
                       className="block w-full text-left"
                     >
                       {activeMenu === "Services" && ItemIcon && (
-                        <span className="mb-4 grid h-10 w-10 place-items-center rounded-xl border border-teal-300/20 bg-teal-300/10 text-teal-200">
+                        <span
+                          className={`mb-4 grid h-10 w-10 place-items-center rounded-xl border ${
+                            serviceDefinitions[item.serviceKey]?.classes ||
+                            "border-teal-300/20 bg-teal-300/10 text-teal-200"
+                          }`}
+                        >
                           <ItemIcon className="h-5 w-5" />
                         </span>
                       )}
@@ -977,7 +986,12 @@ export default function SNZHeader({
 
                             <div className="flex items-start gap-3">
                               {label === "Services" && ItemIcon && (
-                                <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-teal-300/20 bg-teal-300/10 text-teal-200">
+                                <span
+                                  className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${
+                                    serviceDefinitions[item.serviceKey]?.classes ||
+                                    "border-teal-300/20 bg-teal-300/10 text-teal-200"
+                                  }`}
+                                >
                                   <ItemIcon className="h-4 w-4" />
                                 </span>
                               )}

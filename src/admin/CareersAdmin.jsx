@@ -21,6 +21,21 @@ import {
 
 import { careersApi } from "../lib/careersApi";
 
+const DEFAULT_RIGHT_FIT = [
+  "Good fit for this role",
+  "Enjoy making a difference and creating a positive impact.",
+  "Like working as part of a team where everyone pitches in.",
+  "Want to help shape the future of a growing organisation.",
+  "Take ownership, use your initiative and look for solutions rather than problems.",
+  "Are open to learning, trying new ideas and embracing change.",
+  "Not the right fit for this role",
+  "Prefer to work entirely on your own with little collaboration.",
+  "Prefer well-established processes and procedures with little need for change or innovation.",
+  "Like every day to be the same and find change frustrating.",
+  "Are not comfortable taking ownership or making decisions.",
+  'See this as "just a job" rather than an opportunity to contribute to something meaningful.',
+];
+
 const EMPTY_JOB = {
   title: "",
   department: "",
@@ -32,7 +47,8 @@ const EMPTY_JOB = {
   salary: "",
   roleIncludes: [],
   skillsNeeded: [],
-  benefits: [],
+  benefits: DEFAULT_RIGHT_FIT,
+  screeningQuestions: [],
   published: false,
   sortOrder: 100,
 };
@@ -54,6 +70,21 @@ function textToList(value) {
     .split(/\r?\n/)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function normaliseScreeningQuestions(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((question) =>
+      String(question || "")
+        .trim()
+        .slice(0, 300)
+    )
+    .filter(Boolean)
+    .slice(0, 3);
 }
 
 function LoginPanel({ onLogin }) {
@@ -229,8 +260,15 @@ function JobEditor({
     ),
 
     benefitsText: listToText(
-      initialJob?.benefits || []
+      initialJob?.benefits?.length
+        ? initialJob.benefits
+        : DEFAULT_RIGHT_FIT
     ),
+
+    screeningQuestions:
+      normaliseScreeningQuestions(
+        initialJob?.screeningQuestions
+      ),
   });
 
   const [saving, setSaving] =
@@ -246,6 +284,56 @@ function JobEditor({
     setForm((current) => ({
       ...current,
       [field]: value,
+    }));
+  }
+
+  function updateScreeningQuestion(
+    index,
+    value
+  ) {
+    setForm((current) => {
+      const questions = [
+        ...(current.screeningQuestions || []),
+      ];
+
+      questions[index] = value;
+
+      return {
+        ...current,
+        screeningQuestions:
+          questions.slice(0, 3),
+      };
+    });
+  }
+
+  function addScreeningQuestion() {
+    setForm((current) => {
+      const questions =
+        current.screeningQuestions || [];
+
+      if (questions.length >= 3) {
+        return current;
+      }
+
+      return {
+        ...current,
+        screeningQuestions: [
+          ...questions,
+          "",
+        ],
+      };
+    });
+  }
+
+  function removeScreeningQuestion(index) {
+    setForm((current) => ({
+      ...current,
+      screeningQuestions: (
+        current.screeningQuestions || []
+      ).filter(
+        (_question, questionIndex) =>
+          questionIndex !== index
+      ),
     }));
   }
 
@@ -331,6 +419,11 @@ function JobEditor({
         form.benefitsText
       ),
 
+      screeningQuestions:
+        normaliseScreeningQuestions(
+          form.screeningQuestions
+        ),
+
       published:
         form.published === true,
 
@@ -378,7 +471,7 @@ function JobEditor({
           </h2>
 
           <p className="mt-1 text-sm font-semibold text-slate-500">
-            Enter one responsibility, skill or benefit per line.
+            Enter one responsibility, skill or right-fit statement per line. Screening questions are optional.
           </p>
         </div>
 
@@ -668,15 +761,15 @@ function JobEditor({
 
           <label className="block">
             <span className="text-sm font-black text-slate-700">
-              Role benefits
+              The right fit
             </span>
 
             <span className="mt-1 block text-xs font-semibold text-slate-500">
-              Enter one benefit per line.
+              Default guidance is included for new roles and can be edited.
             </span>
 
             <textarea
-              rows={10}
+              rows={16}
               value={
                 form.benefitsText
               }
@@ -690,6 +783,92 @@ function JobEditor({
             />
           </label>
         </div>
+
+        <section className="rounded-3xl border border-violet-200 bg-violet-50/60 p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 className="text-xl font-black text-[#07133c]">
+                Screening Questions
+              </h3>
+
+              <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-slate-600">
+                Add up to three optional Yes or No questions. Applicants must answer every question added to the role before submitting their application.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={addScreeningQuestion}
+              disabled={
+                (form.screeningQuestions || [])
+                  .length >= 3
+              }
+              className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-violet-300 bg-white px-4 py-3 text-sm font-black text-violet-700 transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add question
+            </button>
+          </div>
+
+          {(form.screeningQuestions || [])
+            .length === 0 ? (
+            <div className="mt-5 rounded-2xl border border-dashed border-violet-300 bg-white/70 p-5 text-sm font-semibold text-slate-500">
+              No screening questions have been added. This section will not appear to applicants.
+            </div>
+          ) : (
+            <div className="mt-5 space-y-4">
+              {form.screeningQuestions.map(
+                (question, index) => (
+                  <div
+                    key={`screening-question-${index}`}
+                    className="rounded-2xl border border-violet-200 bg-white p-4"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <label
+                        htmlFor={`screening-question-${index}`}
+                        className="text-sm font-black text-slate-700"
+                      >
+                        Question {index + 1}
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeScreeningQuestion(
+                            index
+                          )
+                        }
+                        className="inline-flex items-center rounded-xl px-3 py-2 text-xs font-black text-rose-700 transition hover:bg-rose-50"
+                      >
+                        <Trash2 className="mr-1.5 h-4 w-4" />
+                        Remove
+                      </button>
+                    </div>
+
+                    <input
+                      id={`screening-question-${index}`}
+                      type="text"
+                      value={question}
+                      onChange={(event) =>
+                        updateScreeningQuestion(
+                          index,
+                          event.target.value
+                        )
+                      }
+                      maxLength={300}
+                      placeholder="For example: Are you eligible to work in the UK?"
+                      className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                    />
+
+                    <p className="mt-2 text-xs font-semibold text-slate-500">
+                      Applicants will select Yes or No.
+                    </p>
+                  </div>
+                )
+              )}
+            </div>
+          )}
+        </section>
 
         <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <input

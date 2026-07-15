@@ -103,22 +103,6 @@ const cultureCards = [
   },
 ];
 
-const rightFitPoints = [
-  "Enjoy making a difference and creating a positive impact.",
-  "Like working as part of a team where everyone pitches in.",
-  "Want to help shape the future of a growing organisation.",
-  "Take ownership, use your initiative and look for solutions rather than problems.",
-  "Are open to learning, trying new ideas and embracing change.",
-];
-
-const notRightFitPoints = [
-  "Prefer to work entirely on your own with little collaboration.",
-  "Prefer well-established processes and procedures with little need for change or innovation.",
-  "Like every day to be the same and find change frustrating.",
-  "Are not comfortable taking ownership or making decisions.",
-  'See this as "just a job" rather than an opportunity to contribute to something meaningful.',
-];
-
 function TargetIcon({ className }) {
   return (
     <svg
@@ -181,147 +165,6 @@ function ArrowGrowthIcon({ className }) {
         strokeLinecap="round"
       />
     </svg>
-  );
-}
-
-function RightFitSection({ jobsAvailable }) {
-  return (
-    <section className="bg-slate-50 px-5 py-14 lg:px-8 lg:py-18">
-      <div className="mx-auto max-w-7xl">
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-black text-cyan-800">
-            <Sparkles className="h-4 w-4" />
-            Life at Smart Net Zero
-          </div>
-
-          <h2 className="mt-5 text-4xl font-black tracking-tight text-[#07133c] md:text-5xl">
-            Is SNZ the Right Fit for You?
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-3xl text-lg font-semibold leading-8 text-slate-600">
-            Finding the right role is not just about your skills. It is also
-            about finding an organisation where you will enjoy coming to work,
-            feel supported and have the opportunity to thrive.
-          </p>
-
-          <p className="mx-auto mt-4 max-w-3xl text-base font-semibold leading-7 text-slate-600">
-            At Smart Net Zero, we are looking for people who share our values,
-            enjoy working as part of an innovative team and genuinely want to
-            make a difference.
-          </p>
-        </div>
-
-        <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          <article className="relative overflow-hidden rounded-[2rem] border border-emerald-200 bg-white p-7 shadow-xl shadow-emerald-900/5 md:p-9">
-            <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-emerald-100/70 blur-3xl" />
-
-            <div className="relative">
-              <div className="flex items-start gap-4">
-                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-emerald-100 text-emerald-700">
-                  <CheckCircle2 className="h-8 w-8" />
-                </div>
-
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">
-                    You will probably thrive here
-                  </p>
-
-                  <h3 className="mt-2 text-2xl font-black text-[#07133c]">
-                    You will probably love working at SNZ if you...
-                  </h3>
-                </div>
-              </div>
-
-              <div className="mt-7 space-y-4">
-                {rightFitPoints.map((point) => (
-                  <div
-                    key={point}
-                    className="flex gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4"
-                  >
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-
-                    <p className="text-sm font-semibold leading-6 text-slate-700">
-                      {point}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </article>
-
-          <article className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-7 shadow-xl shadow-slate-900/5 md:p-9">
-            <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-violet-100/80 blur-3xl" />
-
-            <div className="relative">
-              <div className="flex items-start gap-4">
-                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-700">
-                  <X className="h-8 w-8" />
-                </div>
-
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-violet-700">
-                    It may not be the right environment
-                  </p>
-
-                  <h3 className="mt-2 text-2xl font-black text-[#07133c]">
-                    This might not be the right fit if you...
-                  </h3>
-                </div>
-              </div>
-
-              <div className="mt-7 space-y-4">
-                {notRightFitPoints.map((point) => (
-                  <div
-                    key={point}
-                    className="flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                  >
-                    <X className="mt-0.5 h-5 w-5 shrink-0 text-violet-600" />
-
-                    <p className="text-sm font-semibold leading-6 text-slate-700">
-                      {point}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <div className="mt-8 overflow-hidden rounded-[2rem] bg-[#06112e] p-7 text-white shadow-xl md:p-9">
-          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
-            <div className="max-w-4xl">
-              <p className="text-base font-semibold leading-7 text-white/72">
-                There is nothing wrong with any of the above. We simply want to
-                help you decide whether Smart Net Zero is the right place for
-                you before you apply.
-              </p>
-
-              <h3 className="mt-4 text-2xl font-black md:text-3xl">
-                Did you read this and think, “That sounds like me”?
-              </h3>
-
-              <p className="mt-3 text-base font-semibold text-white/72">
-                We would love to hear from you.
-              </p>
-            </div>
-
-            {jobsAvailable ? (
-              <a
-                href="#apply-now"
-                className="inline-flex items-center justify-center rounded-2xl bg-white px-7 py-4 text-sm font-black text-[#07133c] transition hover:scale-[1.02]"
-              >
-                Apply to join SNZ
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </a>
-            ) : (
-              <span className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-7 py-4 text-center text-sm font-black text-white">
-                Check back for future roles
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -422,6 +265,7 @@ function ApplyForm({
     roleId: selectedJob?.id || "",
     linkedin: "",
     message: "",
+    screeningAnswers: {},
   });
 
   const [cvFile, setCvFile] =
@@ -441,16 +285,32 @@ function ApplyForm({
     setForm((current) => ({
       ...current,
       roleId: selectedJob?.id || "",
+      screeningAnswers: {},
     }));
   }, [selectedJob]);
 
-  const selectedRoleTitle = useMemo(() => {
+  const selectedRole = useMemo(() => {
     return (
       jobs.find(
         (job) => job.id === form.roleId
-      )?.title || ""
+      ) || selectedJob || null
     );
-  }, [jobs, form.roleId]);
+  }, [jobs, form.roleId, selectedJob]);
+
+  const selectedRoleTitle =
+    selectedRole?.title || "";
+
+  const screeningQuestions =
+    Array.isArray(
+      selectedRole?.screeningQuestions
+    )
+      ? selectedRole.screeningQuestions
+          .map((question) =>
+            String(question || "").trim()
+          )
+          .filter(Boolean)
+          .slice(0, 3)
+      : [];
 
   const validateFile = (file) => {
     if (!file) {
@@ -522,6 +382,9 @@ function ApplyForm({
     setForm((current) => ({
       ...current,
       [field]: value,
+      ...(field === "roleId"
+        ? { screeningAnswers: {} }
+        : {}),
     }));
 
     if (field === "roleId") {
@@ -535,6 +398,19 @@ function ApplyForm({
       );
     }
   };
+
+  function handleScreeningAnswer(
+    questionIndex,
+    answer
+  ) {
+    setForm((current) => ({
+      ...current,
+      screeningAnswers: {
+        ...(current.screeningAnswers || {}),
+        [questionIndex]: answer,
+      },
+    }));
+  }
 
   const handleSubmit = async (
     event
@@ -573,6 +449,47 @@ function ApplyForm({
       return;
     }
 
+    const unansweredQuestionIndex =
+      screeningQuestions.findIndex(
+        (_question, index) => {
+          const answer =
+            form.screeningAnswers?.[
+              index
+            ];
+
+          return (
+            answer !== "Yes" &&
+            answer !== "No"
+          );
+        }
+      );
+
+    if (
+      unansweredQuestionIndex !== -1
+    ) {
+      setSubmitState({
+        loading: false,
+        success: "",
+        error:
+          `Please answer screening question ${
+            unansweredQuestionIndex + 1
+          }.`,
+      });
+
+      return;
+    }
+
+    const screeningResponses =
+      screeningQuestions.map(
+        (question, index) => ({
+          question,
+          answer:
+            form.screeningAnswers?.[
+              index
+            ] || "",
+        })
+      );
+
     const payload =
       new FormData();
 
@@ -609,6 +526,13 @@ function ApplyForm({
     payload.append(
       "message",
       form.message
+    );
+
+    payload.append(
+      "screeningResponses",
+      JSON.stringify(
+        screeningResponses
+      )
     );
 
     payload.append(
@@ -681,6 +605,7 @@ function ApplyForm({
 
         linkedin: "",
         message: "",
+        screeningAnswers: {},
       });
 
       setCvFile(null);
@@ -881,7 +806,7 @@ function ApplyForm({
 
         <label className="block">
           <span className="text-xs font-black text-slate-700">
-            Cover Letter / Message
+            Cover Message
           </span>
 
           <textarea
@@ -897,6 +822,80 @@ function ApplyForm({
             className="mt-1 w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-cyan-400"
           />
         </label>
+
+        {screeningQuestions.length > 0 && (
+          <section className="rounded-2xl border border-violet-200 bg-violet-50/70 p-5">
+            <h3 className="text-base font-black text-[#07133c]">
+              Screening Questions
+            </h3>
+
+            <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
+              Please answer all questions before submitting your application.
+            </p>
+
+            <div className="mt-5 space-y-5">
+              {screeningQuestions.map(
+                (question, index) => {
+                  const fieldName =
+                   `screening-question-${selectedRole?.id || "role"}-${index}`;
+
+                  const selectedAnswer =
+                    form.screeningAnswers?.[
+                      index
+                    ] || "";
+
+                  return (
+                    <fieldset
+                      key={`${question}-${index}`}
+                      className="rounded-2xl border border-violet-200 bg-white p-4"
+                    >
+                      <legend className="px-1 text-sm font-black leading-6 text-slate-800">
+                        {index + 1}. {question}
+                        <span className="ml-1 text-rose-600">
+                          *
+                        </span>
+                      </legend>
+
+                      <div className="mt-3 grid grid-cols-2 gap-3">
+                        {["Yes", "No"].map(
+                          (answer) => (
+                            <label
+                              key={answer}
+                              className={`flex cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-sm font-black transition ${
+                                selectedAnswer === answer
+                                  ? "border-violet-500 bg-violet-100 text-violet-800 ring-2 ring-violet-200"
+                                  : "border-slate-200 bg-white text-slate-700 hover:border-violet-300 hover:bg-violet-50"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name={fieldName}
+                                value={answer}
+                                checked={
+                                  selectedAnswer === answer
+                                }
+                                onChange={() =>
+                                  handleScreeningAnswer(
+                                    index,
+                                    answer
+                                  )
+                                }
+                                className="mr-2 h-4 w-4 border-slate-300 text-violet-700 focus:ring-violet-600"
+                                required
+                              />
+
+                              {answer}
+                            </label>
+                          )
+                        )}
+                      </div>
+                    </fieldset>
+                  );
+                }
+              )}
+            </div>
+          </section>
+        )}
 
         {submitState.error && (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-bold text-rose-700">
@@ -950,6 +949,26 @@ function JobDetailsModal({
   const Icon =
     iconMap[job.icon] || Briefcase;
 
+  const rightFitItems =
+    Array.isArray(job.benefits)
+      ? job.benefits
+      : [];
+
+  const notFitHeadingIndex =
+    rightFitItems.findIndex((item) => {
+      const normalisedItem =
+        String(item)
+          .trim()
+          .toLowerCase();
+
+      return (
+        normalisedItem ===
+          "not the right fit for this role" ||
+        normalisedItem ===
+          "not fit for this role"
+      );
+    });
+
   return (
     <div
       className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-sm"
@@ -969,7 +988,6 @@ function JobDetailsModal({
 
         <div className="relative overflow-hidden rounded-t-[2rem] bg-[#06112e] p-8 text-white md:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(34,211,238,0.22),transparent_28%),radial-gradient(circle_at_86%_72%,rgba(236,72,153,0.18),transparent_30%)]" />
-
           <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(90deg,rgba(34,211,238,.14)_1px,transparent_1px),linear-gradient(rgba(34,211,238,.10)_1px,transparent_1px)] [background-size:34px_34px]" />
 
           <div className="relative z-10 max-w-3xl">
@@ -987,6 +1005,17 @@ function JobDetailsModal({
             >
               {job.title}
             </h2>
+
+            <div className="mt-5 inline-flex flex-col rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-5 py-3">
+              <span className="text-xs font-black uppercase tracking-[0.14em] text-cyan-300">
+                Salary
+              </span>
+
+              <span className="mt-1 text-lg font-black text-white">
+                {job.salary ||
+                  "Competitive salary depending on experience"}
+              </span>
+            </div>
 
             <div className="mt-5 flex flex-wrap gap-3">
               <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black text-white">
@@ -1024,7 +1053,6 @@ function JobDetailsModal({
                     className="flex gap-3"
                   >
                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-cyan-700" />
-
                     <p className="text-sm font-semibold leading-6 text-slate-700">
                       {item}
                     </p>
@@ -1047,7 +1075,6 @@ function JobDetailsModal({
                     className="flex gap-3"
                   >
                     <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-violet-700" />
-
                     <p className="text-sm font-semibold leading-6 text-slate-700">
                       {item}
                     </p>
@@ -1059,34 +1086,80 @@ function JobDetailsModal({
 
           <article className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6">
             <h3 className="text-xl font-black text-[#07133c]">
-              Benefits
+              Who would be a good fit
             </h3>
 
-            <div className="mt-5 rounded-2xl bg-white p-4 shadow-sm">
-              <p className="text-xs font-black uppercase tracking-[0.12em] text-cyan-700">
-                Salary level
-              </p>
-
-              <p className="mt-2 text-lg font-black leading-6 text-[#07133c]">
-                {job.salary ||
-                  "Competitive salary depending on experience"}
-              </p>
-            </div>
-
             <div className="mt-5 space-y-3">
-              {(job.benefits || []).map(
-                (item, index) => (
-                  <div
-                    key={`${item}-${index}`}
-                    className="flex gap-3"
-                  >
-                    <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-pink-600" />
+              {rightFitItems.map(
+                (item, index) => {
+                  const normalisedItem =
+                    String(item)
+                      .trim()
+                      .toLowerCase();
 
-                    <p className="text-sm font-semibold leading-6 text-slate-700">
-                      {item}
-                    </p>
-                  </div>
-                )
+                  const isGoodFitHeading =
+                    normalisedItem ===
+                    "good fit for this role";
+
+                  const isNotFitHeading =
+                    normalisedItem ===
+                      "not the right fit for this role" ||
+                    normalisedItem ===
+                      "not fit for this role";
+
+                  const isNotFitPoint =
+                    notFitHeadingIndex >= 0 &&
+                    index > notFitHeadingIndex;
+
+                  if (isGoodFitHeading) {
+                    return (
+                      <h4
+                        key={`${item}-${index}`}
+                        className="pt-1 text-base font-black text-emerald-800"
+                      >
+                        {item}
+                      </h4>
+                    );
+                  }
+
+                  if (isNotFitHeading) {
+                    return (
+                      <h4
+                        key={`${item}-${index}`}
+                        className="border-t border-slate-200 pt-5 text-base font-black text-violet-800"
+                      >
+                        {item}
+                      </h4>
+                    );
+                  }
+
+                  if (!String(item).trim()) {
+                    return null;
+                  }
+
+                  return (
+                    <div
+                      key={`${item}-${index}`}
+                      className="flex gap-3"
+                    >
+                      {isNotFitPoint ? (
+                        <X className="mt-0.5 h-5 w-5 shrink-0 text-violet-600" />
+                      ) : (
+                        <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-pink-600" />
+                      )}
+
+                      <p className="text-sm font-semibold leading-6 text-slate-700">
+                        {item}
+                      </p>
+                    </div>
+                  );
+                }
+              )}
+
+              {rightFitItems.length === 0 && (
+                <p className="text-sm font-semibold leading-6 text-slate-600">
+                  Right-fit guidance will be added for this role.
+                </p>
               )}
             </div>
           </article>
@@ -1095,8 +1168,7 @@ function JobDetailsModal({
         <div className="border-t border-slate-200 px-6 py-5 md:px-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm font-semibold text-slate-600">
-              Interested in this opportunity?
-              Start your application now.
+              Interested in this opportunity? Start your application now.
             </p>
 
             <button
@@ -1105,7 +1177,6 @@ function JobDetailsModal({
               className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-700 to-pink-600 px-6 py-3 text-sm font-black text-white transition hover:scale-[1.02]"
             >
               Apply for this role
-
               <ArrowRight className="ml-2 h-4 w-4" />
             </button>
           </div>
@@ -1393,9 +1464,7 @@ export default function Careers({
           </div>
         </section>
 
-        <RightFitSection jobsAvailable={jobs.length > 0} />
-
-        <section className="bg-white px-5 py-8 lg:px-8">
+         <section className="bg-white px-5 py-8 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="flex items-center gap-3">
               <Heart className="h-8 w-8 text-pink-600" />
@@ -1413,7 +1482,7 @@ export default function Careers({
               </div>
             </div>
 
-            <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+            <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7">
               {benefits.map(
                 (benefit) => {
                   const Icon =
