@@ -71,18 +71,58 @@ export async function createCareersApplication({
   cvSizeBytes,
 }) {
   const safeScreeningResponses =
-    Array.isArray(screeningResponses)
-      ? screeningResponses
-      : [];
+  normaliseScreeningResponses(
+    screeningResponses
+  );
 
-  const screeningResponsesJson =
-    JSON.stringify(
-      safeScreeningResponses
-    );
+  console.log(
+    "Creating careers application:",
+    {
+      jobId,
+      roleTitle,
+      fullName,
+      screeningResponses:
+        safeScreeningResponses,
+    }
+  );
 
-  const rows = await sql`
-    insert into
-      public.careers_applications (
+  try {
+    const rows = await sql`
+      insert into
+        public.careers_applications (
+          job_id,
+          role_title,
+          full_name,
+          email,
+          phone,
+          linkedin_url,
+          message,
+          screening_responses,
+          cv_bucket,
+          cv_path,
+          cv_original_name,
+          cv_mime_type,
+          cv_size_bytes
+        )
+      values (
+        ${jobId},
+        ${roleTitle},
+        ${fullName},
+        ${email},
+        ${phone || null},
+        ${linkedin || null},
+        ${message || null},
+        ${sql.json(
+          safeScreeningResponses
+        )},
+        ${cvBucket},
+        ${cvPath},
+        ${cvOriginalName},
+        ${cvMimeType},
+        ${cvSizeBytes}
+      )
+      returning
+        id,
         job_id,
         role_title,
         full_name,
@@ -91,48 +131,29 @@ export async function createCareersApplication({
         linkedin_url,
         message,
         screening_responses,
-        cv_bucket,
-        cv_path,
         cv_original_name,
-        cv_mime_type,
-        cv_size_bytes
-      )
-    values (
-      ${jobId},
-      ${roleTitle},
-      ${fullName},
-      ${email},
-      ${phone || null},
-      ${linkedin || null},
-      ${message || null},
-      ${screeningResponsesJson}::jsonb,
-      ${cvBucket},
-      ${cvPath},
-      ${cvOriginalName},
-      ${cvMimeType},
-      ${cvSizeBytes}
-    )
-    returning
-      id,
-      job_id,
-      role_title,
-      full_name,
-      email,
-      phone,
-      linkedin_url,
-      message,
-      screening_responses,
-      cv_bucket,
-      cv_path,
-      cv_original_name,
-      cv_mime_type,
-      cv_size_bytes,
-      status,
-      email_notification_sent,
-      submitted_at
-  `;
+        status,
+        submitted_at
+    `;
 
-  return rows[0] || null;
+    return rows[0] || null;
+  } catch (error) {
+    console.error(
+      "Careers application insert failed:",
+      {
+        message: error?.message,
+        code: error?.code,
+        detail: error?.detail,
+        hint: error?.hint,
+        column: error?.column,
+        table: error?.table,
+        constraint:
+          error?.constraint,
+      }
+    );
+
+    throw error;
+  }
 }
 
 export async function markApplicationEmailSent(

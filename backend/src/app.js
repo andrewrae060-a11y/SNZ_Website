@@ -181,19 +181,8 @@ app.use(
 
     return res.status(500).json({
       success: false,
-
       message:
-        error?.message ||
         "An unexpected server error occurred.",
-
-      code:
-        error?.code || null,
-
-      detail:
-        error?.detail || null,
-
-      hint:
-        error?.hint || null,
     });
   }
 );

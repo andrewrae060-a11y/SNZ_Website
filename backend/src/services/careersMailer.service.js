@@ -61,12 +61,42 @@ function escapeHtml(value) {
 function normaliseScreeningResponses(
   application
 ) {
-  const responses =
+  let responses =
     application
       ?.screening_responses ??
     application
       ?.screeningResponses ??
     [];
+
+  /*
+   * PostgreSQL or the database driver may
+   * return JSONB as a JSON string. Parse it
+   * before checking whether it is an array.
+   */
+  for (
+    let attempt = 0;
+    attempt < 2;
+    attempt += 1
+  ) {
+    if (
+      typeof responses !==
+      "string"
+    ) {
+      break;
+    }
+
+    try {
+      responses =
+        JSON.parse(responses);
+    } catch (error) {
+      console.error(
+        "Could not parse screening responses for email:",
+        error
+      );
+
+      return [];
+    }
+  }
 
   if (!Array.isArray(responses)) {
     return [];
