@@ -7,15 +7,23 @@ import {
 
 import {
   Briefcase,
+  CalendarDays,
+  ExternalLink,
   Eye,
   EyeOff,
+  FileText,
+  Linkedin,
   Loader2,
   LogOut,
+  Mail,
   Pencil,
+  Phone,
   Plus,
   RefreshCw,
   Save,
+  Search,
   Trash2,
+  Users,
   X,
 } from "lucide-react";
 
@@ -78,13 +86,133 @@ function normaliseScreeningQuestions(value) {
   }
 
   return value
-    .map((question) =>
-      String(question || "")
+    .map((item) => {
+      if (typeof item === "string") {
+        const question = item
+          .trim()
+          .slice(0, 300);
+
+        return question
+          ? {
+              question,
+              answerType: "yes_no",
+            }
+          : null;
+      }
+
+      const question = String(
+        item?.question || ""
+      )
         .trim()
-        .slice(0, 300)
-    )
+        .slice(0, 300);
+
+      if (!question) {
+        return null;
+      }
+
+      return {
+        question,
+        answerType:
+          item?.answerType === "text"
+            ? "text"
+            : "yes_no",
+      };
+    })
     .filter(Boolean)
     .slice(0, 3);
+}
+
+function normaliseApplicationResponses(value) {
+  let responses = value;
+
+  for (
+    let attempt = 0;
+    attempt < 2;
+    attempt += 1
+  ) {
+    if (typeof responses !== "string") {
+      break;
+    }
+
+    try {
+      responses = JSON.parse(responses);
+    } catch {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(responses)) {
+    return [];
+  }
+
+  return responses
+    .map((item) => {
+      const question = String(
+        item?.question || ""
+      ).trim();
+
+      const answer = String(
+        item?.answer || ""
+      ).trim();
+
+      if (!question || !answer) {
+        return null;
+      }
+
+      return {
+        question,
+        answer,
+        answerType:
+          item?.answerType === "text"
+            ? "text"
+            : "yes_no",
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
+function formatApplicationDate(value) {
+  if (!value) {
+    return "Date unavailable";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date unavailable";
+  }
+
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatFileSize(value) {
+  const bytes = Number(value || 0);
+
+  if (!bytes) {
+    return "";
+  }
+
+  if (bytes < 1024) {
+    return `${bytes} bytes`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${Math.round(
+      bytes / 1024
+    )} KB`;
+  }
+
+  return `${(
+    bytes /
+    (1024 * 1024)
+  ).toFixed(1)} MB`;
 }
 
 function LoginPanel({ onLogin }) {
@@ -289,14 +417,25 @@ function JobEditor({
 
   function updateScreeningQuestion(
     index,
+    field,
     value
   ) {
     setForm((current) => {
       const questions = [
-        ...(current.screeningQuestions || []),
+        ...(current.screeningQuestions ||
+          []),
       ];
 
-      questions[index] = value;
+      const existingQuestion =
+        questions[index] || {
+          question: "",
+          answerType: "yes_no",
+        };
+
+      questions[index] = {
+        ...existingQuestion,
+        [field]: value,
+      };
 
       return {
         ...current,
@@ -317,9 +456,13 @@ function JobEditor({
 
       return {
         ...current,
+
         screeningQuestions: [
           ...questions,
-          "",
+          {
+            question: "",
+            answerType: "yes_no",
+          },
         ],
       };
     });
@@ -328,6 +471,7 @@ function JobEditor({
   function removeScreeningQuestion(index) {
     setForm((current) => ({
       ...current,
+
       screeningQuestions: (
         current.screeningQuestions || []
       ).filter(
@@ -770,9 +914,7 @@ function JobEditor({
 
             <textarea
               rows={16}
-              value={
-                form.benefitsText
-              }
+              value={form.benefitsText}
               onChange={(event) =>
                 updateField(
                   "benefitsText",
@@ -792,16 +934,20 @@ function JobEditor({
               </h3>
 
               <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-slate-600">
-                Add up to three optional Yes or No questions. Applicants must answer every question added to the role before submitting their application.
+                Add up to three optional screening questions. Each question can use a Yes or No answer or an open-text answer.
               </p>
             </div>
 
             <button
               type="button"
-              onClick={addScreeningQuestion}
+              onClick={
+                addScreeningQuestion
+              }
               disabled={
-                (form.screeningQuestions || [])
-                  .length >= 3
+                (
+                  form.screeningQuestions ||
+                  []
+                ).length >= 3
               }
               className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-violet-300 bg-white px-4 py-3 text-sm font-black text-violet-700 transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -810,15 +956,19 @@ function JobEditor({
             </button>
           </div>
 
-          {(form.screeningQuestions || [])
-            .length === 0 ? (
+          {(
+            form.screeningQuestions || []
+          ).length === 0 ? (
             <div className="mt-5 rounded-2xl border border-dashed border-violet-300 bg-white/70 p-5 text-sm font-semibold text-slate-500">
               No screening questions have been added. This section will not appear to applicants.
             </div>
           ) : (
             <div className="mt-5 space-y-4">
               {form.screeningQuestions.map(
-                (question, index) => (
+                (
+                  screeningQuestion,
+                  index
+                ) => (
                   <div
                     key={`screening-question-${index}`}
                     className="rounded-2xl border border-violet-200 bg-white p-4"
@@ -828,7 +978,8 @@ function JobEditor({
                         htmlFor={`screening-question-${index}`}
                         className="text-sm font-black text-slate-700"
                       >
-                        Question {index + 1}
+                        Question{" "}
+                        {index + 1}
                       </label>
 
                       <button
@@ -848,21 +999,52 @@ function JobEditor({
                     <input
                       id={`screening-question-${index}`}
                       type="text"
-                      value={question}
+                      value={
+                        screeningQuestion.question ||
+                        ""
+                      }
                       onChange={(event) =>
                         updateScreeningQuestion(
                           index,
-                          event.target.value
+                          "question",
+                          event.target
+                            .value
                         )
                       }
                       maxLength={300}
-                      placeholder="For example: Are you eligible to work in the UK?"
+                      placeholder="Enter the screening question"
                       className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
                     />
 
-                    <p className="mt-2 text-xs font-semibold text-slate-500">
-                      Applicants will select Yes or No.
-                    </p>
+                    <label className="mt-4 block">
+                      <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+                        Answer type
+                      </span>
+
+                      <select
+                        value={
+                          screeningQuestion.answerType ||
+                          "yes_no"
+                        }
+                        onChange={(event) =>
+                          updateScreeningQuestion(
+                            index,
+                            "answerType",
+                            event.target
+                              .value
+                          )
+                        }
+                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                      >
+                        <option value="yes_no">
+                          Yes / No
+                        </option>
+
+                        <option value="text">
+                          Open text
+                        </option>
+                      </select>
+                    </label>
                   </div>
                 )
               )}
@@ -1000,7 +1182,9 @@ function JobCard({
                 Updated:{" "}
                 {new Date(
                   job.updatedAt
-                ).toLocaleString()}
+                ).toLocaleString(
+                  "en-GB"
+                )}
               </span>
             )}
           </div>
@@ -1034,10 +1218,219 @@ function JobCard({
   );
 }
 
+function ApplicationCard({
+  application,
+}) {
+  const [showDetails, setShowDetails] =
+    useState(false);
+
+  const screeningResponses =
+    normaliseApplicationResponses(
+      application.screeningResponses
+    );
+
+  return (
+    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-xl font-black text-[#07133c]">
+              {application.fullName}
+            </h3>
+
+            <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-black text-violet-700">
+              {application.status ||
+                "Received"}
+            </span>
+          </div>
+
+          <p className="mt-2 flex items-center text-sm font-black text-blue-700">
+            <Briefcase className="mr-2 h-4 w-4" />
+
+            {application.roleTitle ||
+              "Role unavailable"}
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold text-slate-600">
+            {application.email && (
+              <a
+                href={`mailto:${application.email}`}
+                className="inline-flex items-center transition hover:text-blue-700"
+              >
+                <Mail className="mr-2 h-4 w-4" />
+
+                {application.email}
+              </a>
+            )}
+
+            {application.phone && (
+              <a
+                href={`tel:${application.phone}`}
+                className="inline-flex items-center transition hover:text-blue-700"
+              >
+                <Phone className="mr-2 h-4 w-4" />
+
+                {application.phone}
+              </a>
+            )}
+
+            {application.linkedin && (
+              <a
+                href={
+                  application.linkedin
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center transition hover:text-blue-700"
+              >
+                <Linkedin className="mr-2 h-4 w-4" />
+
+                LinkedIn
+              </a>
+            )}
+          </div>
+
+          <p className="mt-4 inline-flex items-center text-xs font-bold text-slate-400">
+            <CalendarDays className="mr-2 h-4 w-4" />
+
+            Applied{" "}
+            {formatApplicationDate(
+              application.submittedAt
+            )}
+          </p>
+        </div>
+
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              setShowDetails(
+                (current) =>
+                  !current
+              )
+            }
+            className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-black text-[#07133c] transition hover:bg-slate-50"
+          >
+            <Eye className="mr-2 h-4 w-4" />
+
+            {showDetails
+              ? "Hide details"
+              : "View details"}
+          </button>
+
+          {application.cvUrl ? (
+            <a
+              href={application.cvUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-700 to-pink-600 px-4 py-3 text-sm font-black text-white shadow-lg transition hover:scale-[1.01]"
+            >
+              <FileText className="mr-2 h-4 w-4" />
+
+              Open CV
+
+              <ExternalLink className="ml-2 h-4 w-4" />
+            </a>
+          ) : (
+            <span className="inline-flex items-center rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-400">
+              CV unavailable
+            </span>
+          )}
+        </div>
+      </div>
+
+      {showDetails && (
+        <div className="mt-6 border-t border-slate-200 pt-6">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <h4 className="font-black text-[#07133c]">
+                Candidate message
+              </h4>
+
+              <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-6 text-slate-600">
+                {application.message ||
+                  "No candidate message was provided."}
+              </p>
+            </section>
+
+            <section className="rounded-2xl border border-violet-200 bg-violet-50/60 p-5">
+              <h4 className="font-black text-[#07133c]">
+                Screening responses
+              </h4>
+
+              {screeningResponses.length >
+              0 ? (
+                <div className="mt-4 space-y-3">
+                  {screeningResponses.map(
+                    (
+                      response,
+                      index
+                    ) => (
+                      <div
+                        key={`${response.question}-${index}`}
+                        className="rounded-xl border border-violet-200 bg-white p-4"
+                      >
+                        <p className="text-sm font-black text-slate-800">
+                          {index + 1}.{" "}
+                          {
+                            response.question
+                          }
+                        </p>
+
+                        <p className="mt-2 whitespace-pre-wrap text-sm font-semibold text-slate-600">
+                          <span className="font-black">
+                            Answer:
+                          </span>{" "}
+                          {response.answer}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              ) : (
+                <p className="mt-3 text-sm font-semibold text-slate-500">
+                  No screening responses were supplied.
+                </p>
+              )}
+            </section>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-4 text-xs font-bold text-slate-500">
+            <span>
+              CV:{" "}
+              {application.cvOriginalName ||
+                "Candidate CV"}
+            </span>
+
+            {Number(
+              application.cvSizeBytes
+            ) > 0 && (
+              <span>
+                File size:{" "}
+                {formatFileSize(
+                  application.cvSizeBytes
+                )}
+              </span>
+            )}
+
+            <span>
+              Email notification:{" "}
+              {application.emailNotificationSent
+                ? "Sent"
+                : "Not confirmed"}
+            </span>
+          </div>
+        </div>
+      )}
+    </article>
+  );
+}
+
 export default function CareersAdmin() {
   useEffect(() => {
-        document.title = "Careers Admin | Smart Net Zero";
-      }, []);
+    document.title =
+      "Careers Admin | Smart Net Zero";
+  }, []);
 
   const [signedIn, setSignedIn] =
     useState(false);
@@ -1047,14 +1440,32 @@ export default function CareersAdmin() {
     setCheckingSession,
   ] = useState(true);
 
+  const [activeView, setActiveView] =
+    useState("roles");
+
   const [jobs, setJobs] =
     useState([]);
+
+  const [
+    applications,
+    setApplications,
+  ] = useState([]);
 
   const [loadingJobs, setLoadingJobs] =
     useState(false);
 
+  const [
+    loadingApplications,
+    setLoadingApplications,
+  ] = useState(false);
+
   const [pageError, setPageError] =
     useState("");
+
+  const [
+    applicationSearch,
+    setApplicationSearch,
+  ] = useState("");
 
   const [editingJob, setEditingJob] =
     useState(null);
@@ -1077,6 +1488,49 @@ export default function CareersAdmin() {
 
   const draftCount =
     jobs.length - publishedCount;
+
+  const filteredApplications =
+    useMemo(() => {
+      const query =
+        applicationSearch
+          .trim()
+          .toLowerCase();
+
+      if (!query) {
+        return applications;
+      }
+
+      return applications.filter(
+        (application) =>
+          [
+            application.fullName,
+            application.email,
+            application.roleTitle,
+            application.phone,
+          ].some((value) =>
+            String(value || "")
+              .toLowerCase()
+              .includes(query)
+          )
+      );
+    }, [
+      applications,
+      applicationSearch,
+    ]);
+
+  const roleApplicationCount =
+    useMemo(
+      () =>
+        new Set(
+          applications
+            .map(
+              (application) =>
+                application.roleTitle
+            )
+            .filter(Boolean)
+        ).size,
+      [applications]
+    );
 
   const loadJobs = useCallback(
     async () => {
@@ -1120,6 +1574,44 @@ export default function CareersAdmin() {
     []
   );
 
+  const loadApplications =
+    useCallback(async () => {
+      setLoadingApplications(true);
+      setPageError("");
+
+      try {
+        const data =
+          await careersApi.getApplications();
+
+        setApplications(
+          Array.isArray(data)
+            ? data
+            : []
+        );
+
+        setSignedIn(true);
+      } catch (error) {
+        const message =
+          getErrorMessage(
+            error,
+            "Applications could not be loaded."
+          );
+
+        if (
+          /login|required|session|expired|unauthorised|unauthorized/i.test(
+            message
+          )
+        ) {
+          setSignedIn(false);
+          setApplications([]);
+        } else {
+          setPageError(message);
+        }
+      } finally {
+        setLoadingApplications(false);
+      }
+    }, []);
+
   useEffect(() => {
     let active = true;
 
@@ -1138,6 +1630,7 @@ export default function CareersAdmin() {
         if (active) {
           setSignedIn(false);
           setJobs([]);
+          setApplications([]);
         }
       } finally {
         if (active) {
@@ -1178,9 +1671,26 @@ export default function CareersAdmin() {
     } finally {
       setSignedIn(false);
       setJobs([]);
+      setApplications([]);
+      setActiveView("roles");
+      setApplicationSearch("");
       setEditingJob(null);
       setShowEditor(false);
       setPageError("");
+    }
+  }
+
+  function showRoles() {
+    setActiveView("roles");
+    setPageError("");
+  }
+
+  async function showApplications() {
+    setActiveView("applications");
+    setPageError("");
+
+    if (applications.length === 0) {
+      await loadApplications();
     }
   }
 
@@ -1217,7 +1727,7 @@ export default function CareersAdmin() {
     try {
       await loadJobs();
     } catch {
-      // loadJobs handles the visible error state.
+      // loadJobs handles the visible error.
     }
   }
 
@@ -1289,7 +1799,7 @@ export default function CareersAdmin() {
               </h1>
 
               <p className="mt-1 text-sm font-semibold text-white/65">
-                Manage public job vacancies.
+                Manage vacancies and review candidate applications.
               </p>
             </div>
           </div>
@@ -1306,6 +1816,49 @@ export default function CareersAdmin() {
       </header>
 
       <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
+        {!showEditor && (
+          <nav className="mb-8 flex flex-wrap gap-3 rounded-3xl border border-slate-200 bg-white p-3 shadow-sm">
+            <button
+              type="button"
+              onClick={showRoles}
+              className={`inline-flex items-center rounded-2xl px-5 py-3 text-sm font-black transition ${
+                activeView === "roles"
+                  ? "bg-[#07133c] text-white"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <Briefcase className="mr-2 h-4 w-4" />
+
+              Job roles
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                showApplications().catch(
+                  () => {}
+                );
+              }}
+              className={`inline-flex items-center rounded-2xl px-5 py-3 text-sm font-black transition ${
+                activeView ===
+                "applications"
+                  ? "bg-[#07133c] text-white"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <Users className="mr-2 h-4 w-4" />
+
+              Applications
+
+              {applications.length > 0 && (
+                <span className="ml-2 rounded-full bg-cyan-300 px-2 py-0.5 text-xs text-[#07133c]">
+                  {applications.length}
+                </span>
+              )}
+            </button>
+          </nav>
+        )}
+
         {showEditor ? (
           <JobEditor
             key={
@@ -1316,6 +1869,143 @@ export default function CareersAdmin() {
             onSaved={handleSaved}
             onCancel={closeEditor}
           />
+        ) : activeView ===
+          "applications" ? (
+          <section>
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <h2 className="text-3xl font-black text-[#07133c]">
+                  Candidate applications
+                </h2>
+
+                <p className="mt-1 text-sm font-semibold text-slate-600">
+                  Review applicants, screening responses and submitted CVs.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <label className="relative block">
+                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                  <input
+                    type="search"
+                    value={
+                      applicationSearch
+                    }
+                    onChange={(event) =>
+                      setApplicationSearch(
+                        event.target
+                          .value
+                      )
+                    }
+                    placeholder="Search applicants..."
+                    className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 sm:w-72"
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    loadApplications()
+                  }
+                  disabled={
+                    loadingApplications
+                  }
+                  className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+                >
+                  <RefreshCw
+                    className={`mr-2 h-4 w-4 ${
+                      loadingApplications
+                        ? "animate-spin"
+                        : ""
+                    }`}
+                  />
+
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <section className="mt-6 grid gap-4 sm:grid-cols-3">
+              <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+                  Total applications
+                </p>
+
+                <p className="mt-3 text-3xl font-black text-[#07133c]">
+                  {applications.length}
+                </p>
+              </article>
+
+              <article className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
+                <p className="text-xs font-black uppercase tracking-[0.12em] text-blue-700">
+                  Roles applied for
+                </p>
+
+                <p className="mt-3 text-3xl font-black text-blue-800">
+                  {roleApplicationCount}
+                </p>
+              </article>
+
+              <article className="rounded-3xl border border-violet-200 bg-violet-50 p-5 shadow-sm">
+                <p className="text-xs font-black uppercase tracking-[0.12em] text-violet-700">
+                  Search results
+                </p>
+
+                <p className="mt-3 text-3xl font-black text-violet-800">
+                  {
+                    filteredApplications.length
+                  }
+                </p>
+              </article>
+            </section>
+
+            {pageError && (
+              <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-bold text-rose-700">
+                {pageError}
+              </div>
+            )}
+
+            {loadingApplications ? (
+              <div className="mt-6 grid min-h-52 place-items-center rounded-3xl border border-slate-200 bg-white">
+                <div className="text-center">
+                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-700" />
+
+                  <p className="mt-3 font-black text-slate-600">
+                    Loading applications...
+                  </p>
+                </div>
+              </div>
+            ) : filteredApplications.length ===
+              0 ? (
+              <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+                <Users className="mx-auto h-12 w-12 text-blue-700" />
+
+                <h3 className="mt-5 text-xl font-black text-[#07133c]">
+                  No applications found
+                </h3>
+
+                <p className="mt-2 text-sm font-semibold text-slate-600">
+                  Applications will appear here after candidates submit the careers form.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6 space-y-4">
+                {filteredApplications.map(
+                  (application) => (
+                    <ApplicationCard
+                      key={
+                        application.id
+                      }
+                      application={
+                        application
+                      }
+                    />
+                  )
+                )}
+              </div>
+            )}
+          </section>
         ) : (
           <>
             <section className="grid gap-4 sm:grid-cols-3">
