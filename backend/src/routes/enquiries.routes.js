@@ -31,6 +31,14 @@ function createEnquiryTransporter() {
   });
 }
 
+router.get("/test", (_req, res) => {
+  return res.status(200).json({
+    success: true,
+    message:
+      "Enquiry router is working.",
+  });
+});
+
 router.post("/", async (req, res) => {
   try {
     const {
