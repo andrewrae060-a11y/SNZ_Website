@@ -22,6 +22,9 @@ import adminResearchRoutes from
 import jobsRoutes from
   "./routes/jobs.routes.js";
 
+import enquiriesRoutes from
+  "./routes/enquiries.routes.js";
+
 import careersApplicationsRoutes from
   "./routes/careersApplications.routes.js";
 
@@ -106,6 +109,11 @@ app.use(
 app.use(
   "/api/events",
   eventRegistrationsRoutes
+);
+
+app.use(
+  "/api/enquiries",
+  enquiriesRoutes
 );
 
 app.get(
