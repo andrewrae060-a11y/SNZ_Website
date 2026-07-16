@@ -1520,39 +1520,47 @@ function KMCConsultingPartnerModal({ isOpen, onClose }) {
 function LeadershipCard({ leader }) {
   return (
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="relative h-40 overflow-hidden bg-gradient-to-br from-slate-50 to-slate-200">
+      <div className="relative h-64 overflow-hidden bg-gradient-to-br from-slate-50 to-slate-200 sm:h-72 md:h-52 lg:h-40">
         {leader.image ? (
           <img
             src={leader.image}
             alt={`${leader.name} profile`}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover object-top"
           />
         ) : (
           <>
             <div className="absolute left-1/2 top-6 h-16 w-16 -translate-x-1/2 rounded-full bg-slate-300" />
+
             <div className="absolute bottom-0 left-1/2 h-24 w-32 -translate-x-1/2 rounded-t-full bg-slate-300" />
+
             <div className="absolute bottom-0 right-0 h-24 w-24 rounded-tl-[4rem] bg-white/45" />
           </>
         )}
       </div>
 
       <div className="p-5">
-        <h3 className="text-lg font-black text-[#07133c]">{leader.name}</h3>
-        <p className="mt-1 text-xs font-black text-teal-600">{leader.role}</p>
+        <h3 className="text-lg font-black text-[#07133c]">
+          {leader.name}
+        </h3>
+
+        <p className="mt-1 text-xs font-black text-teal-600">
+          {leader.role}
+        </p>
+
         <p className="mt-4 min-h-[84px] text-sm font-semibold leading-6 text-[#07133c]">
           {leader.text}
         </p>
 
         {leader.linkedin && (
-        <a
-          href={leader.linkedin}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`${leader.name} LinkedIn`}
-          className="mt-4 inline-flex h-6 w-6 items-center justify-center rounded bg-[#0a66c2] text-xs font-black text-white transition hover:scale-110 hover:bg-[#004182]"
-        >
-          in
-        </a>
+          <a
+            href={leader.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${leader.name} LinkedIn`}
+            className="mt-4 inline-flex h-6 w-6 items-center justify-center rounded bg-[#0a66c2] text-xs font-black text-white transition hover:scale-110 hover:bg-[#004182]"
+          >
+            in
+          </a>
         )}
       </div>
     </article>

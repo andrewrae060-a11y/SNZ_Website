@@ -416,7 +416,7 @@ const tools = [
   {
     title: "BDRR",
     text: "Portfolio and building decarbonisation decision support and prioritisation.",
-    cta: "Explore BDDR",
+    cta: "Explore BDRR",
     page: "SmartDecarb360",
     modal: "bdrr",
     stat: "↓ 36%",
