@@ -71,8 +71,13 @@ export async function createCareersApplication({
   cvSizeBytes,
 }) {
   const safeScreeningResponses =
-    normaliseScreeningResponses(
-      screeningResponses
+    Array.isArray(screeningResponses)
+      ? screeningResponses
+      : [];
+
+  const screeningResponsesJson =
+    JSON.stringify(
+      safeScreeningResponses
     );
 
   const rows = await sql`
@@ -100,9 +105,7 @@ export async function createCareersApplication({
       ${phone || null},
       ${linkedin || null},
       ${message || null},
-      ${sql.json(
-        safeScreeningResponses
-      )},
+      ${screeningResponsesJson}::jsonb,
       ${cvBucket},
       ${cvPath},
       ${cvOriginalName},
