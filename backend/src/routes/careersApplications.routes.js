@@ -18,8 +18,12 @@ import {
 } from
   "../services/careersMailer.service.js";
 
+import requireCareersAdmin from
+  "../middleware/requireCareersAdmin.js";
+
 import {
   createCareersApplication,
+  getCareersApplications,
   getPublishedJobById,
   markApplicationEmailSent,
 } from
@@ -54,11 +58,6 @@ const upload = multer({
 
     files: 1,
 
-    /*
-     * The application form currently
-     * submits fewer than 10 multipart
-     * text fields.
-     */
     fields: 10,
   },
 
@@ -118,9 +117,9 @@ function emailLooksValid(
 }
 
 /*
- * screeningResponses arrives as a
- * JSON string because the application
- * form uses multipart FormData.
+ * Screening responses arrive as a JSON
+ * string because the application form uses
+ * multipart FormData.
  */
 function parseScreeningResponses(
   value
@@ -168,10 +167,6 @@ function parseScreeningResponses(
           return null;
         }
 
-        /*
-         * Enforce valid values for
-         * yes/no questions.
-         */
         if (
           answerType ===
             "yes_no" &&
@@ -197,6 +192,84 @@ function parseScreeningResponses(
 
     return [];
   }
+}
+
+/*
+ * Older database rows may contain JSON that
+ * has been serialised more than once. Parse
+ * string values up to two times.
+ */
+function parseStoredScreeningResponses(
+  value
+) {
+  let responses = value;
+
+  for (
+    let attempt = 0;
+    attempt < 2;
+    attempt += 1
+  ) {
+    if (
+      typeof responses !==
+      "string"
+    ) {
+      break;
+    }
+
+    try {
+      responses =
+        JSON.parse(responses);
+    } catch (error) {
+      console.error(
+        "Stored screening responses could not be parsed:",
+        error
+      );
+
+      return [];
+    }
+  }
+
+  if (
+    !Array.isArray(responses)
+  ) {
+    return [];
+  }
+
+  return responses
+    .map((item) => {
+      const question =
+        cleanText(
+          item?.question,
+          1000
+        );
+
+      const answer =
+        cleanText(
+          item?.answer,
+          2000
+        );
+
+      const answerType =
+        item?.answerType ===
+        "text"
+          ? "text"
+          : "yes_no";
+
+      if (
+        !question ||
+        !answer
+      ) {
+        return null;
+      }
+
+      return {
+        question,
+        answerType,
+        answer,
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 3);
 }
 
 function safeFileExtension(
@@ -242,6 +315,168 @@ function sanitiseFilename(
     );
 }
 
+/*
+ * Admin-only application list.
+ *
+ * Final endpoint:
+ * GET /api/careers/applications
+ */
+router.get(
+  "/applications",
+
+  requireCareersAdmin,
+
+  async (
+    _req,
+    res,
+    next
+  ) => {
+    try {
+      const applications =
+        await getCareersApplications();
+
+      const applicationsWithCvLinks =
+        await Promise.all(
+          applications.map(
+            async (
+              application
+            ) => {
+              let cvUrl = null;
+
+              if (
+                application
+                  .cv_bucket &&
+                application
+                  .cv_path
+              ) {
+                const signedUrlResult =
+                  await supabaseAdmin
+                    .storage
+                    .from(
+                      application
+                        .cv_bucket
+                    )
+                    .createSignedUrl(
+                      application
+                        .cv_path,
+
+                      60 * 60
+                    );
+
+                if (
+                  signedUrlResult
+                    .error
+                ) {
+                  console.error(
+                    "Could not create candidate CV link:",
+                    {
+                      applicationId:
+                        application.id,
+
+                      error:
+                        signedUrlResult
+                          .error,
+                    }
+                  );
+                } else {
+                  cvUrl =
+                    signedUrlResult
+                      .data
+                      .signedUrl;
+                }
+              }
+
+              return {
+                id:
+                  application.id,
+
+                jobId:
+                  application
+                    .job_id,
+
+                roleTitle:
+                  application
+                    .role_title,
+
+                fullName:
+                  application
+                    .full_name,
+
+                email:
+                  application.email,
+
+                phone:
+                  application.phone ||
+                  "",
+
+                linkedin:
+                  application
+                    .linkedin_url ||
+                  "",
+
+                message:
+                  application.message ||
+                  "",
+
+                screeningResponses:
+                  parseStoredScreeningResponses(
+                    application
+                      .screening_responses
+                  ),
+
+                cvOriginalName:
+                  application
+                    .cv_original_name ||
+                  "Candidate CV",
+
+                cvMimeType:
+                  application
+                    .cv_mime_type ||
+                  "",
+
+                cvSizeBytes:
+                  Number(
+                    application
+                      .cv_size_bytes ||
+                    0
+                  ),
+
+                cvUrl,
+
+                status:
+                  application.status ||
+                  "Received",
+
+                emailNotificationSent:
+                  application
+                    .email_notification_sent ===
+                  true,
+
+                submittedAt:
+                  application
+                    .submitted_at,
+              };
+            }
+          )
+        );
+
+      return res
+        .status(200)
+        .json(
+          applicationsWithCvLinks
+        );
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+/*
+ * Public job application endpoint.
+ *
+ * Final endpoint:
+ * POST /api/careers/apply
+ */
 router.post(
   "/apply",
 
@@ -391,14 +626,10 @@ router.post(
        */
       const jobScreeningQuestions =
         Array.isArray(
-          job.screeningQuestions
+          job.screening_questions
         )
-          ? job.screeningQuestions
-          : Array.isArray(
-                job.screening_questions
-              )
-            ? job.screening_questions
-            : [];
+          ? job.screening_questions
+          : [];
 
       const expectedScreeningCount =
         jobScreeningQuestions
@@ -510,12 +741,6 @@ router.post(
           storagePath,
       };
 
-      /*
-       * screeningResponses must be accepted
-       * by createCareersApplication and
-       * mapped to screening_responses in
-       * Supabase.
-       */
       const application =
         await createCareersApplication({
           jobId:
@@ -575,12 +800,6 @@ router.post(
       let emailSent = false;
 
       try {
-        /*
-         * The application object returned
-         * by the repository should include
-         * screeningResponses or
-         * screening_responses.
-         */
         await sendCareersApplicationEmail({
           application,
 
@@ -599,11 +818,10 @@ router.post(
         emailError
       ) {
         /*
-         * The application is already safely
-         * stored, so do not tell the candidate
-         * their complete submission failed
-         * solely because the notification
-         * email could not be sent.
+         * The application is already stored.
+         * Do not tell the candidate their
+         * submission failed solely because
+         * the notification email failed.
          */
         console.error(
           "Careers notification email failed:",

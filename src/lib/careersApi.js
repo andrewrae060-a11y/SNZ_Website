@@ -59,6 +59,12 @@ export const careersApi = {
     return request("/api/jobs");
   },
 
+getApplications() {
+  return request(
+    "/api/careers/applications"
+  );
+},
+
   login(email, password) {
     return request(
       "/api/admin/login",
