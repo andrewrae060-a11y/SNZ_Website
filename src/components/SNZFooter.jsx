@@ -48,7 +48,7 @@ export default function SNZFooter({ goToPage }) {
           {/* Right-hand strapline, LinkedIn link and footer page links */}
           <div className="flex flex-col items-start gap-5 md:items-end">
             <div className="flex min-w-0 flex-col gap-2 text-center sm:items-start sm:text-left">
-              <p className="max-w-full whitespace-normal break-words text-sm leading-6 text-slate-900">
+              <p className="max-w-full whitespace-normal break-words text-sm font-bold leading-6 text-slate-900">
                 Making Infrastructure Smarter, Safer, and More Sustainable
               </p>
 
@@ -56,7 +56,7 @@ export default function SNZFooter({ goToPage }) {
                 href="https://www.linkedin.com/company/smart-net-zero/"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center text-sm font-semibold text-cyan-300 transition hover:text-white sm:justify-start"
+                className="inline-flex self-end items-center text-sm font-semibold text-blue-700 transition hover:text-blue-900"
               >
                 Follow us on LinkedIn
               </a>
