@@ -165,6 +165,12 @@ app.use(
         message: error?.message,
         code: error?.code,
         detail: error?.detail,
+        hint: error?.hint,
+        position: error?.position,
+        column: error?.column,
+        table: error?.table,
+        constraint:
+          error?.constraint,
         stack: error?.stack,
       }
     );
@@ -175,8 +181,19 @@ app.use(
 
     return res.status(500).json({
       success: false,
+
       message:
+        error?.message ||
         "An unexpected server error occurred.",
+
+      code:
+        error?.code || null,
+
+      detail:
+        error?.detail || null,
+
+      hint:
+        error?.hint || null,
     });
   }
 );
