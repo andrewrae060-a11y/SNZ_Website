@@ -12,7 +12,6 @@ import {
   Eye,
   EyeOff,
   FileText,
-  Linkedin,
   Loader2,
   LogOut,
   Mail,
@@ -87,6 +86,10 @@ function normaliseScreeningQuestions(value) {
 
   return value
     .map((item) => {
+      /*
+       * Backwards compatibility for older
+       * questions stored as plain strings.
+       */
       if (typeof item === "string") {
         const question = item
           .trim()
@@ -112,6 +115,7 @@ function normaliseScreeningQuestions(value) {
 
       return {
         question,
+
         answerType:
           item?.answerType === "text"
             ? "text"
@@ -422,8 +426,7 @@ function JobEditor({
   ) {
     setForm((current) => {
       const questions = [
-        ...(current.screeningQuestions ||
-          []),
+        ...(current.screeningQuestions || []),
       ];
 
       const existingQuestion =
@@ -439,34 +442,35 @@ function JobEditor({
 
       return {
         ...current,
+
         screeningQuestions:
           questions.slice(0, 3),
       };
     });
   }
 
-  function addScreeningQuestion() {
-    setForm((current) => {
-      const questions =
-        current.screeningQuestions || [];
+ function addScreeningQuestion() {
+  setForm((current) => {
+    const questions =
+      current.screeningQuestions || [];
 
-      if (questions.length >= 3) {
-        return current;
-      }
+    if (questions.length >= 3) {
+      return current;
+    }
 
-      return {
-        ...current,
+    return {
+      ...current,
 
-        screeningQuestions: [
-          ...questions,
-          {
-            question: "",
-            answerType: "yes_no",
-          },
-        ],
-      };
-    });
-  }
+      screeningQuestions: [
+        ...questions,
+        {
+          question: "",
+          answerType: "yes_no",
+        },
+      ],
+    };
+  });
+}
 
   function removeScreeningQuestion(index) {
     setForm((current) => ({
@@ -934,19 +938,18 @@ function JobEditor({
               </h3>
 
               <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-slate-600">
-                Add up to three optional screening questions. Each question can use a Yes or No answer or an open-text answer.
+                Add up to three optional screening questions.
+                Choose whether each question requires a
+                Yes or No answer or an open-text response.
               </p>
             </div>
 
             <button
               type="button"
-              onClick={
-                addScreeningQuestion
-              }
+              onClick={addScreeningQuestion}
               disabled={
                 (
-                  form.screeningQuestions ||
-                  []
+                  form.screeningQuestions || []
                 ).length >= 3
               }
               className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-violet-300 bg-white px-4 py-3 text-sm font-black text-violet-700 transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-50"
@@ -960,7 +963,8 @@ function JobEditor({
             form.screeningQuestions || []
           ).length === 0 ? (
             <div className="mt-5 rounded-2xl border border-dashed border-violet-300 bg-white/70 p-5 text-sm font-semibold text-slate-500">
-              No screening questions have been added. This section will not appear to applicants.
+              No screening questions have been added.
+              This section will not appear to applicants.
             </div>
           ) : (
             <div className="mt-5 space-y-4">
@@ -978,8 +982,7 @@ function JobEditor({
                         htmlFor={`screening-question-${index}`}
                         className="text-sm font-black text-slate-700"
                       >
-                        Question{" "}
-                        {index + 1}
+                        Question {index + 1}
                       </label>
 
                       <button
@@ -1007,8 +1010,7 @@ function JobEditor({
                         updateScreeningQuestion(
                           index,
                           "question",
-                          event.target
-                            .value
+                          event.target.value
                         )
                       }
                       maxLength={300}
@@ -1030,8 +1032,7 @@ function JobEditor({
                           updateScreeningQuestion(
                             index,
                             "answerType",
-                            event.target
-                              .value
+                            event.target.value
                           )
                         }
                         className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
@@ -1283,7 +1284,7 @@ function ApplicationCard({
                 rel="noreferrer"
                 className="inline-flex items-center transition hover:text-blue-700"
               >
-                <Linkedin className="mr-2 h-4 w-4" />
+                <ExternalLink className="mr-2 h-4 w-4" />
 
                 LinkedIn
               </a>
