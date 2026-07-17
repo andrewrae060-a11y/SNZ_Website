@@ -23,11 +23,11 @@ import requireCareersAdmin from
 
 import {
   createCareersApplication,
+  deleteCareersApplication,
   getCareersApplications,
   getPublishedJobById,
   markApplicationEmailSent,
-} from
-  "../careersApplicationRepository.js";
+} from "../careersApplicationRepository.js";
 
 const router = Router();
 
@@ -344,28 +344,22 @@ router.get(
               let cvUrl = null;
 
               if (
-                application
-                  .cv_bucket &&
-                application
-                  .cv_path
+                application.cv_bucket &&
+                application.cv_path
               ) {
                 const signedUrlResult =
                   await supabaseAdmin
                     .storage
                     .from(
-                      application
-                        .cv_bucket
+                      application.cv_bucket
                     )
                     .createSignedUrl(
-                      application
-                        .cv_path,
-
+                      application.cv_path,
                       60 * 60
                     );
 
                 if (
-                  signedUrlResult
-                    .error
+                  signedUrlResult.error
                 ) {
                   console.error(
                     "Could not create candidate CV link:",
@@ -374,14 +368,12 @@ router.get(
                         application.id,
 
                       error:
-                        signedUrlResult
-                          .error,
+                        signedUrlResult.error,
                     }
                   );
                 } else {
                   cvUrl =
-                    signedUrlResult
-                      .data
+                    signedUrlResult.data
                       .signedUrl;
                 }
               }
@@ -391,16 +383,13 @@ router.get(
                   application.id,
 
                 jobId:
-                  application
-                    .job_id,
+                  application.job_id,
 
                 roleTitle:
-                  application
-                    .role_title,
+                  application.role_title,
 
                 fullName:
-                  application
-                    .full_name,
+                  application.full_name,
 
                 email:
                   application.email,
@@ -410,8 +399,7 @@ router.get(
                   "",
 
                 linkedin:
-                  application
-                    .linkedin_url ||
+                  application.linkedin_url ||
                   "",
 
                 message:
@@ -465,6 +453,61 @@ router.get(
         .json(
           applicationsWithCvLinks
         );
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+/*
+ * Admin-only application deletion.
+ *
+ * Final endpoint:
+ * DELETE /api/careers/applications/:applicationId
+ */
+router.delete(
+  "/applications/:applicationId",
+
+  requireCareersAdmin,
+
+  async (
+    req,
+    res,
+    next
+  ) => {
+    try {
+      const applicationId =
+        String(
+          req.params
+            .applicationId ||
+          ""
+        ).trim();
+
+      if (!applicationId) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+
+            message:
+              "Application ID is required.",
+          });
+      }
+
+      await deleteCareersApplication(
+        applicationId
+      );
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+
+          message:
+            "Application deleted.",
+
+          applicationId,
+        });
     } catch (error) {
       return next(error);
     }

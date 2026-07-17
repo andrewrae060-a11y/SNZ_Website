@@ -1,4 +1,6 @@
 import sql from "./database.js";
+import supabaseAdmin from
+  "./services/supabaseAdmin.service.js";
 
 function normaliseScreeningResponses(
   value
@@ -188,4 +190,51 @@ export async function markApplicationEmailSent(
     where
       id = ${applicationId}
   `;
+}
+
+export async function deleteCareersApplication(
+  applicationId
+) {
+  const cleanApplicationId = String(
+    applicationId || ""
+  ).trim();
+
+  if (!cleanApplicationId) {
+    throw new Error(
+      "Application ID is required."
+    );
+  }
+
+  const {
+    data,
+    error,
+  } = await supabaseAdmin
+    .from("careers_applications")
+    .delete()
+    .eq("id", cleanApplicationId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      "Failed to delete careers application:",
+      error
+    );
+
+    throw new Error(
+      "The application could not be deleted."
+    );
+  }
+
+  if (!data) {
+    const notFoundError = new Error(
+      "Application not found."
+    );
+
+    notFoundError.statusCode = 404;
+
+    throw notFoundError;
+  }
+
+  return data;
 }

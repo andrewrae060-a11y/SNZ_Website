@@ -42,8 +42,8 @@ const leaders = [
   },
   {
     name: "Danny Carroll",
-    role: "Operations & Energy Director",
-    text: "Leads delivery excellence across projects, operations and smart energy initiatives.",
+    role: "Co-Founder & Group Service Director",
+    text: "Leads delivery excellence across projects, operations and energy initiatives.",
     image: "/danny-carroll-profile.png",
     linkedin: "https://uk.linkedin.com/in/danny-carroll-28262b16",
   },
@@ -56,8 +56,8 @@ const leaders = [
   },
   {
     name: "Andrew Rae",
-    role: "Innovation & Resilience Director",
-    text: "Focuses on innovation and building resilient infrastructure that adapts to future challenges.",
+    role: "Co-Founder & Group Technology Assurance Director",
+    text: "Ensures technology is secure, resilient, reliable, and ready to meet future challenges.",
     image: "/andrew-rae-profile.png",
     linkedin: "https://www.linkedin.com/in/andrew-rae-a880611b6/",
   },

@@ -65,6 +65,17 @@ getApplications() {
   );
 },
 
+deleteApplication(applicationId) {
+  return request(
+    `/api/careers/applications/${encodeURIComponent(
+      applicationId
+    )}`,
+    {
+      method: "DELETE",
+    }
+  );
+},
+
   login(email, password) {
     return request(
       "/api/admin/login",

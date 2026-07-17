@@ -1221,6 +1221,8 @@ function JobCard({
 
 function ApplicationCard({
   application,
+  deleting,
+  onDecline,
 }) {
   const [showDetails, setShowDetails] =
     useState(false);
@@ -1231,7 +1233,13 @@ function ApplicationCard({
     );
 
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <article
+      className={`rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition ${
+        deleting
+          ? "pointer-events-none opacity-60"
+          : ""
+      }`}
+    >
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -1259,7 +1267,6 @@ function ApplicationCard({
                 className="inline-flex items-center transition hover:text-blue-700"
               >
                 <Mail className="mr-2 h-4 w-4" />
-
                 {application.email}
               </a>
             )}
@@ -1270,22 +1277,18 @@ function ApplicationCard({
                 className="inline-flex items-center transition hover:text-blue-700"
               >
                 <Phone className="mr-2 h-4 w-4" />
-
                 {application.phone}
               </a>
             )}
 
             {application.linkedin && (
               <a
-                href={
-                  application.linkedin
-                }
+                href={application.linkedin}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center transition hover:text-blue-700"
               >
                 <ExternalLink className="mr-2 h-4 w-4" />
-
                 LinkedIn
               </a>
             )}
@@ -1306,8 +1309,7 @@ function ApplicationCard({
             type="button"
             onClick={() =>
               setShowDetails(
-                (current) =>
-                  !current
+                (current) => !current
               )
             }
             className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-black text-[#07133c] transition hover:bg-slate-50"
@@ -1327,9 +1329,7 @@ function ApplicationCard({
               className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-700 to-pink-600 px-4 py-3 text-sm font-black text-white shadow-lg transition hover:scale-[1.01]"
             >
               <FileText className="mr-2 h-4 w-4" />
-
               Open CV
-
               <ExternalLink className="ml-2 h-4 w-4" />
             </a>
           ) : (
@@ -1337,6 +1337,27 @@ function ApplicationCard({
               CV unavailable
             </span>
           )}
+
+          <button
+            type="button"
+            onClick={() =>
+              onDecline(application)
+            }
+            disabled={deleting}
+            className="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm font-black text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {deleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Removing...
+              </>
+            ) : (
+              <>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Decline applicant
+              </>
+            )}
+          </button>
         </div>
       </div>
 
@@ -1363,19 +1384,14 @@ function ApplicationCard({
               0 ? (
                 <div className="mt-4 space-y-3">
                   {screeningResponses.map(
-                    (
-                      response,
-                      index
-                    ) => (
+                    (response, index) => (
                       <div
                         key={`${response.question}-${index}`}
                         className="rounded-xl border border-violet-200 bg-white p-4"
                       >
                         <p className="text-sm font-black text-slate-800">
                           {index + 1}.{" "}
-                          {
-                            response.question
-                          }
+                          {response.question}
                         </p>
 
                         <p className="mt-2 whitespace-pre-wrap text-sm font-semibold text-slate-600">
@@ -1479,6 +1495,11 @@ export default function CareersAdmin() {
     setDeletingJobId,
   ] = useState(null);
 
+  const [
+  deletingApplicationId,
+  setDeletingApplicationId,
+  ] = useState(null);
+
   const publishedCount = useMemo(
     () =>
       jobs.filter(
@@ -1490,19 +1511,13 @@ export default function CareersAdmin() {
   const draftCount =
     jobs.length - publishedCount;
 
-  const filteredApplications =
-    useMemo(() => {
-      const query =
-        applicationSearch
-          .trim()
-          .toLowerCase();
+  const filteredApplications = useMemo(() => {
+    const query = applicationSearch
+      .trim()
+      .toLowerCase();
 
-      if (!query) {
-        return applications;
-      }
-
-      return applications.filter(
-        (application) =>
+    const matchingApplications = query
+      ? applications.filter((application) =>
           [
             application.fullName,
             application.email,
@@ -1513,11 +1528,62 @@ export default function CareersAdmin() {
               .toLowerCase()
               .includes(query)
           )
-      );
-    }, [
-      applications,
-      applicationSearch,
-    ]);
+        )
+      : [...applications];
+
+    return matchingApplications.sort(
+      (applicationA, applicationB) => {
+        const roleComparison = String(
+          applicationA.roleTitle ||
+            "Role unavailable"
+        ).localeCompare(
+          String(
+            applicationB.roleTitle ||
+              "Role unavailable"
+          ),
+          "en-GB",
+          {
+            sensitivity: "base",
+          }
+        );
+
+        if (roleComparison !== 0) {
+          return roleComparison;
+        }
+
+        return (
+          new Date(
+            applicationB.submittedAt || 0
+          ).getTime() -
+          new Date(
+            applicationA.submittedAt || 0
+          ).getTime()
+        );
+      }
+    );
+  }, [
+    applications,
+    applicationSearch,
+  ]);
+
+  const groupedApplications = useMemo(() => {
+    return filteredApplications.reduce(
+      (groups, application) => {
+        const roleTitle =
+          application.roleTitle?.trim() ||
+          "Role unavailable";
+
+        if (!groups[roleTitle]) {
+          groups[roleTitle] = [];
+        }
+
+        groups[roleTitle].push(application);
+
+        return groups;
+      },
+      {}
+    );
+  }, [filteredApplications]);
 
   const roleApplicationCount =
     useMemo(
@@ -1679,6 +1745,7 @@ export default function CareersAdmin() {
       setShowEditor(false);
       setPageError("");
     }
+    setDeletingApplicationId(null);
   }
 
   function showRoles() {
@@ -1762,6 +1829,46 @@ export default function CareersAdmin() {
       setDeletingJobId(null);
     }
   }
+
+  async function handleDeclineApplication(
+  application
+) {
+  const confirmed = window.confirm(
+    `Decline ${application.fullName} for "${application.roleTitle || "this role"}"?\n\nThis permanently deletes the application from the database and cannot be undone.`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  setDeletingApplicationId(
+    application.id
+  );
+
+  setPageError("");
+
+  try {
+    await careersApi.deleteApplication(
+      application.id
+    );
+
+    setApplications((current) =>
+      current.filter(
+        (item) =>
+          item.id !== application.id
+      )
+    );
+  } catch (error) {
+    setPageError(
+      getErrorMessage(
+        error,
+        "The application could not be deleted."
+      )
+    );
+  } finally {
+    setDeletingApplicationId(null);
+  }
+}
 
   if (checkingSession) {
     return (
@@ -1991,17 +2098,58 @@ export default function CareersAdmin() {
                 </p>
               </div>
             ) : (
-              <div className="mt-6 space-y-4">
-                {filteredApplications.map(
-                  (application) => (
-                    <ApplicationCard
-                      key={
-                        application.id
-                      }
-                      application={
-                        application
-                      }
-                    />
+              <div className="mt-8 space-y-10">
+                {Object.entries(
+                  groupedApplications
+                ).map(
+                  ([
+                    roleTitle,
+                    roleApplications,
+                  ]) => (
+                    <section key={roleTitle}>
+                      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#07133c] px-5 py-4 text-white">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-cyan-300/10 text-cyan-300">
+                            <Briefcase className="h-5 w-5" />
+                          </span>
+
+                          <div className="min-w-0">
+                            <h3 className="truncate text-lg font-black">
+                              {roleTitle}
+                            </h3>
+
+                            <p className="mt-0.5 text-xs font-semibold text-white/65">
+                              Sorted by newest application first
+                            </p>
+                          </div>
+                        </div>
+
+                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-cyan-200">
+                          {roleApplications.length}{" "}
+                          {roleApplications.length === 1
+                            ? "applicant"
+                            : "applicants"}
+                        </span>
+                      </div>
+
+                      <div className="space-y-4">
+                        {roleApplications.map(
+                          (application) => (
+                            <ApplicationCard
+                              key={application.id}
+                              application={application}
+                              deleting={
+                                deletingApplicationId ===
+                                application.id
+                              }
+                              onDecline={
+                                handleDeclineApplication
+                              }
+                            />
+                          )
+                        )}
+                      </div>
+                    </section>
                   )
                 )}
               </div>
