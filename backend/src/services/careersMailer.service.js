@@ -1,4 +1,20 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import nodemailer from "nodemailer";
+
+const currentFilePath =
+  fileURLToPath(import.meta.url);
+
+const currentDirectory =
+  path.dirname(currentFilePath);
+
+const emailLogoPath = path.resolve(
+  currentDirectory,
+  "../assets/snz-email-logo.png"
+);
+
+const emailLogoCid =
+  "snz-email-logo";
 
 function booleanFromEnvironment(
   value
@@ -532,8 +548,16 @@ export async function sendCareersApplicationEmail({
     subject,
     text,
     html,
+
+    attachments: [
+      {
+        filename: "snz-email-logo.png",
+        path: emailLogoPath,
+        cid: emailLogoCid,
+      },
+    ],
   });
-}
+  }
 
 export async function sendCareersDeclineEmail({
   application,
@@ -625,17 +649,30 @@ export async function sendCareersDeclineEmail({
                 "
               >
                 <tr>
-                  <td
+                 <td
                     style="
                       background:#07133c;
                       padding:28px 32px;
                       color:#ffffff;
                     "
                   >
+                    <img
+                      src="cid:snz-email-logo"
+                      alt="Smart Net Zero"
+                      style="
+                        display:block;
+                        width:56px;
+                        height:auto;
+                        margin:0 0 14px;
+                      "
+                    />
+
                     <h1
                       style="
                         margin:0;
                         font-size:24px;
+                        line-height:1.2;
+                        color:#ffffff;
                       "
                     >
                       Smart Net Zero
@@ -752,6 +789,14 @@ export async function sendCareersDeclineEmail({
     subject,
     text,
     html,
+
+    attachments: [
+      {
+        filename: "snz-email-logo.png",
+        path: emailLogoPath,
+        cid: emailLogoCid,
+      },
+    ],
   });
 
   return {
