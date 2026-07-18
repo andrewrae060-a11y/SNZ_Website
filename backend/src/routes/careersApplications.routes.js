@@ -15,8 +15,8 @@ import supabaseAdmin from
 
 import {
   sendCareersApplicationEmail,
-} from
-  "../services/careersMailer.service.js";
+  sendCareersDeclineEmail,
+} from "../services/careersMailer.service.js";
 
 import requireCareersAdmin from
   "../middleware/requireCareersAdmin.js";
@@ -24,6 +24,7 @@ import requireCareersAdmin from
 import {
   createCareersApplication,
   deleteCareersApplication,
+  getCareersApplicationById,
   getCareersApplications,
   getPublishedJobById,
   markApplicationEmailSent,
@@ -460,9 +461,11 @@ router.get(
 );
 
 /*
- * Admin-only application deletion.
+ * Admin-only application decline.
  *
- * Final endpoint:
+ * Sends the decline email first and then
+ * permanently removes the application.
+ *
  * DELETE /api/careers/applications/:applicationId
  */
 router.delete(
@@ -476,12 +479,9 @@ router.delete(
     next
   ) => {
     try {
-      const applicationId =
-        String(
-          req.params
-            .applicationId ||
-          ""
-        ).trim();
+      const applicationId = String(
+        req.params.applicationId || ""
+      ).trim();
 
       if (!applicationId) {
         return res
@@ -494,6 +494,74 @@ router.delete(
           });
       }
 
+      const application =
+        await getCareersApplicationById(
+          applicationId
+        );
+
+      if (!application) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+
+            message:
+              "Application not found.",
+          });
+      }
+
+      /*
+       * Send before deleting. If sending fails,
+       * retain the application so the admin can
+       * try again.
+       */
+      await sendCareersDeclineEmail({
+        application,
+      });
+
+      /*
+       * Remove the CV from private storage.
+       * Treat storage cleanup failure as
+       * non-fatal so the database record can
+       * still be removed.
+       */
+      if (
+        application.cv_bucket &&
+        application.cv_path
+      ) {
+        try {
+          const storageResult =
+            await supabaseAdmin
+              .storage
+              .from(
+                application.cv_bucket
+              )
+              .remove([
+                application.cv_path,
+              ]);
+
+          if (storageResult.error) {
+            console.error(
+              "Applicant CV could not be removed:",
+              {
+                applicationId,
+
+                error:
+                  storageResult.error,
+              }
+            );
+          }
+        } catch (storageError) {
+          console.error(
+            "Applicant CV cleanup failed:",
+            {
+              applicationId,
+              error: storageError,
+            }
+          );
+        }
+      }
+
       await deleteCareersApplication(
         applicationId
       );
@@ -504,11 +572,18 @@ router.delete(
           success: true,
 
           message:
-            "Application deleted.",
+            "The applicant was notified and the application was deleted.",
 
           applicationId,
+
+          emailSent: true,
         });
     } catch (error) {
+      console.error(
+        "Applicant decline failed:",
+        error
+      );
+
       return next(error);
     }
   }

@@ -84,6 +84,46 @@ export async function getCareersApplications() {
   return rows;
 }
 
+export async function getCareersApplicationById(
+  applicationId
+) {
+  const cleanApplicationId = String(
+    applicationId || ""
+  ).trim();
+
+  if (!cleanApplicationId) {
+    throw new Error(
+      "Application ID is required."
+    );
+  }
+
+  const rows = await sql`
+    select
+      id,
+      job_id,
+      role_title,
+      full_name,
+      email,
+      phone,
+      linkedin_url,
+      message,
+      screening_responses,
+      cv_bucket,
+      cv_path,
+      cv_original_name,
+      cv_mime_type,
+      cv_size_bytes,
+      status,
+      email_notification_sent,
+      submitted_at
+    from public.careers_applications
+    where id = ${cleanApplicationId}
+    limit 1
+  `;
+
+  return rows[0] || null;
+}
+
 export async function createCareersApplication({
   jobId,
   roleTitle,

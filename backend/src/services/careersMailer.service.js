@@ -534,3 +534,228 @@ export async function sendCareersApplicationEmail({
     html,
   });
 }
+
+export async function sendCareersDeclineEmail({
+  application,
+}) {
+  const transporter =
+    createTransporter();
+
+  const applicantName = String(
+    application?.full_name ||
+      application?.fullName ||
+      "Applicant"
+  ).trim();
+
+  const applicantEmail = String(
+    application?.email || ""
+  ).trim();
+
+  const roleTitle = String(
+    application?.role_title ||
+      application?.roleTitle ||
+      "the position"
+  ).trim();
+
+  if (!applicantEmail) {
+    throw new Error(
+      "The applicant email address is missing."
+    );
+  }
+
+  const from =
+    process.env.MAIL_FROM?.trim() ||
+    process.env.SMTP_USER?.trim() ||
+    "careers@smartnetzero.co.uk";
+
+  const subject =
+    `Your application for ${roleTitle} – Smart Net Zero`;
+
+  const text = [
+    `Dear ${applicantName},`,
+    "",
+    `Thank you for taking the time to apply for the ${roleTitle} position at Smart Net Zero.`,
+    "",
+    "After careful consideration, we are sorry to let you know that your application has not been successful on this occasion.",
+    "",
+    "We appreciate your interest in Smart Net Zero and the time you invested in your application.",
+    "",
+    "We wish you every success in your job search and future career.",
+    "",
+    "Kind regards,",
+    "Smart Net Zero Careers Team",
+  ].join("\n");
+
+  const html = `
+    <!doctype html>
+    <html lang="en">
+      <body
+        style="
+          margin:0;
+          padding:0;
+          background:#f1f5f9;
+          font-family:Arial,sans-serif;
+          color:#172033;
+        "
+      >
+        <table
+          role="presentation"
+          width="100%"
+          cellpadding="0"
+          cellspacing="0"
+          style="
+            width:100%;
+            background:#f1f5f9;
+            padding:32px 16px;
+          "
+        >
+          <tr>
+            <td align="center">
+              <table
+                role="presentation"
+                width="100%"
+                cellpadding="0"
+                cellspacing="0"
+                style="
+                  width:100%;
+                  max-width:640px;
+                  background:#ffffff;
+                  border-radius:20px;
+                  overflow:hidden;
+                "
+              >
+                <tr>
+                  <td
+                    style="
+                      background:#07133c;
+                      padding:28px 32px;
+                      color:#ffffff;
+                    "
+                  >
+                    <h1
+                      style="
+                        margin:0;
+                        font-size:24px;
+                      "
+                    >
+                      Smart Net Zero
+                    </h1>
+
+                    <p
+                      style="
+                        margin:8px 0 0;
+                        color:#bae6fd;
+                        font-size:14px;
+                        font-weight:bold;
+                      "
+                    >
+                      Careers Team
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td
+                    style="
+                      padding:32px;
+                    "
+                  >
+                    <p
+                      style="
+                        margin:0 0 20px;
+                        font-size:16px;
+                        line-height:1.7;
+                      "
+                    >
+                      Dear ${escapeHtml(
+                        applicantName
+                      )},
+                    </p>
+
+                    <p
+                      style="
+                        margin:0 0 20px;
+                        font-size:16px;
+                        line-height:1.7;
+                      "
+                    >
+                      Thank you for taking the time to apply for the
+                      <strong>
+                        ${escapeHtml(
+                          roleTitle
+                        )}
+                      </strong>
+                      position at Smart Net Zero.
+                    </p>
+
+                    <p
+                      style="
+                        margin:0 0 20px;
+                        font-size:16px;
+                        line-height:1.7;
+                      "
+                    >
+                      After careful consideration, we are sorry to let you know
+                      that your application has not been successful on this
+                      occasion.
+                    </p>
+
+                    <p
+                      style="
+                        margin:0 0 20px;
+                        font-size:16px;
+                        line-height:1.7;
+                      "
+                    >
+                      We appreciate your interest in Smart Net Zero and the time
+                      you invested in your application.
+                    </p>
+
+                    <p
+                      style="
+                        margin:0 0 20px;
+                        font-size:16px;
+                        line-height:1.7;
+                      "
+                    >
+                      We wish you every success in your job search and future
+                      career.
+                    </p>
+
+                    <p
+                      style="
+                        margin:28px 0 0;
+                        font-size:16px;
+                        line-height:1.7;
+                      "
+                    >
+                      Kind regards,<br />
+
+                      <strong>
+                        Smart Net Zero Careers Team
+                      </strong>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `;
+
+  await transporter.sendMail({
+    from,
+    to: applicantEmail,
+    replyTo: from,
+    subject,
+    text,
+    html,
+  });
+
+  return {
+    sent: true,
+    recipient: applicantEmail,
+  };
+}

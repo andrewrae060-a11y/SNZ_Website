@@ -1349,7 +1349,7 @@ function ApplicationCard({
             {deleting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Removing...
+                Notifying...
               </>
             ) : (
               <>
@@ -1834,7 +1834,7 @@ export default function CareersAdmin() {
   application
 ) {
   const confirmed = window.confirm(
-    `Decline ${application.fullName} for "${application.roleTitle || "this role"}"?\n\nThis permanently deletes the application from the database and cannot be undone.`
+    `Decline ${application.fullName} for "${application.roleTitle || "this role"}"?\n\nA decline email will be sent to ${application.email}. Once the email has been sent, the application and CV will be permanently deleted.\n\nThis cannot be undone.`
   );
 
   if (!confirmed) {
