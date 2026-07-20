@@ -871,7 +871,7 @@ function ApplyForm({
         </label>
 
         {screeningQuestions.length > 0 && (
-          <section className="rounded-2xl border border-violet-200 bg-violet-50/70 p-5">
+          <section className="min-w-0 rounded-2xl border border-violet-200 bg-violet-50/70 p-5">
             <h3 className="text-base font-black text-[#07133c]">
               Screening Questions
             </h3>
@@ -881,90 +881,101 @@ function ApplyForm({
             </p>
 
             <div className="mt-5 space-y-5">
-            {screeningQuestions.map(
-              (screeningQuestion, index) => {
-                const fieldName =
-                  `screening-question-${index}`;
+              {screeningQuestions.map(
+                (screeningQuestion, index) => {
+                  const fieldName =
+                    `screening-question-${index}`;
 
-                const selectedAnswer =
-                  form.screeningAnswers?.[
-                    index
-                  ] || "";
+                  const selectedAnswer =
+                    form.screeningAnswers?.[
+                      index
+                    ] || "";
 
-                const isOpenText =
-                  screeningQuestion.answerType ===
-                  "text";
+                  const isOpenText =
+                    screeningQuestion.answerType ===
+                    "text";
 
-                return (
-                  <fieldset
-                    key={`${screeningQuestion.question}-${index}`}
-                    className="rounded-2xl border border-violet-200 bg-white p-4"
-                  >
-                    <legend className="px-1 text-sm font-black leading-6 text-slate-800">
-                      {index + 1}.{" "}
-                      {screeningQuestion.question}
+                  return (
+                    <div
+                      key={`${screeningQuestion.question}-${index}`}
+                      className="min-w-0 overflow-hidden rounded-2xl border border-violet-200 bg-white p-4 shadow-sm"
+                    >
+                      <p
+                        id={`${fieldName}-label`}
+                        className="max-w-full break-words text-sm font-black leading-6 text-slate-800 [overflow-wrap:anywhere]"
+                      >
+                        {index + 1}.{" "}
+                        {screeningQuestion.question}
 
-                      <span className="ml-1 text-rose-600">
-                        *
-                      </span>
-                    </legend>
+                        <span className="ml-1 text-rose-600">
+                          *
+                        </span>
+                      </p>
 
-                    {isOpenText ? (
-                      <textarea
-                        name={fieldName}
-                        rows={4}
-                        value={selectedAnswer}
-                        onChange={(event) =>
-                          handleScreeningAnswer(
-                            index,
-                            event.target.value
-                          )
-                        }
-                        maxLength={1500}
-                        required
-                        placeholder="Enter your answer..."
-                        className="mt-3 w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
-                      />
-                    ) : (
-                      <div className="mt-3 grid grid-cols-2 gap-3">
-                        {["Yes", "No"].map(
-                          (answer) => (
-                            <label
-                              key={answer}
-                              className={`flex cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-sm font-black transition ${
-                                selectedAnswer === answer
-                                  ? "border-violet-500 bg-violet-100 text-violet-800 ring-2 ring-violet-200"
-                                  : "border-slate-200 bg-white text-slate-700 hover:border-violet-300 hover:bg-violet-50"
-                              }`}
-                            >
-                              <input
-                                type="radio"
-                                name={fieldName}
-                                value={answer}
-                                checked={
-                                  selectedAnswer ===
-                                  answer
-                                }
-                                onChange={() =>
-                                  handleScreeningAnswer(
-                                    index,
-                                    answer
-                                  )
-                                }
-                                className="mr-2 h-4 w-4 border-slate-300 text-violet-700 focus:ring-violet-600"
-                                required
-                              />
+                      {isOpenText ? (
+                        <textarea
+                          name={fieldName}
+                          aria-labelledby={`${fieldName}-label`}
+                          rows={4}
+                          value={selectedAnswer}
+                          onChange={(event) =>
+                            handleScreeningAnswer(
+                              index,
+                              event.target.value
+                            )
+                          }
+                          maxLength={1500}
+                          required
+                          placeholder="Enter your answer..."
+                          className="mt-3 block w-full min-w-0 resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                        />
+                      ) : (
+                        <fieldset
+                          aria-labelledby={`${fieldName}-label`}
+                          className="mt-3 min-w-0"
+                        >
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {["Yes", "No"].map(
+                              (answer) => (
+                                <label
+                                  key={answer}
+                                  className={`flex min-w-0 cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-sm font-black transition ${
+                                    selectedAnswer === answer
+                                      ? "border-violet-500 bg-violet-100 text-violet-800 ring-2 ring-violet-200"
+                                      : "border-slate-200 bg-white text-slate-700 hover:border-violet-300 hover:bg-violet-50"
+                                  }`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name={fieldName}
+                                    value={answer}
+                                    checked={
+                                      selectedAnswer ===
+                                      answer
+                                    }
+                                    onChange={() =>
+                                      handleScreeningAnswer(
+                                        index,
+                                        answer
+                                      )
+                                    }
+                                    className="mr-2 h-4 w-4 shrink-0 border-slate-300 text-violet-700 focus:ring-violet-600"
+                                    required
+                                  />
 
-                              {answer}
-                            </label>
-                          )
-                        )}
-                      </div>
-                    )}
-                  </fieldset>
-                );
-              }
-            )}  
+                                  <span className="break-words">
+                                    {answer}
+                                  </span>
+                                </label>
+                              )
+                            )}
+                          </div>
+                        </fieldset>
+                      )}
+                    </div>
+                  );
+                }
+              )}
             </div>
           </section>
         )}

@@ -49,7 +49,7 @@ const leaders = [
   },
   {
     name: "Alison MacLeod",
-    role: "Finance Director",
+    role: "Group Finance Director",
     text: "Drives financial strategy and governance, ensuring long-term stability and sustainable growth.",
     image: "/alison-macleod-profile.png",
     linkedin: "https://www.linkedin.com/in/alison-macleod-26652035/",
