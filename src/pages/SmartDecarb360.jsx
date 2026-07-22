@@ -2227,7 +2227,8 @@ export default function SmartDecarb360({ goToPage, openEnquiryForm }) {
       <SNZHeader
         goToPage={goToPage}
         openEnquiryForm={() => setRequestDemoOpen(true)}
-       />
+        activePage="SmartDecarb360"
+      />
 
       <main id="product">
         <section className="relative overflow-hidden bg-[#080536] text-white">
