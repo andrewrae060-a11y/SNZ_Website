@@ -490,15 +490,40 @@ export default function SNZHeader({
   };
 
   const isActive = (label) => {
-    const pageMap = {
-      Home: "Homepage",
-      Research: "Research",
-      "About Us": "AboutUs",
-      Careers: "Careers",
-    };
+  const activePagesByMenu = {
+    Home: ["Homepage"],
 
-    return pageMap[label] === activePage;
+    Services: [
+      "SustainabilityNetZero",
+      "SmartEnergyManagement",
+      "OTSecurityResilience",
+      "SmartRegulations",
+    ],
+
+    Solutions: [
+      "SmartApplications",
+      "SmartDecarb360",
+      "SpecialistConsultancy",
+      "LabTestingCompliance",
+      "SmartInfrastructureAssurance",
+      "EnergyOptimisation",
+    ],
+
+    Industries: [
+      "BuiltEnvironment",
+      "PublicSectorLocalAuthorities",
+      "ManufacturersConnectedProducts",
+      "EnergyUtilitiesCriticalInfrastructure",
+      "DataCentres",
+    ],
+
+    Research: ["Research"],
+    "About Us": ["AboutUs"],
+    Careers: ["Careers"],
   };
+
+  return activePagesByMenu[label]?.includes(activePage) ?? false;
+};
 
   const openSearch = () => {
     setSearchOpen(true);
