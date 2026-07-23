@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-   "api": "node backend/src/server.js",
+    "api": "node backend/src/server.js",
     "server": "node backend/src/server.js",
     "server:dev": "node --watch backend/src/server.js",
     "cms:seed": "node server/cms/seed.js",
+    "generate:sitemap": "node server/routes/generateSitemap.js",
+    "prebuild": "npm run generate:sitemap",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
