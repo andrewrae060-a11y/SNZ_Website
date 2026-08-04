@@ -770,20 +770,18 @@ export default function AdminCMS({ goToPage }) {
                 {items.map((item) => (
                   <article
                     key={item.id}
-                    className="flex flex-col gap-4 rounded-2xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex min-w-0 flex-col gap-4 rounded-2xl border border-slate-200 p-4 sm:flex-row sm:items-center"
                   >
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="truncate font-black">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 flex-wrap items-start gap-2">
+                        <h3 className="min-w-0 flex-1 break-words font-black">
                           {getItemTitle(item)}
                         </h3>
 
-                        <StatusBadge
-                          status={item.status}
-                        />
+                        <StatusBadge status={item.status} />
                       </div>
 
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 break-all text-sm text-slate-500">
                         Key: {item.itemKey}
                       </p>
 
@@ -792,12 +790,10 @@ export default function AdminCMS({ goToPage }) {
                       </p>
                     </div>
 
-                    <div className="flex shrink-0 gap-2">
+                    <div className="flex shrink-0 gap-2 sm:ml-auto">
                       <button
                         type="button"
-                        onClick={() =>
-                          setEditingItem(item)
-                        }
+                        onClick={() => setEditingItem(item)}
                         className="inline-flex items-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold transition hover:bg-slate-50"
                       >
                         <Edit3 className="mr-2 h-4 w-4" />
@@ -806,9 +802,7 @@ export default function AdminCMS({ goToPage }) {
 
                       <button
                         type="button"
-                        onClick={() =>
-                          handleDelete(item)
-                        }
+                        onClick={() => handleDelete(item)}
                         className="inline-flex items-center rounded-xl border border-red-200 px-3 py-2 text-sm font-bold text-red-700 transition hover:bg-red-50"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
