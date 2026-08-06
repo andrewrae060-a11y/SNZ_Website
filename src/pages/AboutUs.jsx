@@ -11,6 +11,7 @@ import {
   ClipboardCheck,
   ExternalLink,
   FileCheck2,
+  FileScan,
   Gauge,
   Globe2,
   Handshake,
@@ -20,6 +21,7 @@ import {
   PlugZap,
   Radio,
   RadioTower,
+  ScanLine,
   Settings2,
   ShieldCheck,
   ShieldPlus,
@@ -540,11 +542,21 @@ function BoomPartnerModal({ isOpen, onClose }) {
     {
       label: "Digital Twins",
       icon: Building2,
-      colour: "border-cyan-400/50 text-cyan-300",
+      colour: "border-yellow-300/60 text-yellow-200",
     },
     {
       label: "3D Metadata",
       icon: Monitor,
+      colour: "border-cyan-400/50 text-cyan-300",
+    },
+    {
+      label: "Drawing-to-Data",
+      icon: FileScan,
+      colour: "border-pink-400/50 text-pink-300",
+    },
+    {
+      label: "As Built Capture",
+      icon: ScanLine,
       colour: "border-yellow-300/60 text-yellow-200",
     },
     {
@@ -599,11 +611,17 @@ function BoomPartnerModal({ isOpen, onClose }) {
                 Partner Spotlight
               </p>
 
-              <div className="mt-7">
+              <div className="mt-7 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
                 <img
                   src="/boom-logo-white.png"
                   alt="BOOM Interactive"
-                  className="h-auto w-[390px] max-w-full object-contain"
+                  className="h-auto w-[195px] max-w-full object-contain"
+                />
+
+                <img
+                  src="/cs3d-logo-white.png"
+                  alt="CoreSpec3D"
+                  className="h-auto w-[150px] max-w-full object-contain"
                 />
               </div>
 
@@ -614,10 +632,7 @@ function BoomPartnerModal({ isOpen, onClose }) {
               <div className="mt-5 h-1 w-20 rounded-full bg-gradient-to-r from-cyan-300 via-pink-400 to-yellow-300" />
 
               <p className="mt-5 max-w-xl text-base font-semibold leading-7 text-white/76">
-                BOOM Interactive helps turn building information into more
-                usable, collaborative and intelligent digital asset data —
-                supporting smarter planning, retrofit, operations and lifecycle
-                decision-making.
+                CoreSpec, from BOOM Interactive, turns raw building information — drawings, scans and images — into structured, editable 3D asset data. That data powers smarter planning, retrofit, operations and lifecycle decisions across an estate.
               </p>
             </div>
 
@@ -642,40 +657,35 @@ function BoomPartnerModal({ isOpen, onClose }) {
               <div className="flex gap-3">
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-cyan-400" />
                 <p className="text-sm font-semibold leading-6 text-white/76">
-                  BOOM Interactive is an AI technology company focused on the
-                  built world.
+                  CoreSpec is BOOM's AI platform for building data which converts drawings, plans and imagery into structured, editable 3D building data.
                 </p>
               </div>
 
               <div className="flex gap-3">
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-cyan-400" />
                 <p className="text-sm font-semibold leading-6 text-white/76">
-                  Supports workflows from design through to facilities
-                  management.
+                  Uses image recognition and drawing-to-data AI to capture as-built conditions faster than manual survey.
                 </p>
               </div>
 
               <div className="flex gap-3">
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-cyan-400" />
                 <p className="text-sm font-semibold leading-6 text-white/76">
-                  Platform capabilities include image recognition,
-                  drawing-to-data conversion and editable 3D metadata.
+                  Produces rich 3D metadata — spaces, assets and attributes — not just geometry.
                 </p>
               </div>
 
               <div className="flex gap-3">
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-cyan-400" />
                 <p className="text-sm font-semibold leading-6 text-white/76">
-                  Enables real-time collaboration and digital twin workflows for
-                  intelligent building assets.
+                  Enables digital twin and real-time collaboration workflows across design, construction and facilities management.
                 </p>
               </div>
 
               <div className="flex gap-3">
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-cyan-400" />
                 <p className="text-sm font-semibold leading-6 text-white/76">
-                  Helps create clearer, more actionable building data for asset
-                  owners, operators and project teams.
+                  Delivers clearer, more actionable building data for asset owners, operators and project teams.
                 </p>
               </div>
             </div>
@@ -699,8 +709,7 @@ function BoomPartnerModal({ isOpen, onClose }) {
               <div className="flex gap-3">
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-pink-400" />
                 <p className="text-sm font-semibold leading-6 text-white/76">
-                  Joined-up Smart Net Zero advisory strengthened by BOOM’s AI,
-                  3D data and digital twin capabilities.
+                  Smart Net Zero advisory, strengthened by CoreSpec's AI and 3D data.
                 </p>
               </div>
 
@@ -723,16 +732,21 @@ function BoomPartnerModal({ isOpen, onClose }) {
               <div className="flex gap-3">
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-pink-400" />
                 <p className="text-sm font-semibold leading-6 text-white/76">
-                  Stronger pathway from building data capture to practical
-                  retrofit, compliance and lifecycle improvement actions.
+                  A stronger pathway from building-data capture through to practical retrofit, compliance and lifecycle actions.
                 </p>
               </div>
 
               <div className="flex gap-3">
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-pink-400" />
                 <p className="text-sm font-semibold leading-6 text-white/76">
-                  Greater confidence when making investment decisions across
-                  complex, data-poor or hard-to-assess building portfolios.
+                  Greater confidence in investment decisions across complex, data-poor or hard-to-assess portfolios.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-pink-400" />
+                <p className="text-sm font-semibold leading-6 text-white/76">
+                  A single source of truth for building data that both advisory and delivery teams can work from.
                 </p>
               </div>
             </div>
@@ -760,11 +774,11 @@ function BoomPartnerModal({ isOpen, onClose }) {
             >
               <div className="h-3 rounded-t-2xl bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-300" />
 
-              <div className="overflow-hidden">
+              <div className="flex aspect-[16/10] items-center justify-center overflow-hidden bg-[#05080c] p-3">
                 <img
                   src="/boom-website-snapshot.png"
                   alt="BOOM Interactive website snapshot"
-                  className="h-auto w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                  className="max-h-full max-w-full object-contain transition duration-500 group-hover:scale-[1.02]"
                 />
               </div>
 
@@ -1850,7 +1864,7 @@ export default function AboutUs({ goToPage, openEnquiryForm }) {
                   <img
                     src="/boom-logo-dark.png"
                     alt="BOOM Interactive"
-                    className="max-h-20 w-full max-w-[260px] object-contain"
+                    className="max-h-40 w-full max-w-[520px] object-contain"
                   />
                 </button>
 
