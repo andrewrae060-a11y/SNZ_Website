@@ -96,7 +96,7 @@ const promises = [
 ];
 
 const boomPartnerDetails = {
-  website: "https://www.boominc.ai/",
+  website: "https://www.cs3d.ai/",
   pedigree:
     "BOOM Interactive is an AI technology company focused on the built world, supporting workflows from design through to facilities management. Its platform capabilities include image recognition, drawing-to-data conversion, editable 3D metadata, real-time collaboration and digital twin workflows.",
   benefits: [
@@ -777,14 +777,14 @@ function BoomPartnerModal({ isOpen, onClose }) {
               <div className="flex aspect-[16/10] items-center justify-center overflow-hidden bg-[#05080c] p-3">
                 <img
                   src="/boom-website-snapshot.png"
-                  alt="BOOM Interactive website snapshot"
+                  alt="CoreSpec by BOOM Interactive website snapshot"
                   className="max-h-full max-w-full object-contain transition duration-500 group-hover:scale-[1.02]"
                 />
               </div>
 
               <div className="flex items-center justify-between gap-3 p-4">
                 <span className="text-sm font-black text-yellow-200">
-                  www.boominc.ai
+                  www.cs3d.ai
                 </span>
 
                 <ExternalLink className="h-5 w-5 shrink-0 text-yellow-200 transition group-hover:translate-x-1" />
