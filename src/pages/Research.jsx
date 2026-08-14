@@ -947,9 +947,7 @@ function AbstractModal({ item, onClose }) {
             </div>
 
             <p className="mt-5 leading-7 text-slate-600">
-              {item.description} This prototype abstract can later be connected
-              to your research content management system, subscriber database,
-              or gated document library.
+              {item.description} 
             </p>
 
             <button
