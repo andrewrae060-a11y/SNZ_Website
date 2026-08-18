@@ -53,6 +53,10 @@ const OTSecurityResilience = lazy(() =>
   import("./pages/OTSecurityResilience")
 );
 
+const OTVisibilityReview = lazy(() =>
+  import("./pages/OTVisibilityReview")
+);
+
 const SmartRegulations = lazy(() =>
   import("./pages/SmartRegulations")
 );
@@ -147,6 +151,9 @@ const PAGE_PATHS = {
 
   OTSecurityResilience:
     "/solutions/ot-security-resilience",
+
+  OTVisibilityReview:
+  "/ot-visibility-review",
 
   SmartRegulations:
     "/solutions/smart-regulations",
@@ -361,6 +368,17 @@ export default function App() {
           element={
             <LazyPage message="Loading OT Security and Resilience...">
               <OTSecurityResilience
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/ot-visibility-review"
+          element={
+            <LazyPage message="Loading OT Visibility Review...">
+              <OTVisibilityReview
                 {...sharedPageProps}
               />
             </LazyPage>
