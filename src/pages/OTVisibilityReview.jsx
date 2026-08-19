@@ -180,8 +180,7 @@ function Hero({ openEnquiryForm }) {
             <p className="mt-7 max-w-xl text-lg font-medium leading-8 text-white/82">
               Understand what&apos;s connected across your sites,
               systems and suppliers. An OT visibility review gives
-              you the insight to make smarter, safer and more
-              efficient decisions.
+              you a clearer basis for operational, security, compliance and energy decisions.               
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
