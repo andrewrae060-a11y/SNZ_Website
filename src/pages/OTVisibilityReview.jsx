@@ -147,19 +147,30 @@ const discoveryDeliverables = [
 function Hero({ openEnquiryForm }) {
   return (
     <section className="relative isolate overflow-hidden bg-[#06112e] text-white">
-        <div className="absolute inset-0 -z-30">
+        <div className="absolute inset-0 -z-30 bg-[#06112e]">
+          {/* Blurred fill sits behind the uncropped image so wide viewports have no empty gap. */}
           <img
             src="/ot-visibility-review-hero.png"
-            alt="Operational technology environment within a modern industrial facility"
-            className="h-full w-full object-cover object-center"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full scale-125 object-cover object-center opacity-60 blur-2xl"
           />
+          {/* Wrapper matches the image aspect ratio so the mask fades the image's own left edge into the blurred fill. */}
+          <div className="absolute inset-y-0 left-0 right-0 lg:left-auto lg:aspect-[1672/941] lg:[-webkit-mask-image:linear-gradient(90deg,transparent_0%,rgba(0,0,0,0.45)_14%,#000_36%)] lg:[mask-image:linear-gradient(90deg,transparent_0%,rgba(0,0,0,0.45)_14%,#000_36%)]">
+            <img
+              src="/ot-visibility-review-hero.png"
+              alt="Operational technology environment within a modern industrial facility"
+              className="h-full w-full object-cover object-[62%_45%]"
+            />
+          </div>
         </div>
 
         <div className="absolute inset-0 -z-20 bg-[linear-gradient(90deg,rgba(5,14,40,0.99)_0%,rgba(5,14,40,0.94)_32%,rgba(5,14,40,0.72)_50%,rgba(5,14,40,0.18)_78%,rgba(5,14,40,0.08)_100%)]" />
 
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_22%_80%,rgba(219,39,119,0.14),transparent_28%),radial-gradient(circle_at_58%_28%,rgba(79,70,229,0.12),transparent_26%)]" />
 
-        <div className="mx-auto grid min-h-[540px] max-w-7xl items-center px-5 py-16 lg:grid-cols-[0.56fr_0.44fr] lg:px-8 lg:py-20">
+        {/* Height grows with viewport width so the hero keeps close to the image aspect ratio and the building stays visible. */}
+        <div className="mx-auto grid min-h-[540px] max-w-7xl items-center px-5 py-16 lg:min-h-[clamp(540px,50vw,860px)] lg:grid-cols-[0.56fr_0.44fr] lg:px-8 lg:py-20">
           <div className="max-w-2xl">
             <div className="inline-flex items-center rounded-full border border-pink-500/70 bg-slate-950/30 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-pink-300 backdrop-blur">
               OT Security Service
