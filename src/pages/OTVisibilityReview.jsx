@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import {
+  AlertTriangle,
   ArrowRight,
   Building2,
   Check,
@@ -7,9 +8,11 @@ import {
   ClipboardCheck,
   Download,
   FileSearch,
+  FileCheck2,
   Leaf,
   Network,
   Radio,
+  RefreshCw,
   Search,
   ShieldCheck,
   Users,
@@ -205,6 +208,97 @@ function Hero({ openEnquiryForm }) {
           <div className="hidden lg:block" />
         </div>
       </section>
+  );
+}
+
+function OperationalEnvironmentQuestions() {
+  const questions = [
+    {
+      number: "1",
+      title: "What Is Connected?",
+      text:
+        "Identify the devices, systems and communication pathways supporting your operations.",
+      icon: Network,
+    },
+    {
+      number: "2",
+      title: "What Has Changed?",
+      text:
+        "Identify where the current environment may no longer match records, expectations or actual use.",
+      icon: RefreshCw,
+    },
+    {
+      number: "3",
+      title: "Who Is Responsible?",
+      text:
+        "Clarify ownership across internal teams, suppliers and service providers.",
+      icon: Users,
+    },
+    {
+      number: "4",
+      title: "What Could Be Affected?",
+      text:
+        "Understand the relationships and dependencies that may influence operations, energy use and resilience.",
+      icon: AlertTriangle,
+    },
+    {
+      number: "5",
+      title: "Can You Evidence It?",
+      text:
+        "Build a clearer record to support assurance, planning and future decisions.",
+      icon: FileCheck2,
+    },
+  ];
+
+  return (
+    <section className="bg-white px-5 py-14 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl font-black tracking-tight text-[#101a4a] md:text-4xl">
+            Do You Understand Your Operational Environment?
+          </h2>
+
+          <p className="mx-auto mt-4 max-w-2xl text-base font-medium leading-7 text-slate-600 md:text-lg">
+            Before deciding what to do next, can you answer these
+            questions about your connected environment?
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+          {questions.map((question) => {
+            const Icon = question.icon;
+
+            return (
+              <article
+                key={question.number}
+                className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-violet-300 hover:shadow-xl hover:shadow-violet-950/5"
+              >
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-pink-500 via-violet-600 to-blue-600" />
+
+                <span className="absolute left-4 top-4 grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-violet-600 to-blue-600 text-xs font-black text-white">
+                  {question.number}
+                </span>
+
+                <div className="mx-auto mt-4 grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-violet-50 via-purple-50 to-blue-50 text-violet-700 transition group-hover:scale-105">
+                  <Icon
+                    className="h-10 w-10"
+                    strokeWidth={1.8}
+                  />
+                </div>
+
+                <h3 className="mt-6 text-center text-lg font-black leading-6 text-[#101a4a]">
+                  {question.title}
+                </h3>
+
+                <p className="mt-3 text-center text-sm font-medium leading-6 text-slate-600">
+                  {question.text}
+                </p>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -520,6 +614,8 @@ export default function OTVisibilityReview({
         <Hero
           openEnquiryForm={openEnquiryForm}
         />
+
+        <OperationalEnvironmentQuestions />
 
         <WhyVisibilityMatters />
 
