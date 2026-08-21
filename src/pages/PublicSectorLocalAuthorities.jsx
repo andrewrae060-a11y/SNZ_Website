@@ -3,6 +3,7 @@ import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
 import FAQSection from "../components/FAQSection";
 import { getPageFaqs } from "../data/pageFaqs.js";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   BadgeCheck,
@@ -646,6 +647,7 @@ export default function PublicSectorLocalAuthorities({
   goToPage,
   openEnquiryForm,
 }) {
+  useGoogleTag();
 const faqContent = getPageFaqs(
   "PublicSectorLocalAuthorities"
 );

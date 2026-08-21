@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   BarChart3,
@@ -994,6 +995,7 @@ function Footer() {
 }
 
 export default function Research({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
   useEffect(() => {
         document.title = "Research & Insights | Smart Net Zero";
     }, []);

@@ -4,6 +4,7 @@ import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
 import FAQSection from "../components/FAQSection";
 import { getPageFaqs } from "../data/pageFaqs.js";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   BarChart3,
@@ -609,6 +610,7 @@ function safeGo(goToPage, page) {
 }
 const faqContent = getPageFaqs("BuiltEnvironment");
 export default function BuiltEnvironment({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
   useEffect(() => {
     document.title = "Built Environment | Smart Net Zero";
   }, []);

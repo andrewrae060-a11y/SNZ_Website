@@ -3,6 +3,7 @@ import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
 import FAQSection from "../components/FAQSection";
 import { getPageFaqs } from "../data/pageFaqs.js";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   Activity,
   ArrowRight,
@@ -378,6 +379,7 @@ function HeroDashboardMockup() {
 }
 
 export default function SmartEnergyManagement({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
   const smartEnergyFaqContent = getPageFaqs("SmartEnergyManagement");
 
   useEffect(() => {

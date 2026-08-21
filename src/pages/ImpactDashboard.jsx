@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowLeft,
   ArrowRight,
@@ -780,6 +781,7 @@ function DashboardContent() {
 }
 
 export default function ImpactDashboard({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
 
   useEffect(() => {
     document.title = "SmartImpact360 Dashboard | Smart Net Zero";

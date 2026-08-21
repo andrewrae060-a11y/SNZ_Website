@@ -4,6 +4,7 @@ import SNZFooter from "../components/SNZFooter";
 import FAQSection from "../components/FAQSection";
 import { getPageFaqs } from "../data/pageFaqs.js";
 import { motion } from "framer-motion";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   BarChart3,
@@ -2014,6 +2015,7 @@ function CTASection({ openEnquiryForm }) {
 }
 
 export default function SustainabilityNetZero({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
   const sustainabilityFaqContent = getPageFaqs("SustainabilityNetZero");
   useEffect(() => {
     document.title = "Sustainability & Net Zero | Smart Net Zero";

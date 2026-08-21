@@ -3,6 +3,7 @@ import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
 import FAQSection from "../components/FAQSection";
 import { getPageFaqs } from "../data/pageFaqs.js";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   Activity,
   AlertTriangle,
@@ -1409,6 +1410,7 @@ function CTA({ openEnquiryForm }) {
 }
 
 export default function OTSecurityResilience({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
   const otSecurityFaqContent = getPageFaqs("OTSecurityResilience");
 
   useEffect(() => {

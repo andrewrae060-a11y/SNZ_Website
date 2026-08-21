@@ -23,6 +23,7 @@ import {
 
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 
 /* -------------------------------------------------------------------------- */
 /*                                PRODUCT DATA                                */
@@ -1691,6 +1692,7 @@ export default function SmartApplications({
   openEnquiryForm,
   onEarlyAccessSubmit,
 }) {
+  useGoogleTag();
   const [
     selectedProduct,
     setSelectedProduct,

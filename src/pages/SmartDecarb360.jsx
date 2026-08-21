@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   BarChart3,
@@ -2192,6 +2193,7 @@ function RequestDemoModal({ open, onClose }) {
 }
 
 export default function SmartDecarb360({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
 
   useEffect(() => {
         document.title = "SmartDecarb360 | Smart Net Zero";

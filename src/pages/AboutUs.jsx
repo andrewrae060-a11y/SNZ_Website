@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   BarChart3,
@@ -1665,6 +1666,7 @@ function StatIcon({ type }) {
 }
 
 export default function AboutUs({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
 
   useEffect(() => {
       document.title = "About Us | Smart Net Zero";

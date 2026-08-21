@@ -34,6 +34,7 @@ import {
 
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 
 const regulations = [
   {
@@ -931,6 +932,7 @@ export default function LabTestingCompliance({
   goToPage,
   openEnquiryForm,
 }) {
+  useGoogleTag();
 
     useEffect(() => {
     document.title = "Lab Testing & Compliance | Smart Net Zero";

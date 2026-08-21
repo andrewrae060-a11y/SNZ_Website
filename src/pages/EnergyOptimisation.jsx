@@ -20,6 +20,7 @@ import {
 
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 
 const approachCards = [
   {
@@ -609,6 +610,7 @@ export default function EnergyOptimisation({
   goToPage,
   openEnquiryForm,
 }) {
+  useGoogleTag();
 
 useEffect(() => {
     document.title = "Energy Performance Optimisation | Smart Net Zero";

@@ -3,6 +3,7 @@ import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
 import { useSocialHubContent, subscribeToUpdates } from "../hooks/useSocialHubContent";
 import { AnimatePresence, motion } from "framer-motion";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   BookOpen,
@@ -1843,6 +1844,7 @@ function Toast({ message, onClose }) {
 }
 
 export default function SocialMedia({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
   const { content: cmsContent, loading: cmsLoading, error: cmsError } = useSocialHubContent();
   const [content, setContent] = useState(null);
   const [collection, setCollection] = useState(null);

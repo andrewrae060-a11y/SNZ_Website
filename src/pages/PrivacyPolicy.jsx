@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   CheckCircle2,
@@ -217,6 +218,7 @@ function PolicySection({ section }) {
 }
 
 export default function PrivacyPolicy({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
   useEffect(() => {
     document.title = "Privacy Policy | Smart Net Zero";
   }, []);

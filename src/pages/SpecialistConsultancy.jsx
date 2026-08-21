@@ -26,6 +26,7 @@ import {
 
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 
 /* -------------------------------------------------------------------------- */
 /*                                SERVICE AREAS                               */
@@ -1521,6 +1522,7 @@ export default function SpecialistConsultancy({
   goToPage,
   openEnquiryForm,
 }) {
+  useGoogleTag();
 
     useEffect(() => {
         document.title = "Specialist Consultancy | Smart Net Zero";

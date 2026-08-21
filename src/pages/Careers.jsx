@@ -8,6 +8,7 @@ import {
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
 import { careersApi } from "../lib/careersApi";
+import useGoogleTag from "../hooks/useGoogleTag";
 
 import {
   ArrowRight,
@@ -1273,6 +1274,7 @@ export default function Careers({
   goToPage,
   openEnquiryForm,
 }) {
+  useGoogleTag();
   useEffect(() => {
       document.title = "Careers | Smart Net Zero";
   }, []);

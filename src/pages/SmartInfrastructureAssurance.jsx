@@ -22,6 +22,7 @@ import {
 
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 
 /* -------------------------------------------------------------------------- */
 /*                             LIFECYCLE CONTENT                              */
@@ -1119,6 +1120,7 @@ export default function SmartInfrastructureAssurance({
   goToPage,
   openEnquiryForm,
 }) {
+  useGoogleTag();
 
   useEffect(() => {
   document.title = "Smart Infrastructure Assurance | Smart Net Zero";

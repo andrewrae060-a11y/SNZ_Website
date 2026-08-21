@@ -3,6 +3,7 @@ import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
 import FAQSection from "../components/FAQSection";
 import { getPageFaqs } from "../data/pageFaqs.js";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   AlertTriangle,
   ArrowRight,
@@ -1051,6 +1052,7 @@ export default function ManufacturersConnectedProducts({
   goToPage,
   openEnquiryForm,
 }) {
+  useGoogleTag();
 
   const faqContent = getPageFaqs(
   "ManufacturersConnectedProducts"

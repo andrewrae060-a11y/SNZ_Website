@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   Banknote,
@@ -1619,6 +1620,7 @@ export default function Homepage({
   goToPage,
   openEnquiryForm,
 }) {
+  useGoogleTag();
   useEffect(() => {
     document.title =
       "Smart Net Zero | Smart Infrastructure for a secure, safe and sustainable future";

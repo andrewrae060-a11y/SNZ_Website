@@ -4,6 +4,7 @@ import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
 import FAQSection from "../components/FAQSection";
 import { getPageFaqs } from "../data/pageFaqs.js";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   Building2,
@@ -795,6 +796,7 @@ function CTASection({ openEnquiryForm }) {
 }
 
 export default function SmartRegulations({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
   const smartRegulationsFaqContent = getPageFaqs("SmartRegulations");
 
   useEffect(() => {

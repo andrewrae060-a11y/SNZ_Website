@@ -4,6 +4,7 @@ import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
 import FAQSection from "../components/FAQSection";
 import { getPageFaqs } from "../data/pageFaqs.js";
+import useGoogleTag from "../hooks/useGoogleTag";
 import {
   ArrowRight,
   BarChart3,
@@ -647,6 +648,7 @@ function safeGo(goToPage, page) {
 }
 
 export default function EnergyUtilitiesCriticalInfrastructure({ goToPage, openEnquiryForm }) {
+  useGoogleTag();
 
   const faqContent = getPageFaqs(
   "EnergyUtilitiesCriticalInfrastructure"

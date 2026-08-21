@@ -21,6 +21,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import useGoogleTag from "../hooks/useGoogleTag";
 
 const STATUS_OPTIONS = [
   {
@@ -590,6 +591,7 @@ function RequestCard({
 }
 
 export default function ResearchAdmin() {
+  useGoogleTag();
   useEffect(() => {
         document.title = "Research Admin | Smart Net Zero";
       }, []);

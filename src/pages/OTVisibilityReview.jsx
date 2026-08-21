@@ -20,6 +20,7 @@ import {
 
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import useGoogleTag from "../hooks/useGoogleTag";
 
 const visibilityBenefits = [
   {
@@ -576,6 +577,7 @@ export default function OTVisibilityReview({
   goToPage,
   openEnquiryForm,
 }) {
+  useGoogleTag();
   useEffect(() => {
     document.title =
       "OT Visibility Review | Smart Net Zero";
