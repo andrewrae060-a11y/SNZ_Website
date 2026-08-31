@@ -281,6 +281,8 @@ function getDefaultData(section) {
         channel: "LinkedIn",
         publishedLabel: "Today",
         time: "Today",
+        publishedAt: "",
+        spotlight: false,
         title: "",
         tags: [],
         image: "",
@@ -299,6 +301,8 @@ function getDefaultData(section) {
     case "editorPicks":
       return {
         type: "Article",
+        publishedAt: "",
+        spotlight: false,
         title: "",
         cta: "Read article",
         image: "",
@@ -785,9 +789,6 @@ export default function AdminCMS({ goToPage }) {
                         Key: {item.itemKey}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-400">
-                        Display order: {item.sortOrder}
-                      </p>
                     </div>
 
                     <div className="flex shrink-0 gap-2 sm:ml-auto">
@@ -1028,9 +1029,44 @@ function ContentEditor({
           requestedStatus ||
           form.status ||
           "draft",
-        sortOrder: Number(form.sortOrder) || 0,
         data: normaliseContentUrls(form.data),
       };
+
+      if (
+        requestBody.data.spotlight &&
+        ["channelPosts", "editorPicks"].includes(
+          form.section
+        )
+      ) {
+        const existingSpotlights = [
+          ...(content.channelPosts || []),
+          ...(content.editorPicks || []),
+        ].filter(
+          (item) =>
+            item.id !== form.id &&
+            item.data?.spotlight
+        );
+
+        await Promise.all(
+          existingSpotlights.map((item) =>
+            apiRequest(
+              `/api/admin/content/${item.id}`,
+              {
+                method: "PUT",
+                body: JSON.stringify({
+                  section: item.section,
+                  itemKey: item.itemKey,
+                  status: item.status,
+                  data: {
+                    ...item.data,
+                    spotlight: false,
+                  },
+                }),
+              }
+            )
+          )
+        );
+      }
 
       await apiRequest(
         form.id
@@ -1097,32 +1133,7 @@ function ContentEditor({
           </div>
         )}
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <label>
-            <span className="text-sm font-bold text-slate-700">
-              Display order
-            </span>
-
-            <input
-              type="number"
-              min="0"
-              value={form.sortOrder}
-              onChange={(event) =>
-                setForm({
-                  ...form,
-                  sortOrder: Number(
-                    event.target.value
-                  ),
-                })
-              }
-              className="mt-2 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-teal-500"
-            />
-
-            <span className="mt-1 block text-xs text-slate-500">
-              Lower numbers appear first.
-            </span>
-          </label>
-
+        <div className="mt-6 grid gap-4">
           <div className="rounded-xl bg-slate-50 p-4">
             <p className="text-sm font-bold text-slate-700">
               Current status

@@ -1,4 +1,5 @@
 import {
+  CheckboxField,
   NumberField,
   SelectField,
   TagsField,
@@ -671,6 +672,25 @@ function SocialPostForm({
         placeholder="Today, 3h ago or 18 June 2026"
       />
 
+      <TextField
+        label="Publication date"
+        type="date"
+        value={value.publishedAt || ""}
+        onChange={(nextValue) =>
+          update(value, onChange, "publishedAt", nextValue)
+        }
+        helpText="Used to order posts from latest to oldest."
+      />
+
+      <CheckboxField
+        label="Spotlight"
+        checked={value.spotlight}
+        onChange={(nextValue) =>
+          update(value, onChange, "spotlight", nextValue)
+        }
+        helpText="Only one social post or Editor’s Pick can be in the spotlight. It is shown first."
+      />
+
       <MediaPicker
         label="Post image or video"
         value={value}
@@ -778,6 +798,25 @@ function EditorPickForm({
           update(value, onChange, "title", nextValue)
         }
         required
+      />
+
+      <TextField
+        label="Publication date"
+        type="date"
+        value={value.publishedAt || ""}
+        onChange={(nextValue) =>
+          update(value, onChange, "publishedAt", nextValue)
+        }
+        helpText="Used to order articles from latest to oldest."
+      />
+
+      <CheckboxField
+        label="Spotlight"
+        checked={value.spotlight}
+        onChange={(nextValue) =>
+          update(value, onChange, "spotlight", nextValue)
+        }
+        helpText="Only one social post or Editor’s Pick can be in the spotlight. It is shown first."
       />
 
       <MediaPicker

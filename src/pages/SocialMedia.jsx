@@ -244,8 +244,68 @@ function unwrapCmsItems(section) {
   return section.map((item, index) => ({
     id: item?.id ?? item?.itemKey ?? item?.key ?? index,
     itemKey: item?.itemKey ?? item?.key,
+    createdAt: item?.createdAt ?? item?.created_at,
     ...(item?.data && typeof item.data === "object" ? item.data : item),
   }));
+}
+
+const SECTION_PREVIEW_LIMIT = 4;
+
+function getItemTimestamp(item) {
+  const value =
+    item.publishedAt ||
+    item.publishedDate ||
+    item.date ||
+    item.createdAt;
+  const timestamp = Date.parse(value || "");
+
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function sortByPublicationDate(items, order) {
+  return [...items].sort((first, second) => {
+    if (Boolean(first.spotlight) !== Boolean(second.spotlight)) {
+      return first.spotlight ? -1 : 1;
+    }
+
+    return order === "oldest"
+      ? getItemTimestamp(first) - getItemTimestamp(second)
+      : getItemTimestamp(second) - getItemTimestamp(first);
+  });
+}
+
+function sortEventsByProximity(items, order) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const nowTimestamp = now.getTime();
+
+  return [...items].sort((first, second) => {
+    const firstDistance = Math.abs(getItemTimestamp(first) - nowTimestamp);
+    const secondDistance = Math.abs(getItemTimestamp(second) - nowTimestamp);
+
+    return order === "oldest"
+      ? secondDistance - firstDistance
+      : firstDistance - secondDistance;
+  });
+}
+
+function enforceSingleSpotlight(channelPosts, editorPicks) {
+  const spotlight = [...channelPosts, ...editorPicks]
+    .filter((item) => item.spotlight)
+    .sort((first, second) =>
+      getItemTimestamp(second) - getItemTimestamp(first)
+    )[0];
+
+  const normalise = (items) =>
+    items.map((item) => ({
+      ...item,
+      spotlight: item === spotlight,
+    }));
+
+  return {
+    channelPosts: normalise(channelPosts),
+    editorPicks: normalise(editorPicks),
+  };
 }
 
 function getCmsSection(content, names) {
@@ -625,19 +685,27 @@ function Hero({ onOpenContent, pageSettings, heroCards }) {
 
 function LatestChannels({
   onOpenContent,
-  onViewAllContent,
   onViewAllChannels,
   channelPosts,
   channels,
 }) {
   const [filter, setFilter] = useState("All");
+  const [sortOrder, setSortOrder] = useState("latest");
+  const [showAll, setShowAll] = useState(false);
   const filtered = useMemo(
-    () =>
-      filter === "All"
-        ? channelPosts
-        : channelPosts.filter((post) => post.channel === filter),
-    [filter, channelPosts]
+    () => {
+      const posts =
+        filter === "All"
+          ? channelPosts
+          : channelPosts.filter((post) => post.channel === filter);
+
+      return sortByPublicationDate(posts, sortOrder);
+    },
+    [filter, channelPosts, sortOrder]
   );
+  const visiblePosts = showAll
+    ? filtered
+    : filtered.slice(0, SECTION_PREVIEW_LIMIT);
 
   const availableChannels = useMemo(() => {
     const names = channelPosts
@@ -657,7 +725,10 @@ function LatestChannels({
               {availableChannels.map((item) => (
                 <button
                   key={item}
-                  onClick={() => setFilter(item)}
+                  onClick={() => {
+                    setFilter(item);
+                    setShowAll(false);
+                  }}
                   className={`rounded-full border px-4 py-2 text-xs font-bold transition ${
                     filter === item ? "border-teal-400 bg-teal-50 text-teal-800" : "border-slate-200 text-slate-600 hover:border-teal-300"
                   }`}
@@ -666,20 +737,32 @@ function LatestChannels({
                 </button>
               ))}
             </div>
+            <div className="mt-3 flex gap-2" role="group" aria-label="Sort channel posts">
+              {[
+                ["latest", "Latest"],
+                ["oldest", "Oldest"],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSortOrder(value)}
+                  className={`border-b-2 pb-1 text-xs font-black transition ${
+                    sortOrder === value
+                      ? "border-teal-600 text-teal-700"
+                      : "border-transparent text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={onViewAllContent}
-            className="inline-flex items-center self-start text-sm font-black text-teal-700 md:self-auto"
-          >
-            View all content <ArrowRight className="ml-2 h-4 w-4" />
-          </button>
         </div>
 
         <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_260px]">
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             <AnimatePresence mode="popLayout">
-              {filtered.map((post) => {
+              {visiblePosts.map((post) => {
                 const presentation = getChannelPresentation(post.channel);
                 const Icon = post.icon || presentation.icon;
                 const isVideoPost =
@@ -798,18 +881,56 @@ function LatestChannels({
             </button>
           </aside>
         </div>
+        {filtered.length > SECTION_PREVIEW_LIMIT && (
+          <button
+            type="button"
+            onClick={() => setShowAll((current) => !current)}
+            className="mt-5 inline-flex items-center text-sm font-black text-teal-700"
+          >
+            {showAll ? "Show less" : `View more (${filtered.length})`}
+            <ArrowRight className={`ml-2 h-4 w-4 transition ${showAll ? "rotate-[-90deg]" : ""}`} />
+          </button>
+        )}
       </div>
     </section>
   );
 }
 
 function EditorPicks({ onOpenContent, editorPicks }) {
+  const [sortOrder, setSortOrder] = useState("latest");
+  const [showAll, setShowAll] = useState(false);
+  const sortedPicks = useMemo(
+    () => sortByPublicationDate(editorPicks, sortOrder),
+    [editorPicks, sortOrder]
+  );
+  const visiblePicks = showAll
+    ? sortedPicks
+    : sortedPicks.slice(0, SECTION_PREVIEW_LIMIT);
+
   return (
     <section className="bg-white px-5 py-2 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <h2 className="text-2xl font-black text-slate-950">Editor’s picks</h2>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2 className="text-2xl font-black text-slate-950">Editor’s picks</h2>
+          <div className="flex gap-2" role="group" aria-label="Sort editor picks">
+            {["latest", "oldest"].map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setSortOrder(value)}
+                className={`border-b-2 pb-1 text-xs font-black capitalize transition ${
+                  sortOrder === value
+                    ? "border-teal-600 text-teal-700"
+                    : "border-transparent text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                {value}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          {editorPicks.map((item) => {
+          {visiblePicks.map((item) => {
             const Icon = item.icon || getEditorIcon(item.iconType || item.type);
             return (
               <button
@@ -850,6 +971,16 @@ function EditorPicks({ onOpenContent, editorPicks }) {
             );
           })}
         </div>
+        {sortedPicks.length > SECTION_PREVIEW_LIMIT && (
+          <button
+            type="button"
+            onClick={() => setShowAll((current) => !current)}
+            className="mt-5 inline-flex items-center text-sm font-black text-teal-700"
+          >
+            {showAll ? "Show less" : `View more (${sortedPicks.length})`}
+            <ArrowRight className={`ml-2 h-4 w-4 transition ${showAll ? "rotate-[-90deg]" : ""}`} />
+          </button>
+        )}
       </div>
     </section>
   );
@@ -892,9 +1023,18 @@ function PartnerContent() {
 function Events({
   onOpenContent,
   onRegisterEvent,
-  onViewAllEvents,
   events,
 }) {
+  const [sortOrder, setSortOrder] = useState("latest");
+  const [showAll, setShowAll] = useState(false);
+  const sortedEvents = useMemo(
+    () => sortEventsByProximity(events, sortOrder),
+    [events, sortOrder]
+  );
+  const visibleEvents = showAll
+    ? sortedEvents
+    : sortedEvents.slice(0, SECTION_PREVIEW_LIMIT);
+
   return (
     <section className="bg-white px-5 py-3 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -902,18 +1042,29 @@ function Events({
           <h2 className="text-2xl font-black text-slate-950">
             Upcoming events & webinars
           </h2>
-          <button
-            type="button"
-            onClick={onViewAllEvents}
-            className="inline-flex items-center text-sm font-black text-teal-700"
-          >
-            View all events
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </button>
+          <div className="flex gap-2" role="group" aria-label="Sort events">
+            {[
+              ["latest", "Nearest"],
+              ["oldest", "Furthest"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setSortOrder(value)}
+                className={`border-b-2 pb-1 text-xs font-black transition ${
+                  sortOrder === value
+                    ? "border-teal-600 text-teal-700"
+                    : "border-transparent text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {events.map((event) => {
+          {visibleEvents.map((event) => {
             const displayDate = getEventDisplayDate(event);
             const externalUrl = String(event.url || "").trim();
             const registrationMode =
@@ -993,6 +1144,16 @@ function Events({
             );
           })}
         </div>
+        {sortedEvents.length > SECTION_PREVIEW_LIMIT && (
+          <button
+            type="button"
+            onClick={() => setShowAll((current) => !current)}
+            className="mt-5 inline-flex items-center text-sm font-black text-teal-700"
+          >
+            {showAll ? "Show less" : `View more (${sortedEvents.length})`}
+            <ArrowRight className={`ml-2 h-4 w-4 transition ${showAll ? "rotate-[-90deg]" : ""}`} />
+          </button>
+        )}
       </div>
     </section>
   );
@@ -1959,6 +2120,10 @@ export default function SocialMedia({ goToPage, openEnquiryForm }) {
   const editorPicks = useFallbackContent ? fallbackEditorPicks : cmsEditorPicks;
   const partnerContent = useFallbackContent ? fallbackPartnerContent : cmsPartnerContent;
   const events = useFallbackContent ? fallbackEvents : cmsEvents;
+  const spotlightContent = enforceSingleSpotlight(
+    channelPosts,
+    editorPicks
+  );
   const resolvedHeroCards =
   resolveHeroCards(heroCards, {
     channelPosts,
@@ -2030,15 +2195,6 @@ export default function SocialMedia({ goToPage, openEnquiryForm }) {
         />
         <LatestChannels
           onOpenContent={setContent}
-          onViewAllContent={() =>
-            setCollection({
-              type: "content",
-              title: "All channel content",
-              description:
-                "Browse every social post and channel update currently published through the Smart Net Zero Content Hub.",
-              items: channelPosts,
-            })
-          }
           onViewAllChannels={() =>
             setCollection({
               type: "channels",
@@ -2048,23 +2204,17 @@ export default function SocialMedia({ goToPage, openEnquiryForm }) {
               items: channels,
             })
           }
-          channelPosts={channelPosts}
+          channelPosts={spotlightContent.channelPosts}
           channels={channels}
         />
-        <EditorPicks onOpenContent={setContent} editorPicks={editorPicks} />
+        <EditorPicks
+          onOpenContent={setContent}
+          editorPicks={spotlightContent.editorPicks}
+        />
         <PartnerContent />
         <Events
           onOpenContent={setContent}
           onRegisterEvent={setEventRegistration}
-          onViewAllEvents={() =>
-            setCollection({
-              type: "events",
-              title: "All events and webinars",
-              description:
-                "Browse every event and webinar currently published through the Smart Net Zero Content Hub.",
-              items: events,
-            })
-          }
           events={events}
         />
         {/*
