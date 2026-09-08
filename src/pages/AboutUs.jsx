@@ -65,11 +65,11 @@ const leaders = [
     linkedin: "https://www.linkedin.com/in/andrew-rae-a880611b6/",
   },
   {
-    name: "Sajan Shivshanker",
-    role: "Growth & Strategy Director",
-    text: "Leads growth initiatives and partnerships that expand our impact and create long-term value.",
-    image: "/sajan-shivshanker-profile.png",
-    linkedin: "https://www.linkedin.com/in/sajan-shivshanker-b45312b/",
+    name: "Debra Watson",
+    role: "Transformation Director",
+    text: "Leads transformation across strategy, commercial growth, people, culture, market positioning and organisational capability.",
+    image: "/debra-watson-profile.png",
+    linkedin: "https://www.linkedin.com/in/debra-watson-miwfm-b930734a/",
   },
 ];
 
