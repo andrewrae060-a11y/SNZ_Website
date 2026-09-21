@@ -30,7 +30,12 @@ const initialFormState = {
   urgent: false,
 };
 
-export default function EnquiryModal({ open, onClose }) {
+export default function EnquiryModal({
+  open,
+  onClose,
+  variant = "modal",
+}) {
+  const isPage = variant === "page";
   const [form, setForm] = useState(initialFormState);
 
   const [submitState, setSubmitState] = useState({
@@ -65,7 +70,7 @@ export default function EnquiryModal({ open, onClose }) {
       error: "",
     });
 
-    onClose();
+    onClose?.();
   }
 
   async function handleSubmit(event) {
@@ -139,12 +144,20 @@ export default function EnquiryModal({ open, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/75 px-4 py-8 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
+      className={
+        isPage
+          ? "flex min-h-screen items-center justify-center bg-slate-950 px-4 py-10 md:py-16"
+          : "fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/75 px-4 py-8 backdrop-blur-sm"
+      }
+      role={isPage ? undefined : "dialog"}
+      aria-modal={isPage ? undefined : "true"}
       aria-labelledby="enquiry-modal-title"
     >
-      <div className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-teal-300/20 bg-[#06112e] text-white shadow-2xl">
+      <div
+        className={`relative w-full max-w-3xl rounded-3xl border border-teal-300/20 bg-[#06112e] text-white shadow-2xl ${
+          isPage ? "" : "max-h-[92vh] overflow-y-auto"
+        }`}
+      >
         <div className="flex items-start justify-between border-b border-white/10 p-6 md:p-8">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.2em] text-teal-300">
@@ -164,15 +177,17 @@ export default function EnquiryModal({ open, onClose }) {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleClose}
-            disabled={submitState.loading}
-            className="rounded-full border border-white/15 bg-white/5 p-2 text-white/80 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Close enquiry form"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          {!isPage && (
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={submitState.loading}
+              className="rounded-full border border-white/15 bg-white/5 p-2 text-white/80 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Close enquiry form"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         <form
@@ -379,14 +394,16 @@ export default function EnquiryModal({ open, onClose }) {
             </p>
 
             <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleClose}
-                disabled={submitState.loading}
-                className="rounded-2xl border border-white/20 px-6 py-3 font-black text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Cancel
-              </button>
+              {!isPage && (
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={submitState.loading}
+                  className="rounded-2xl border border-white/20 px-6 py-3 font-black text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              )}
 
               <button
                 type="submit"

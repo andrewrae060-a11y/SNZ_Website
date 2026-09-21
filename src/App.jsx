@@ -129,6 +129,10 @@ const AccessibilityStatement = lazy(() =>
   import("./pages/AccessibilityStatement")
 );
 
+const Contact = lazy(() =>
+  import("./pages/Contact")
+);
+
 /**
  * Maps the existing goToPage("PageName") calls
  * to proper browser URLs.
@@ -579,6 +583,15 @@ export default function App() {
               <AccessibilityStatement
                 {...sharedPageProps}
               />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/contact"
+          element={
+            <LazyPage message="Loading contact form...">
+              <Contact />
             </LazyPage>
           }
         />
