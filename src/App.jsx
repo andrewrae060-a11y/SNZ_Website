@@ -591,7 +591,7 @@ export default function App() {
           path="/contact"
           element={
             <LazyPage message="Loading contact form...">
-              <Contact />
+              <Contact {...sharedPageProps} />
             </LazyPage>
           }
         />
