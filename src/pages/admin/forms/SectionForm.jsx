@@ -10,6 +10,7 @@ import {
 import MediaPicker from "../components/MediaPicker";
 import RichTextEditor from "../components/RichTextEditor";
 import {
+  EDITOR_PICK_SLUG_MAX_LENGTH,
   createEditorPickSlug,
   normalizeEditorPickSlug,
 } from "../../../lib/editorPicks";
@@ -821,7 +822,7 @@ function EditorPickForm({
             normalizeEditorPickSlug(nextValue)
           )
         }
-        maxLength={20}
+        maxLength={EDITOR_PICK_SLUG_MAX_LENGTH}
         placeholder="smart-infrastructure"
         helpText="Used after /content-hub/. It is generated from the title, uses hyphens between words and can be changed if needed."
       />

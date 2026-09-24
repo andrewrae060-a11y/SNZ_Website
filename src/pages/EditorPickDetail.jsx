@@ -7,7 +7,9 @@ import SNZHeader from "../components/SNZHeader";
 import { fallbackEditorPicks } from "../content/editorPicks";
 import useGoogleTag from "../hooks/useGoogleTag";
 import { useSocialHubContent } from "../hooks/useSocialHubContent";
-import { getEditorPickSlug } from "../lib/editorPicks";
+import { getEditorPickPath, getEditorPickSlug } from "../lib/editorPicks";
+
+const CURRENT_DATE_TIMESTAMP = Date.now();
 
 function unwrapEditorPicks(content) {
   const section = content?.editorPicks || content?.editor_picks || [];
@@ -16,9 +18,15 @@ function unwrapEditorPicks(content) {
     ...(item?.data && typeof item.data === "object" ? item.data : item),
     id: item?.id,
     itemKey: item?.itemKey,
+    createdAt: item?.data?.createdAt || item?.createdAt,
     publishedAt: item?.data?.publishedAt || item?.publishedAt,
     updatedAt: item?.updatedAt,
   }));
+}
+
+function getTimestamp(value) {
+  const timestamp = Date.parse(value || "");
+  return Number.isNaN(timestamp) ? null : timestamp;
 }
 
 function formatDate(value) {
@@ -64,6 +72,30 @@ export default function EditorPickDetail({ goToPage, openEnquiryForm }) {
     () => editorPicks.find((pick) => getEditorPickSlug(pick) === slug),
     [editorPicks, slug]
   );
+  const newestEditorPicks = useMemo(() => {
+    return editorPicks
+      .map((pick, originalIndex) => ({
+        pick,
+        originalIndex,
+        createdTimestamp: getTimestamp(pick.createdAt),
+      }))
+      .filter(
+        ({ pick, createdTimestamp }) =>
+          getEditorPickSlug(pick) !== slug &&
+          (createdTimestamp === null ||
+            createdTimestamp <= CURRENT_DATE_TIMESTAMP)
+      )
+      .sort((first, second) => {
+        if (first.createdTimestamp === null && second.createdTimestamp === null) {
+          return first.originalIndex - second.originalIndex;
+        }
+        if (first.createdTimestamp === null) return 1;
+        if (second.createdTimestamp === null) return -1;
+        return second.createdTimestamp - first.createdTimestamp;
+      })
+      .slice(0, 3)
+      .map(({ pick }) => pick);
+  }, [editorPicks, slug]);
 
   useGoogleTag(item?.seoTitle || item?.title);
 
@@ -184,6 +216,73 @@ export default function EditorPickDetail({ goToPage, openEnquiryForm }) {
                 </a>
               )}
             </div>
+
+            {newestEditorPicks.length > 0 && (
+              <section
+                className="border-t border-slate-200 bg-slate-50 px-5 py-14 lg:px-8"
+                aria-labelledby="newest-articles-heading"
+              >
+                <div className="mx-auto max-w-5xl">
+                  <p className="text-sm font-black uppercase tracking-[0.2em] text-teal-700">
+                    Content Hub
+                  </p>
+                  <h2
+                    id="newest-articles-heading"
+                    className="mt-2 text-3xl font-black text-slate-950"
+                  >
+                    Read our newest articles
+                  </h2>
+
+                  <div className="mt-7 grid gap-6 md:grid-cols-3">
+                    {newestEditorPicks.map((relatedItem) => {
+                      const createdDate = formatDate(relatedItem.createdAt);
+
+                      return (
+                        <Link
+                          key={
+                            relatedItem.id ||
+                            relatedItem.itemKey ||
+                            getEditorPickSlug(relatedItem)
+                          }
+                          to={getEditorPickPath(relatedItem)}
+                          className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/10"
+                        >
+                          <div className="h-44 overflow-hidden bg-slate-200">
+                            {relatedItem.image ? (
+                              <img
+                                src={relatedItem.image}
+                                alt={relatedItem.imageAlt || relatedItem.title || ""}
+                                className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                              />
+                            ) : (
+                              <div className="h-full w-full bg-gradient-to-br from-teal-100 via-sky-100 to-violet-100" />
+                            )}
+                          </div>
+
+                          <div className="p-5">
+                            <p className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">
+                              {relatedItem.type || "Editor’s Pick"}
+                            </p>
+                            <h3 className="mt-2 text-lg font-black leading-6 text-slate-950">
+                              {relatedItem.title}
+                            </h3>
+                            {createdDate && (
+                              <p className="mt-3 text-xs font-bold text-slate-500">
+                                Added {createdDate}
+                              </p>
+                            )}
+                            <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-teal-700">
+                              Read article
+                              <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+            )}
           </article>
         )}
       </main>

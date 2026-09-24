@@ -1,4 +1,4 @@
-export const EDITOR_PICK_SLUG_MAX_LENGTH = 20;
+export const EDITOR_PICK_SLUG_MAX_LENGTH = 100;
 
 const SLUG_STOP_WORDS = new Set([
   "a",
