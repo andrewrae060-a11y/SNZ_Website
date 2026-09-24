@@ -18,7 +18,6 @@ function unwrapEditorPicks(content) {
     ...(item?.data && typeof item.data === "object" ? item.data : item),
     id: item?.id,
     itemKey: item?.itemKey,
-    createdAt: item?.data?.createdAt || item?.createdAt,
     publishedAt: item?.data?.publishedAt || item?.publishedAt,
     updatedAt: item?.updatedAt,
   }));
@@ -77,21 +76,24 @@ export default function EditorPickDetail({ goToPage, openEnquiryForm }) {
       .map((pick, originalIndex) => ({
         pick,
         originalIndex,
-        createdTimestamp: getTimestamp(pick.createdAt),
+        publishedTimestamp: getTimestamp(pick.publishedAt),
       }))
       .filter(
-        ({ pick, createdTimestamp }) =>
+        ({ pick, publishedTimestamp }) =>
           getEditorPickSlug(pick) !== slug &&
-          (createdTimestamp === null ||
-            createdTimestamp <= CURRENT_DATE_TIMESTAMP)
+          (publishedTimestamp === null ||
+            publishedTimestamp <= CURRENT_DATE_TIMESTAMP)
       )
       .sort((first, second) => {
-        if (first.createdTimestamp === null && second.createdTimestamp === null) {
+        if (
+          first.publishedTimestamp === null &&
+          second.publishedTimestamp === null
+        ) {
           return first.originalIndex - second.originalIndex;
         }
-        if (first.createdTimestamp === null) return 1;
-        if (second.createdTimestamp === null) return -1;
-        return second.createdTimestamp - first.createdTimestamp;
+        if (first.publishedTimestamp === null) return 1;
+        if (second.publishedTimestamp === null) return -1;
+        return second.publishedTimestamp - first.publishedTimestamp;
       })
       .slice(0, 3)
       .map(({ pick }) => pick);
@@ -235,7 +237,9 @@ export default function EditorPickDetail({ goToPage, openEnquiryForm }) {
 
                   <div className="mt-7 grid gap-6 md:grid-cols-3">
                     {newestEditorPicks.map((relatedItem) => {
-                      const createdDate = formatDate(relatedItem.createdAt);
+                      const relatedPublishedDate = formatDate(
+                        relatedItem.publishedAt
+                      );
 
                       return (
                         <Link
@@ -266,9 +270,9 @@ export default function EditorPickDetail({ goToPage, openEnquiryForm }) {
                             <h3 className="mt-2 text-lg font-black leading-6 text-slate-950">
                               {relatedItem.title}
                             </h3>
-                            {createdDate && (
+                            {relatedPublishedDate && (
                               <p className="mt-3 text-xs font-bold text-slate-500">
-                                Added {createdDate}
+                                Published {relatedPublishedDate}
                               </p>
                             )}
                             <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-teal-700">

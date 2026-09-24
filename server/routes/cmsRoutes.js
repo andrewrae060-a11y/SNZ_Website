@@ -110,7 +110,10 @@ router.get(
         const path = getEditorPickPath(record.data);
         pagesByPath.set(path, {
           path,
-          lastmod: record.updatedAt || record.publishedAt,
+          lastmod:
+            record.data?.publishedAt ||
+            record.publishedAt ||
+            record.updatedAt,
           changefreq: "monthly",
           priority: 0.7,
         });
