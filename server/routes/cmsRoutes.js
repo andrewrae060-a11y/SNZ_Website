@@ -17,7 +17,7 @@ import {
   createSitemapXml,
   getUniquePublicPages,
   publicPages,
-} from "./generateSitemap.js";
+} from "../sitemap.js";
 
 const router = express.Router();
 
