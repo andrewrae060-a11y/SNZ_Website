@@ -1,9 +1,12 @@
 import { useMemo, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import SNZHeader from "../components/SNZHeader";
 import SNZFooter from "../components/SNZFooter";
+import { fallbackEditorPicks } from "../content/editorPicks";
 import { useSocialHubContent, subscribeToUpdates } from "../hooks/useSocialHubContent";
 import { AnimatePresence, motion } from "framer-motion";
 import useGoogleTag from "../hooks/useGoogleTag";
+import { getEditorPickPath, getEditorPickSlug } from "../lib/editorPicks";
 import {
   ArrowRight,
   BookOpen,
@@ -98,44 +101,6 @@ const fallbackChannelPosts = [
     comments: 7,
     shares: 0,
     accent: "from-pink-500 via-fuchsia-500 to-orange-400",
-  },
-];
-
-const fallbackEditorPicks = [
-  {
-    type: "Article",
-    title: "5 Ways Data is Driving Smarter Infrastructure",
-    cta: "Read article",
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80",
-    icon: BookOpen,
-  },
-  {
-    type: "Case Study",
-    title: "How IoT Sensors Reduced Energy Use by 32%",
-    cta: "Explore case study",
-    image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80",
-    icon: CheckCircle2,
-  },
-  {
-    type: "Report",
-    title: "The State of Smart Infrastructure 2026",
-    cta: "Read report",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80",
-    icon: Globe2,
-  },
-  {
-    type: "Podcast",
-    title: "The Net Zero Conversation",
-    cta: "Listen now",
-    image: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=600&q=80",
-    icon: Mic2,
-  },
-  {
-    type: "Webinar",
-    title: "Climate Risk & Resilience in the Built Environment",
-    cta: "Watch webinar",
-    image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=600&q=80",
-    icon: Video,
   },
 ];
 
@@ -480,6 +445,10 @@ function resolveHeroCards(
       detailCtaLabel:
         sourceItem.detailCtaLabel ||
         card.detailCtaLabel,
+      pageSlug:
+        sourceSection === "editorPicks"
+          ? getEditorPickSlug(sourceItem)
+          : card.pageSlug,
     };
   });
 }
@@ -518,6 +487,11 @@ function getEventDisplayDate(event) {
 }
 
 function openContent(item, onOpenContent) {
+  if (item?.pageSlug) {
+    window.location.assign(getEditorPickPath(item));
+    return;
+  }
+
   const url = String(item?.url || "").trim();
 
   if (!url) {
@@ -896,7 +870,7 @@ function LatestChannels({
   );
 }
 
-function EditorPicks({ onOpenContent, editorPicks }) {
+function EditorPicks({ editorPicks }) {
   const [sortOrder, setSortOrder] = useState("latest");
   const [showAll, setShowAll] = useState(false);
   const sortedPicks = useMemo(
@@ -933,9 +907,9 @@ function EditorPicks({ onOpenContent, editorPicks }) {
           {visiblePicks.map((item) => {
             const Icon = item.icon || getEditorIcon(item.iconType || item.type);
             return (
-              <button
+              <Link
                 key={item.id || item.itemKey || item.title}
-                onClick={() => openContent(item, onOpenContent)}
+                to={getEditorPickPath(item)}
                 className="grid grid-cols-[96px_1fr] gap-4 rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/10 xl:grid-cols-1">
                 <div className="relative h-24 overflow-hidden rounded-xl bg-slate-100 xl:h-28">
                   {item.mediaType === "video" && item.image ? (
@@ -967,7 +941,7 @@ function EditorPicks({ onOpenContent, editorPicks }) {
                   <h3 className="mt-2 text-sm font-black leading-5 text-slate-950">{item.title}</h3>
                   <p className="mt-2 inline-flex items-center text-xs font-black text-teal-700">{item.cta} <ArrowRight className="ml-1 h-3 w-3" /></p>
                 </div>
-              </button>
+              </Link>
             );
           })}
         </div>
@@ -2208,7 +2182,6 @@ export default function SocialMedia({ goToPage, openEnquiryForm }) {
           channels={channels}
         />
         <EditorPicks
-          onOpenContent={setContent}
           editorPicks={spotlightContent.editorPicks}
         />
         <PartnerContent />

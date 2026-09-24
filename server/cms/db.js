@@ -1,4 +1,11 @@
 import sql from "../../backend/src/database.js";
+import { ensureEditorPickPageSlug } from "../../src/lib/editorPicks.js";
+
+function normalizeSectionData(section, data) {
+  return section === "editorPicks"
+    ? ensureEditorPickPageSlug(data)
+    : data;
+}
 
 function mapContentItem(row) {
   if (!row) {
@@ -149,6 +156,7 @@ export async function createContentItem({
   data = {},
   updatedBy,
 }) {
+  const normalizedData = normalizeSectionData(section, data);
   const administratorId =
     await getAdministratorId(
       updatedBy
@@ -178,7 +186,7 @@ export async function createContentItem({
             ${itemKey},
             ${status},
             ${sortOrder},
-            ${transaction.json(data)},
+            ${transaction.json(normalizedData)},
             ${publishedAt},
             ${administratorId},
             ${administratorId}
@@ -207,7 +215,7 @@ export async function createContentItem({
         )
         VALUES (
           ${item.id},
-          ${transaction.json(data)},
+          ${transaction.json(normalizedData)},
           ${status},
           ${administratorId}
         )
@@ -273,10 +281,10 @@ export async function updateContentItem(
     changes.sortOrder ??
     existing.sort_order;
 
-  const nextData =
-    changes.data ??
-    existing.data ??
-    {};
+  const nextData = normalizeSectionData(
+    nextSection,
+    changes.data ?? existing.data ?? {}
+  );
 
   let nextPublishedAt =
     existing.published_at;

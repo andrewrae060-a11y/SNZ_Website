@@ -12,6 +12,12 @@ import {
   deleteContentItem,
   createSubscriber,
 } from "../cms/db.js";
+import { getEditorPickPath } from "../../src/lib/editorPicks.js";
+import {
+  createSitemapXml,
+  getUniquePublicPages,
+  publicPages,
+} from "./generateSitemap.js";
 
 const router = express.Router();
 
@@ -79,6 +85,45 @@ router.get(
         generatedAt:
           new Date().toISOString(),
       });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
+
+/**
+ * GET /api/sitemap.xml
+ *
+ * Vercel exposes this at /sitemap.xml. Published Editor's Picks are
+ * added dynamically so custom administrator URLs can be indexed.
+ */
+router.get(
+  "/sitemap.xml",
+  async (_req, res, next) => {
+    try {
+      const content = await getPublishedContent();
+      const pagesByPath = new Map(
+        publicPages.map((page) => [page.path, page])
+      );
+
+      for (const record of content.editorPicks || []) {
+        const path = getEditorPickPath(record.data);
+        pagesByPath.set(path, {
+          path,
+          lastmod: record.updatedAt || record.publishedAt,
+          changefreq: "monthly",
+          priority: 0.7,
+        });
+      }
+
+      const pages = getUniquePublicPages(
+        Array.from(pagesByPath.values())
+      );
+
+      return res
+        .type("application/xml")
+        .status(200)
+        .send(createSitemapXml(pages));
     } catch (error) {
       return next(error);
     }

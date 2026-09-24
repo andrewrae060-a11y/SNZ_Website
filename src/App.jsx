@@ -33,6 +33,10 @@ const SocialMedia = lazy(() =>
   import("./pages/SocialMedia")
 );
 
+const EditorPickDetail = lazy(() =>
+  import("./pages/EditorPickDetail")
+);
+
 const AdminCMS = lazy(() =>
   import("./pages/admin/AdminCMS")
 );
@@ -581,6 +585,17 @@ export default function App() {
           element={
             <LazyPage message="Loading Accessibility Statement...">
               <AccessibilityStatement
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/content-hub/:slug"
+          element={
+            <LazyPage message="Loading Editor’s Pick...">
+              <EditorPickDetail
                 {...sharedPageProps}
               />
             </LazyPage>

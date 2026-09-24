@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { seedContent } from "../cms/seed-data.js";
+import { getEditorPickPath } from "../../src/lib/editorPicks.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,7 +29,7 @@ const SITE_URL = String(
  *
  * When adding a new public website page, add its route here.
  */
-const publicPages = [
+export const publicPages = [
   {
     path: "/",
     changefreq: "weekly",
@@ -146,6 +148,14 @@ const publicPages = [
     priority: 0.8,
   },
 ];
+
+for (const editorPick of seedContent.editorPicks || []) {
+  publicPages.push({
+    path: getEditorPickPath(editorPick.data),
+    changefreq: "monthly",
+    priority: 0.7,
+  });
+}
 
 const allowedChangeFrequencies = new Set([
   "always",
@@ -292,10 +302,10 @@ function createUrlXml(page) {
   return lines.join("\n");
 }
 
-function getUniquePublicPages() {
+export function getUniquePublicPages(pages = publicPages) {
   const uniquePages = new Map();
 
-  publicPages.forEach((page, index) => {
+  pages.forEach((page, index) => {
     const validatedPage = validatePage(page, index);
 
     if (!validatedPage) {
@@ -324,7 +334,7 @@ function getUniquePublicPages() {
   });
 }
 
-function createSitemapXml(pages) {
+export function createSitemapXml(pages) {
   const entries = pages.map(createUrlXml).join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -334,7 +344,7 @@ ${entries}
 `;
 }
 
-function generateSitemap() {
+export function generateSitemap() {
   if (!SITE_URL.startsWith("https://")) {
     throw new Error(
       `PUBLIC_SITE_URL must use HTTPS. Received: ${SITE_URL}`,
@@ -369,16 +379,22 @@ function generateSitemap() {
   console.log(`Output: ${OUTPUT_FILE}`);
 }
 
-try {
-  generateSitemap();
-} catch (error) {
-  console.error("Failed to generate sitemap.xml.");
+const isDirectRun =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === __filename;
 
-  if (error instanceof Error) {
-    console.error(error.message);
-  } else {
-    console.error(error);
+if (isDirectRun) {
+  try {
+    generateSitemap();
+  } catch (error) {
+    console.error("Failed to generate sitemap.xml.");
+
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error(error);
+    }
+
+    process.exitCode = 1;
   }
-
-  process.exitCode = 1;
 }

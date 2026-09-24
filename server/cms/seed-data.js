@@ -10,8 +10,8 @@ export const seedContent = {
     { key: "x-weekly", data: { channel: "X", publishedLabel: "5h ago", title: "The road to net zero is a journey we take together. Here's what's happening this week 🌱", tags: ["#NetZero", "#Sustainability"], image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=900&q=80", likes: 18, comments: 2, shares: 3, url: "#" } }
   ],
   editorPicks: [
-    { key: "data-infrastructure", data: { type: "Article", title: "5 Ways Data is Driving Smarter Infrastructure", cta: "Read article", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80", url: "#" } },
-    { key: "iot-energy", data: { type: "Case Study", title: "How IoT Sensors Reduced Energy Use by 32%", cta: "Explore case study", image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80", url: "#" } }
+    { key: "data-infrastructure", data: { type: "Article", title: "5 Ways Data is Driving Smarter Infrastructure", pageSlug: "5-ways-data-driving", cta: "Read article", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80", url: "#" } },
+    { key: "iot-energy", data: { type: "Case Study", title: "How IoT Sensors Reduced Energy Use by 32%", pageSlug: "iot-sensors-reduced", cta: "Explore case study", image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80", url: "#" } }
   ],
   partnerContent: [
     { key: "autodesk-low-carbon", data: { partner: "AUTODESK", type: "Thought Leadership", title: "Designing for a Low Carbon Future", cta: "Read more", image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80", url: "#" } }

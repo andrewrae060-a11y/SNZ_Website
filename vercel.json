@@ -4,6 +4,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "/api/index?__apiPath=sitemap.xml"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/index?__apiPath=:path*"
     },

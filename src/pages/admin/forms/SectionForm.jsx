@@ -9,6 +9,10 @@ import {
 
 import MediaPicker from "../components/MediaPicker";
 import RichTextEditor from "../components/RichTextEditor";
+import {
+  createEditorPickSlug,
+  normalizeEditorPickSlug,
+} from "../../../lib/editorPicks";
 
 function update(value, onChange, field, nextValue) {
   onChange({
@@ -749,10 +753,6 @@ function EditorPickForm({
   onChange,
   onUploadMedia,
 }) {
-  const hasExternalUrl = Boolean(
-    String(value.url || "").trim()
-  );
-
   return (
     <div className="grid gap-5">
       <SelectField
@@ -794,10 +794,36 @@ function EditorPickForm({
       <TextField
         label="Title"
         value={value.title}
-        onChange={(nextValue) =>
-          update(value, onChange, "title", nextValue)
-        }
+        onChange={(nextValue) => {
+          const generatedCurrentSlug = createEditorPickSlug(value.title);
+          const pageSlug =
+            !value.pageSlug || value.pageSlug === generatedCurrentSlug
+              ? createEditorPickSlug(nextValue)
+              : value.pageSlug;
+
+          onChange({
+            ...value,
+            title: nextValue,
+            pageSlug,
+          });
+        }}
         required
+      />
+
+      <TextField
+        label="Page URL"
+        value={value.pageSlug || createEditorPickSlug(value.title)}
+        onChange={(nextValue) =>
+          update(
+            value,
+            onChange,
+            "pageSlug",
+            normalizeEditorPickSlug(nextValue)
+          )
+        }
+        maxLength={20}
+        placeholder="smart-infrastructure"
+        helpText="Used after /content-hub/. It is generated from the title, uses hyphens between words and can be changed if needed."
       />
 
       <TextField
@@ -848,28 +874,26 @@ function EditorPickForm({
           update(value, onChange, "url", nextValue)
         }
         placeholder="https://..."
-        helpText="If this is completed, the card will open this external page. If left blank, the card will open the internal story popup below."
+        helpText="Optional. This link appears as a call-to-action on the Editor’s Pick page. The card always opens the website page above."
       />
 
-      {!hasExternalUrl && (
-        <div className="rounded-2xl border border-teal-100 bg-teal-50/60 p-5">
+      <div className="rounded-2xl border border-teal-100 bg-teal-50/60 p-5">
           <p className="text-xs font-black uppercase tracking-[0.16em] text-teal-700">
-            Internal story popup
+            Editor’s Pick page
           </p>
 
           <h3 className="mt-1 text-lg font-black text-slate-950">
-            Further information content
+            Page content
           </h3>
 
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            No external URL has been entered, so this Editor’s
-            Pick will open a popup window using the card image
-            and the content below.
+            This content appears on the Editor’s Pick page using
+            the card image above.
           </p>
 
           <div className="mt-5 grid gap-5">
             <TextField
-              label="Popup eyebrow"
+              label="Page eyebrow"
               value={value.detailEyebrow || ""}
               onChange={(nextValue) =>
                 update(
@@ -883,7 +907,7 @@ function EditorPickForm({
             />
 
             <TextField
-              label="Popup heading"
+              label="Page heading"
               value={value.detailHeading || ""}
               onChange={(nextValue) =>
                 update(
@@ -894,11 +918,11 @@ function EditorPickForm({
                 )
               }
               placeholder="Leave blank to use the card title"
-              helpText="If left blank, the popup will use the Editor’s Pick title."
+              helpText="If left blank, the page will use the Editor’s Pick title."
             />
 
             <TextAreaField
-              label="Popup introduction"
+              label="Page introduction"
               value={value.detailIntro || ""}
               onChange={(nextValue) =>
                 update(
@@ -910,11 +934,11 @@ function EditorPickForm({
               }
               rows={4}
               maxLength={500}
-              placeholder="Short opening summary for the popup."
+              placeholder="Short opening summary for the page."
             />
 
            <RichTextEditor
-              label="Popup story detail"
+              label="Page story detail"
               value={value.detailBody || ""}
               onChange={(nextValue) =>
                 update(
@@ -924,7 +948,7 @@ function EditorPickForm({
                   nextValue
                 )
               }
-              helpText="Use headings, bold text, lists, links and colours to structure the popup content."
+              helpText="Use headings, bold text, lists, links and colours to structure the page content."
             />
 
             <TextAreaField
@@ -943,30 +967,8 @@ function EditorPickForm({
               placeholder="Optional highlighted sentence."
             />
 
-            <TextField
-              label="Popup close button label"
-              value={value.detailCtaLabel || "Close"}
-              onChange={(nextValue) =>
-                update(
-                  value,
-                  onChange,
-                  "detailCtaLabel",
-                  nextValue
-                )
-              }
-              placeholder="Close"
-            />
           </div>
         </div>
-      )}
-
-      {hasExternalUrl && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-          This Editor’s Pick has an external URL, so the
-          internal popup content is hidden and will not be
-          used.
-        </div>
-      )}
 
       <SeoFields value={value} onChange={onChange} />
     </div>

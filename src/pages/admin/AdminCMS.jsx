@@ -19,6 +19,11 @@ import {
 } from "lucide-react";
 
 import SectionForm from "./forms/SectionForm";
+import {
+  createEditorPickSlug,
+  getEditorPickSlug,
+  normalizeEditorPickSlug,
+} from "../../lib/editorPicks";
 
 const API_BASE = String(
   import.meta.env.VITE_API_BASE_URL ||
@@ -311,6 +316,7 @@ function getDefaultData(section) {
         mediaType: "image",
         iconType: "article",
         url: "",
+        pageSlug: "",
 
         detailEyebrow: "",
         detailHeading: "",
@@ -1031,6 +1037,26 @@ function ContentEditor({
           "draft",
         data: normaliseContentUrls(form.data),
       };
+
+      if (form.section === "editorPicks") {
+        const pageSlug =
+          normalizeEditorPickSlug(requestBody.data.pageSlug) ||
+          createEditorPickSlug(requestBody.data.title);
+
+        const duplicate = (content.editorPicks || []).find(
+          (item) =>
+            item.id !== form.id &&
+            getEditorPickSlug(item.data) === pageSlug
+        );
+
+        if (duplicate) {
+          throw new Error(
+            "This page URL is already used by another Editor’s Pick. Please enter a different one."
+          );
+        }
+
+        requestBody.data.pageSlug = pageSlug;
+      }
 
       if (
         requestBody.data.spotlight &&
