@@ -220,8 +220,8 @@ function formatFileSize(value) {
 }
 
 function LoginPanel({ onLogin }) {
-  const [email, setEmail] = useState(
-    "careers@smartnetzero.co.uk"
+  const [loginId, setLoginId] = useState(
+    "CADMIN"
   );
 
   const [password, setPassword] =
@@ -244,7 +244,7 @@ function LoginPanel({ onLogin }) {
 
     try {
       await careersApi.login(
-        email,
+        loginId,
         password
       );
 
@@ -283,14 +283,14 @@ function LoginPanel({ onLogin }) {
           >
             <label className="block">
               <span className="text-sm font-black text-slate-700">
-                Email address
+                Login ID
               </span>
 
               <input
-                type="email"
-                value={email}
+                type="text"
+                value={loginId}
                 onChange={(event) =>
-                  setEmail(
+                  setLoginId(
                     event.target.value
                   )
                 }

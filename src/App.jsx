@@ -61,6 +61,10 @@ const OTVisibilityReview = lazy(() =>
   import("./pages/OTVisibilityReview")
 );
 
+const BuildingPerformanceReview = lazy(() =>
+  import("./pages/BuildingPerformanceReview")
+);
+
 const SmartRegulations = lazy(() =>
   import("./pages/SmartRegulations")
 );
@@ -585,6 +589,17 @@ export default function App() {
           element={
             <LazyPage message="Loading Accessibility Statement...">
               <AccessibilityStatement
+                {...sharedPageProps}
+              />
+            </LazyPage>
+          }
+        />
+
+        <Route
+          path="/building-performance-review"
+          element={
+            <LazyPage message="Loading Building Performance Review...">
+              <BuildingPerformanceReview
                 {...sharedPageProps}
               />
             </LazyPage>

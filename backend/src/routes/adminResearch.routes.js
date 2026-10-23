@@ -96,7 +96,7 @@ router.post("/login", async (req, res, next) => {
         success: false,
         authenticated: false,
         message:
-          "Email address and password are required.",
+          "Login ID and password are required.",
       });
     }
 
@@ -127,7 +127,7 @@ router.post("/login", async (req, res, next) => {
         success: false,
         authenticated: false,
         message:
-          "The email address or password is incorrect.",
+          "The login ID or password is incorrect.",
       });
     }
 
@@ -142,7 +142,7 @@ router.post("/login", async (req, res, next) => {
         success: false,
         authenticated: false,
         message:
-          "The email address or password is incorrect.",
+          "The login ID or password is incorrect.",
       });
     }
 

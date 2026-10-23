@@ -76,13 +76,13 @@ deleteApplication(applicationId) {
   );
 },
 
-  login(email, password) {
+  login(loginId, password) {
     return request(
       "/api/admin/login",
       {
         method: "POST",
         body: JSON.stringify({
-          email: email.trim(),
+          email: loginId.trim(),
           password,
         }),
       }
