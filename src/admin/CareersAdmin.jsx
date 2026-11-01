@@ -25,6 +25,8 @@ import {
   Users,
   X,
 } from "lucide-react";
+import TurnstileCaptcha from
+  "../components/TurnstileCaptcha";
 
 import { careersApi } from "../lib/careersApi";
 
@@ -220,9 +222,7 @@ function formatFileSize(value) {
 }
 
 function LoginPanel({ onLogin }) {
-  const [loginId, setLoginId] = useState(
-    "CADMIN"
-  );
+  const [loginId, setLoginId] = useState("");
 
   const [password, setPassword] =
     useState("");
@@ -236,6 +236,12 @@ function LoginPanel({ onLogin }) {
   const [error, setError] =
     useState("");
 
+  const [captchaToken, setCaptchaToken] =
+    useState("");
+
+  const [captchaResetKey, setCaptchaResetKey] =
+    useState(0);
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -245,11 +251,14 @@ function LoginPanel({ onLogin }) {
     try {
       await careersApi.login(
         loginId,
-        password
+        password,
+        captchaToken
       );
 
       await onLogin();
     } catch (loginError) {
+      setCaptchaToken("");
+      setCaptchaResetKey((current) => current + 1);
       setError(
         getErrorMessage(
           loginError,
@@ -279,6 +288,7 @@ function LoginPanel({ onLogin }) {
 
           <form
             onSubmit={handleSubmit}
+            autoComplete="off"
             className="mt-7 space-y-5"
           >
             <label className="block">
@@ -294,11 +304,16 @@ function LoginPanel({ onLogin }) {
                     event.target.value
                   )
                 }
-                autoComplete="username"
+                autoComplete="off"
                 className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
                 required
               />
             </label>
+
+            <TurnstileCaptcha
+              onTokenChange={setCaptchaToken}
+              resetKey={captchaResetKey}
+            />
 
             <label className="block">
               <span className="text-sm font-black text-slate-700">
@@ -355,7 +370,7 @@ function LoginPanel({ onLogin }) {
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || !captchaToken}
               className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-blue-700 to-pink-600 px-6 py-4 text-sm font-black text-white shadow-lg transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? (

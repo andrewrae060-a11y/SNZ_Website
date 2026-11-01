@@ -13,6 +13,8 @@ import {
   getAdminCookieName,
   getAdminCookieOptions,
 } from "../services/adminToken.service.js";
+import { verifyTurnstileToken } from
+  "../services/turnstile.service.js";
 
 const router = Router();
 
@@ -91,12 +93,46 @@ router.post("/login", async (req, res, next) => {
       req.body?.password || ""
     );
 
-    if (!email || !password) {
+    const captchaToken = String(
+      req.body?.captchaToken || ""
+    ).trim();
+
+    if (!email || !password || !captchaToken) {
       return res.status(400).json({
         success: false,
         authenticated: false,
         message:
-          "Login ID and password are required.",
+          "Login ID, password and security check are required.",
+      });
+    }
+
+    let captchaIsValid = false;
+
+    try {
+      captchaIsValid = await verifyTurnstileToken({
+        token: captchaToken,
+        remoteIp: req.ip,
+      });
+    } catch (captchaError) {
+      console.error(
+        "Administrator CAPTCHA verification failed:",
+        captchaError
+      );
+
+      return res.status(503).json({
+        success: false,
+        authenticated: false,
+        message:
+          "The security check is temporarily unavailable. Please try again.",
+      });
+    }
+
+    if (!captchaIsValid) {
+      return res.status(400).json({
+        success: false,
+        authenticated: false,
+        message:
+          "The security check was unsuccessful. Please try again.",
       });
     }
 

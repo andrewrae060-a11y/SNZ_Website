@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 
 import SectionForm from "./forms/SectionForm";
+import TurnstileCaptcha from
+  "../../components/TurnstileCaptcha";
 import {
   createEditorPickSlug,
   getEditorPickSlug,
@@ -30,9 +32,6 @@ const API_BASE = String(
     import.meta.env.VITE_CMS_API_URL ||
     ""
 ).replace(/\/+$/, "");
-
-const CONTENT_MANAGER_EMAIL =
-  "ContentManger@smartnetzero.co.uk";
 
 const ALLOWED_CMS_ROLES = new Set([
   "content_manager",
@@ -1006,14 +1005,18 @@ export default function AdminCMS({ goToPage }) {
 }
 
 function AdminLogin({ onLogin, goToPage }) {
-  const [email, setEmail] = useState(
-    CONTENT_MANAGER_EMAIL
-  );
+  const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] =
     useState(false);
+
+  const [captchaToken, setCaptchaToken] =
+    useState("");
+
+  const [captchaResetKey, setCaptchaResetKey] =
+    useState(0);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -1029,6 +1032,7 @@ function AdminLogin({ onLogin, goToPage }) {
           body: JSON.stringify({
             email: email.trim(),
             password,
+            captchaToken,
           }),
         }
       );
@@ -1054,6 +1058,8 @@ function AdminLogin({ onLogin, goToPage }) {
 
       onLogin();
     } catch (requestError) {
+      setCaptchaToken("");
+      setCaptchaResetKey((current) => current + 1);
       setError(requestError.message);
     } finally {
       setSubmitting(false);
@@ -1064,6 +1070,7 @@ function AdminLogin({ onLogin, goToPage }) {
     <div className="min-h-screen bg-slate-100 px-5 py-20">
       <form
         onSubmit={submit}
+        autoComplete="off"
         className="mx-auto max-w-md rounded-3xl bg-white p-8 shadow-xl"
       >
         <p className="text-xs font-black uppercase tracking-[0.2em] text-teal-700">
@@ -1094,7 +1101,7 @@ function AdminLogin({ onLogin, goToPage }) {
 
           <input
             type="email"
-            autoComplete="username"
+            autoComplete="off"
             value={email}
             onChange={(event) =>
               setEmail(event.target.value)
@@ -1121,9 +1128,16 @@ function AdminLogin({ onLogin, goToPage }) {
           />
         </label>
 
+        <div className="mt-5">
+          <TurnstileCaptcha
+            onTokenChange={setCaptchaToken}
+            resetKey={captchaResetKey}
+          />
+        </div>
+
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || !captchaToken}
           className="mt-6 w-full rounded-xl bg-slate-950 p-3 font-black text-white disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? "Signing in…" : "Sign in"}

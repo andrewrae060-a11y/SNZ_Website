@@ -76,7 +76,7 @@ deleteApplication(applicationId) {
   );
 },
 
-  login(loginId, password) {
+  login(loginId, password, captchaToken) {
     return request(
       "/api/admin/login",
       {
@@ -84,6 +84,7 @@ deleteApplication(applicationId) {
         body: JSON.stringify({
           email: loginId.trim(),
           password,
+          captchaToken,
         }),
       }
     );
