@@ -3,6 +3,10 @@ import { useEffect, useRef, useState } from "react";
 const TURNSTILE_SCRIPT_ID = "cloudflare-turnstile-script";
 const TURNSTILE_SCRIPT_URL =
   "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+const TURNSTILE_DEVELOPMENT_SITE_KEY =
+  "1x00000000000000000000AA";
+const TURNSTILE_PRODUCTION_SITE_KEY =
+  "0x4AAAAAAFvRxEK_S6aFS7ba";
 
 function loadTurnstile() {
   if (window.turnstile) {
@@ -44,12 +48,18 @@ export default function TurnstileCaptcha({
   const widgetIdRef = useRef(null);
   const onTokenChangeRef = useRef(onTokenChange);
   const [error, setError] = useState("");
-  const siteKey = String(
+  const configuredSiteKey = String(
     import.meta.env.VITE_TURNSTILE_SITE_KEY || ""
   ).trim();
-  const configurationError = siteKey
-    ? ""
-    : "The security check is not configured. Contact the site administrator.";
+  const isLocalDevelopment = [
+    "localhost",
+    "127.0.0.1",
+  ].includes(window.location.hostname);
+  const siteKey =
+    configuredSiteKey ||
+    (isLocalDevelopment
+      ? TURNSTILE_DEVELOPMENT_SITE_KEY
+      : TURNSTILE_PRODUCTION_SITE_KEY);
 
   useEffect(() => {
     onTokenChangeRef.current = onTokenChange;
@@ -119,12 +129,12 @@ export default function TurnstileCaptcha({
     <div>
       <div ref={containerRef} className="min-h-[65px]" />
 
-      {(configurationError || error) && (
+      {error && (
         <p
           className="mt-2 text-sm font-bold text-red-700"
           role="alert"
         >
-          {configurationError || error}
+          {error}
         </p>
       )}
     </div>
