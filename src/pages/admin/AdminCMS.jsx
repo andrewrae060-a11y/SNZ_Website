@@ -41,6 +41,12 @@ const ALLOWED_CMS_ROLES = new Set([
 
 const STARTING_SECTION = "channelPosts";
 
+const FILTERABLE_SECTIONS = new Set([
+  "channelPosts",
+  "editorPicks",
+  "events",
+]);
+
 const CMS_SECTIONS = [
   {
     key: "page",
@@ -345,6 +351,7 @@ function getDefaultData(section) {
     case "events":
       return {
         date: "",
+        publishedAt: "",
         type: "Webinar",
         title: "",
         time: "10:00 AM GMT",
@@ -441,6 +448,74 @@ function getItemTitle(item) {
   );
 }
 
+function getPublishedTimestamp(item) {
+  const publishedAt = String(
+    item?.data?.publishedAt || ""
+  ).trim();
+
+  if (publishedAt) {
+    const timestamp = Date.parse(publishedAt);
+
+    if (!Number.isNaN(timestamp)) {
+      return {
+        timestamp,
+        hasPublishedDate: true,
+      };
+    }
+  }
+
+  const fallbackTimestamp = Date.parse(
+    item?.updatedAt || item?.createdAt || ""
+  );
+
+  return {
+    timestamp: Number.isNaN(fallbackTimestamp)
+      ? 0
+      : fallbackTimestamp,
+    hasPublishedDate: false,
+  };
+}
+
+function sortItemsByPublishedDate(items, direction) {
+  const multiplier = direction === "oldest" ? 1 : -1;
+
+  return [...items].sort((firstItem, secondItem) => {
+    const firstDate = getPublishedTimestamp(firstItem);
+    const secondDate = getPublishedTimestamp(secondItem);
+
+    if (
+      firstDate.hasPublishedDate !==
+      secondDate.hasPublishedDate
+    ) {
+      return firstDate.hasPublishedDate ? -1 : 1;
+    }
+
+    return (
+      (firstDate.timestamp - secondDate.timestamp) *
+      multiplier
+    );
+  });
+}
+
+function formatPublishedDate(item) {
+  const value = item?.data?.publishedAt;
+
+  if (!value) return "No publication date";
+
+  const timestamp = Date.parse(value);
+
+  if (Number.isNaN(timestamp)) {
+    return "No publication date";
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(timestamp);
+}
+
 export default function AdminCMS({ goToPage }) {
   useEffect(() => {
     document.title =
@@ -456,6 +531,12 @@ export default function AdminCMS({ goToPage }) {
   const [selectedSection, setSelectedSection] =
     useState(STARTING_SECTION);
 
+  const [statusFilter, setStatusFilter] =
+    useState("all");
+
+  const [publishedDateSort, setPublishedDateSort] =
+    useState("newest");
+
   const [content, setContent] = useState({});
   const [editingItem, setEditingItem] =
     useState(null);
@@ -468,6 +549,31 @@ export default function AdminCMS({ goToPage }) {
     () => normaliseItems(content, selectedSection),
     [content, selectedSection]
   );
+
+  const hasListControls = FILTERABLE_SECTIONS.has(
+    selectedSection
+  );
+
+  const visibleItems = useMemo(() => {
+    if (!hasListControls) return items;
+
+    const filteredItems =
+      statusFilter === "all"
+        ? items
+        : items.filter(
+            (item) => item.status === statusFilter
+          );
+
+    return sortItemsByPublishedDate(
+      filteredItems,
+      publishedDateSort
+    );
+  }, [
+    hasListControls,
+    items,
+    publishedDateSort,
+    statusFilter,
+  ]);
 
   const checkSession = useCallback(async () => {
     try {
@@ -760,6 +866,49 @@ export default function AdminCMS({ goToPage }) {
               </button>
             </div>
 
+            {hasListControls && (
+              <div className="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
+                <label>
+                  <span className="mb-2 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+                    Status
+                  </span>
+
+                  <select
+                    value={statusFilter}
+                    onChange={(event) =>
+                      setStatusFilter(event.target.value)
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-700 outline-none focus:border-teal-500"
+                  >
+                    <option value="all">All</option>
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </label>
+
+                <label>
+                  <span className="mb-2 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+                    Sort by publication date
+                  </span>
+
+                  <select
+                    value={publishedDateSort}
+                    onChange={(event) =>
+                      setPublishedDateSort(event.target.value)
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-bold text-slate-700 outline-none focus:border-teal-500"
+                  >
+                    <option value="newest">
+                      Newest first
+                    </option>
+                    <option value="oldest">
+                      Oldest first
+                    </option>
+                  </select>
+                </label>
+              </div>
+            )}
+
             {loading && items.length === 0 ? (
               <div className="rounded-xl border border-slate-200 p-8 text-center text-slate-500">
                 Loading content…
@@ -775,9 +924,23 @@ export default function AdminCMS({ goToPage }) {
                   record.
                 </p>
               </div>
+            ) : visibleItems.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center">
+                <p className="font-bold text-slate-700">
+                  No {statusFilter} content matches this filter.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("all")}
+                  className="mt-3 text-sm font-black text-teal-700 hover:text-teal-800"
+                >
+                  Show all content
+                </button>
+              </div>
             ) : (
               <div className="space-y-3">
-                {items.map((item) => (
+                {visibleItems.map((item) => (
                   <article
                     key={item.id}
                     className="flex min-w-0 flex-col gap-4 rounded-2xl border border-slate-200 p-4 sm:flex-row sm:items-center"
@@ -794,6 +957,12 @@ export default function AdminCMS({ goToPage }) {
                       <p className="mt-1 break-all text-sm text-slate-500">
                         Key: {item.itemKey}
                       </p>
+
+                      {hasListControls && (
+                        <p className="mt-1 text-sm text-slate-500">
+                          Published: {formatPublishedDate(item)}
+                        </p>
+                      )}
 
                     </div>
 

@@ -1098,6 +1098,16 @@ function EventForm({
       />
 
       <TextField
+        label="Publication date"
+        type="date"
+        value={value.publishedAt || ""}
+        onChange={(nextValue) =>
+          update(value, onChange, "publishedAt", nextValue)
+        }
+        helpText="Used to order events in the content administration list."
+      />
+
+      <TextField
         label="Time or location"
         value={value.time}
         onChange={(nextValue) =>
