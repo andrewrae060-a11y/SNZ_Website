@@ -310,11 +310,6 @@ function LoginPanel({ onLogin }) {
               />
             </label>
 
-            <TurnstileCaptcha
-              onTokenChange={setCaptchaToken}
-              resetKey={captchaResetKey}
-            />
-
             <label className="block">
               <span className="text-sm font-black text-slate-700">
                 Password
@@ -361,6 +356,11 @@ function LoginPanel({ onLogin }) {
                 </button>
               </div>
             </label>
+
+            <TurnstileCaptcha
+              onTokenChange={setCaptchaToken}
+              resetKey={captchaResetKey}
+            />
 
             {error && (
               <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-bold text-rose-700">

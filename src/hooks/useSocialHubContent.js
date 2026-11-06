@@ -2,12 +2,7 @@ import {
   useEffect,
   useState,
 } from "react";
-
-const API_BASE = String(
-  import.meta.env.VITE_API_BASE_URL ||
-    import.meta.env.VITE_CMS_API_URL ||
-    ""
-).replace(/\/+$/, "");
+import { API_BASE } from "../lib/apiBase";
 
 async function requestJson(
   path,

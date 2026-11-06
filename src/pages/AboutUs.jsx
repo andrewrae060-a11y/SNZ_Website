@@ -37,25 +37,11 @@ import {
 
 const leaders = [
   {
-    name: "Richard Jennings",
-    role: "Managing Director",
-    text: "Sets the strategic direction and leads the business in delivering innovative, future-ready solutions.",
-    image: "/richard-jennings-profile.png",
-    linkedin: "https://uk.linkedin.com/in/richard-jennings-10048972",
-  },
-  {
     name: "Danny Carroll",
     role: "Co-Founder & Group Service Director",
     text: "Leads delivery excellence across projects, operations and energy initiatives.",
     image: "/danny-carroll-profile.png",
     linkedin: "https://uk.linkedin.com/in/danny-carroll-28262b16",
-  },
-  {
-    name: "Alison MacLeod",
-    role: "Group Finance Director",
-    text: "Drives financial strategy and governance, ensuring long-term stability and sustainable growth.",
-    image: "/alison-macleod-profile.png",
-    linkedin: "https://www.linkedin.com/in/alison-macleod-26652035/",
   },
   {
     name: "Andrew Rae",
@@ -1867,19 +1853,6 @@ export default function AboutUs({ goToPage, openEnquiryForm }) {
                     src="/boom-logo-dark.png"
                     alt="BOOM Interactive"
                     className="max-h-40 w-full max-w-[520px] object-contain"
-                  />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSafeSharkModalOpen(true)}
-                  className="flex min-h-[150px] items-center justify-center rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-slate-900/10"
-                  aria-label="Open SafeShark partner details"
-                >
-                  <img
-                    src="/safeshark-logo.png"
-                    alt="SafeShark"
-                    className="max-h-24 w-full max-w-[280px] object-contain"
                   />
                 </button>
 

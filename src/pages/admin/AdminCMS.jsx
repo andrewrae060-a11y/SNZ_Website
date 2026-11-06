@@ -26,12 +26,7 @@ import {
   getEditorPickSlug,
   normalizeEditorPickSlug,
 } from "../../lib/editorPicks";
-
-const API_BASE = String(
-  import.meta.env.VITE_API_BASE_URL ||
-    import.meta.env.VITE_CMS_API_URL ||
-    ""
-).replace(/\/+$/, "");
+import { API_BASE } from "../../lib/apiBase";
 
 const ALLOWED_CMS_ROLES = new Set([
   "content_manager",

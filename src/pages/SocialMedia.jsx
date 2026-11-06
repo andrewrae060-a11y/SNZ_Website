@@ -7,6 +7,7 @@ import { useSocialHubContent, subscribeToUpdates } from "../hooks/useSocialHubCo
 import { AnimatePresence, motion } from "framer-motion";
 import useGoogleTag from "../hooks/useGoogleTag";
 import { getEditorPickPath, getEditorPickSlug } from "../lib/editorPicks";
+import { API_BASE } from "../lib/apiBase";
 import {
   ArrowRight,
   BookOpen,
@@ -41,12 +42,6 @@ const LinkedInIcon = ({ className = "" }) => <BrandIcon label="in" className={cl
 const XIcon = ({ className = "" }) => <BrandIcon label="𝕏" className={className} />;
 const YouTubeIcon = ({ className = "" }) => <BrandIcon label="▶" className={className} />;
 const InstagramIcon = ({ className = "" }) => <BrandIcon label="◎" className={className} />;
-
-const API_BASE = String(
-  import.meta.env.VITE_API_BASE_URL ||
-    import.meta.env.VITE_CMS_API_URL ||
-    ""
-).replace(/\/+$/, "");
 
 const fallbackChannelPosts = [
   {
